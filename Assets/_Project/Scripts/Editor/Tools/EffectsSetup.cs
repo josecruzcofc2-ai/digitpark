@@ -155,7 +155,6 @@ namespace DigitPark.Editor
                 // Auth
                 "Assets/_Project/Scenes/Auth/Login.unity",
                 "Assets/_Project/Scenes/Auth/Register.unity",
-                "Assets/_Project/Scenes/Auth/AgeVerification.unity",
                 // Games - Navigation
                 "Assets/_Project/Scenes/Games/Navigation/GameSelector.unity",
                 "Assets/_Project/Scenes/Games/Navigation/PlayModeSelection.unity",
@@ -184,19 +183,8 @@ namespace DigitPark.Editor
                 "Assets/_Project/Scenes/Tournaments/TournamentsBrowser.unity",
                 "Assets/_Project/Scenes/Tournaments/TournamentCreate.unity",
                 "Assets/_Project/Scenes/Tournaments/TournamentLobby.unity",
-                // CashBattle
-                "Assets/_Project/Scenes/CashBattle/CashBattle1v1.unity",
-                "Assets/_Project/Scenes/CashBattle/CashBattleHub.unity",
-                "Assets/_Project/Scenes/CashBattle/CashHistory.unity",
-                "Assets/_Project/Scenes/CashBattle/CashMatchmaking.unity",
-                "Assets/_Project/Scenes/CashBattle/CashProfile.unity",
-                "Assets/_Project/Scenes/CashBattle/CashWallet.unity",
-                "Assets/_Project/Scenes/CashBattle/CashTournaments/CashTournaments.unity",
-                "Assets/_Project/Scenes/CashBattle/CashTournaments/CashTournamentCreate.unity",
-                "Assets/_Project/Scenes/CashBattle/CashTournaments/CashTournamentLobby.unity",
                 // Onboarding
                 "Assets/_Project/Scenes/Onboarding/Onboarding.unity",
-                "Assets/_Project/Scenes/Onboarding/CashBattleOnboarding.unity",
             };
 
             int totalButtons = 0;
@@ -238,10 +226,11 @@ namespace DigitPark.Editor
                 totalButtons += sceneButtons;
             }
 
-            EditorUtility.DisplayDialog("Setup Completado",
-                $"Se agregó ButtonEffects a {totalButtons} botones en {scenes.Length} escenas.\n\n" +
-                "Todas las escenas han sido guardadas.",
-                "OK");
+            if (!AllScenesBatchBuilder.SilentMode)
+                EditorUtility.DisplayDialog("Setup Completado",
+                    $"Se agregó ButtonEffects a {totalButtons} botones en {scenes.Length} escenas.\n\n" +
+                    "Todas las escenas han sido guardadas.",
+                    "OK");
         }
 
         [MenuItem("DigitPark/Polish/Effects/Create Background Particles", false, 320)]

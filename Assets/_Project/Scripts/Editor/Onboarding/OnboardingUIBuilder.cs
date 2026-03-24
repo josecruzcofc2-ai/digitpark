@@ -3,15 +3,13 @@ using UnityEngine.UI;
 using UnityEditor;
 using TMPro;
 using DigitPark.UI;
-using DigitPark.Themes;
-using ET = DigitPark.Themes.ThemeApplier.ElementType;
 
 namespace DigitPark.Editor
 {
     /// <summary>
     /// Main Onboarding UI Builder - Slide-Based Architecture
-    /// Each step is an independent slide inside SlidesContainer (like CashBattle).
-    /// 7 slides: Welcome, Name, Games, CashBattle, Tournaments, Rewards, Completion
+    /// Each step is an independent slide inside SlidesContainer.
+    /// 6 slides: Welcome, Name, Games, Tournaments, Rewards, Completion
     /// Portrait 9:16 (1080x1920), matchWidthOrHeight=0
     ///
     /// Menu: DigitPark/UI Builders/Onboarding/Main Onboarding
@@ -73,7 +71,6 @@ namespace DigitPark.Editor
             "Assets/_Project/Art/Icons/Onboarding/WelcomeIcon.png",
             "Assets/_Project/Art/Icons/Social/ProfileIcon.png",
             "Assets/_Project/Art/Icons/Onboarding/GamesIcon.png",
-            "Assets/_Project/Art/Icons/Onboarding/CashBattleIcon.png",
             "Assets/_Project/Art/Icons/Onboarding/TournamentsIcon.png",
             "Assets/_Project/Art/Icons/Onboarding/RewardsIcon.png",
             "Assets/_Project/Art/Icons/Onboarding/CompleteIcon.png"
@@ -94,7 +91,7 @@ namespace DigitPark.Editor
             GUILayout.Space(10);
 
             EditorGUILayout.HelpBox(
-                "Arquitectura slide-based (como CashBattle):\n\n" +
+                "Arquitectura slide-based:\n\n" +
                 "Canvas\n" +
                 "  Background\n" +
                 "  ProgressBar (Slider, maxValue=7)\n" +
@@ -181,7 +178,6 @@ namespace DigitPark.Editor
             rt.offsetMin = Vector2.zero;
             rt.offsetMax = Vector2.zero;
             GetOrAdd<Image>(bg).color = Color.white;
-            ThemeApplierHelper.Apply(bg, ET.PrimaryBackground);
         }
 
         #endregion
@@ -326,12 +322,11 @@ namespace DigitPark.Editor
             CreateSlide1_Welcome(container.transform);
             CreateSlide2_Name(container.transform);
             CreateSlide3_Games(container.transform);
-            CreateSlide4_CashBattle(container.transform);
-            CreateSlide5_Tournaments(container.transform);
-            CreateSlide6_Rewards(container.transform);
-            CreateSlide7_Completion(container.transform);
+            CreateSlide4_Tournaments(container.transform);
+            CreateSlide5_Rewards(container.transform);
+            CreateSlide6_Completion(container.transform);
 
-            Debug.Log("[OnboardingUI] SlidesContainer creado (7 slides)");
+            Debug.Log("[OnboardingUI] SlidesContainer creado (6 slides)");
         }
 
         // --- Slide Base: Icon + Title (shared by info slides) ---
@@ -663,32 +658,11 @@ namespace DigitPark.Editor
 
         #endregion
 
-        #region Slide 4 - CashBattle
+        #region Slide 4 - Tournaments
 
-        private static void CreateSlide4_CashBattle(Transform parent)
+        private static void CreateSlide4_Tournaments(Transform parent)
         {
             var slide = CreateSlideBase(parent, "Slide4", 3, false);
-            CreateSlideTitle(slide, "CashBattle", CYAN_NEON);
-
-            var content = CreateContentCard(slide);
-            AddContentText(content, "Ready for the challenge? Compete 1v1 against other players for real prizes.",
-                (int)FontSizes.Body, TEXT_WHITE, TextAlignmentOptions.Center);
-            AddContentSpacer(content, 10);
-            AddContentText(content, "COMPETE FOR REAL PRIZES",
-                (int)FontSizes.Subtitle, CYAN_NEON, TextAlignmentOptions.Center, true);
-            AddContentSpacer(content, 14);
-            AddBulletText(content, "Skill-based 1v1 matchmaking");
-            AddBulletText(content, "Bets starting at $1 USD");
-            AddBulletText(content, "Secure and verified platform");
-        }
-
-        #endregion
-
-        #region Slide 5 - Tournaments
-
-        private static void CreateSlide5_Tournaments(Transform parent)
-        {
-            var slide = CreateSlideBase(parent, "Slide5", 4, false);
             CreateSlideTitle(slide, "Tournaments", CYAN_NEON);
 
             var content = CreateContentCard(slide);
@@ -705,11 +679,11 @@ namespace DigitPark.Editor
 
         #endregion
 
-        #region Slide 6 - Rewards
+        #region Slide 5 - Rewards
 
-        private static void CreateSlide6_Rewards(Transform parent)
+        private static void CreateSlide5_Rewards(Transform parent)
         {
-            var slide = CreateSlideBase(parent, "Slide6", 5, false);
+            var slide = CreateSlideBase(parent, "Slide5", 4, false);
             CreateSlideTitle(slide, "Daily Rewards", CYAN_NEON);
 
             var content = CreateContentCard(slide);
@@ -726,11 +700,11 @@ namespace DigitPark.Editor
 
         #endregion
 
-        #region Slide 7 - Completion
+        #region Slide 6 - Completion
 
-        private static void CreateSlide7_Completion(Transform parent)
+        private static void CreateSlide6_Completion(Transform parent)
         {
-            var slide = FindOrCreate(parent, "Slide7");
+            var slide = FindOrCreate(parent, "Slide6");
             var sRT = GetOrAdd<RectTransform>(slide);
             sRT.anchorMin = Vector2.zero;
             sRT.anchorMax = Vector2.one;
@@ -763,7 +737,7 @@ namespace DigitPark.Editor
             var iconImg = iconGO.AddComponent<Image>();
             iconImg.color = Color.white;
             iconImg.preserveAspect = true;
-            Sprite completeSprite = AssetDatabase.LoadAssetAtPath<Sprite>(SLIDE_ICONS[7]);
+            Sprite completeSprite = AssetDatabase.LoadAssetAtPath<Sprite>(SLIDE_ICONS[5]);
             if (completeSprite != null) iconImg.sprite = completeSprite;
 
             // CompletionTitle

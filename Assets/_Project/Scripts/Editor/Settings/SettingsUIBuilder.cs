@@ -4,8 +4,6 @@ using UnityEditor;
 using TMPro;
 using System.Collections.Generic;
 using DigitPark.UI;
-using DigitPark.Themes;
-using ET = DigitPark.Themes.ThemeApplier.ElementType;
 
 namespace DigitPark.Editor
 {
@@ -159,7 +157,6 @@ namespace DigitPark.Editor
             img.sprite = WhiteSprite;
             img.color = Color.white; // ThemeApplier tints at runtime
             img.raycastTarget = false;
-            ThemeApplierHelper.Apply(bg, ET.PrimaryBackground);
 
             bg.transform.SetAsFirstSibling();
         }
@@ -423,141 +420,6 @@ namespace DigitPark.Editor
 
             CreateDropdownRow(card, "LanguageDropdown", "ChangeLanguageLabel", "Language",
                 new[] { "English", "Español", "Français", "Português", "Deutsch" }, 1);
-            CreateSeparator(card);
-
-            // Load theme names dynamically from Resources/Themes
-            string[] themeNames = GetThemeNamesFromResources();
-            CreateThemeDropdownRow(card, "ThemeDropdown", "ChangeThemeLabel", "Theme", themeNames, 0);
-        }
-
-        /// <summary>
-        /// Loads all theme names from Resources/Themes, ordered: NeonDark first, then alphabetical
-        /// </summary>
-        private static string[] GetThemeNamesFromResources()
-        {
-            var themes = Resources.LoadAll<DigitPark.Themes.ThemeData>("Themes");
-            if (themes == null || themes.Length == 0)
-                return new[] { "Neon Dark" };
-
-            // Order: 1) Neon Dark (free), 2) Earnable (silver lock), 3) Premium (gold lock)
-            var sorted = new List<DigitPark.Themes.ThemeData>(themes);
-            sorted.Sort((a, b) =>
-            {
-                int GroupOf(DigitPark.Themes.ThemeData t) =>
-                    t.themeId == "neon_dark" ? 0 : (!t.isPremium ? 0 : (t.isEarnable ? 1 : 2));
-                int cmp = GroupOf(a).CompareTo(GroupOf(b));
-                if (cmp != 0) return cmp;
-                return string.Compare(a.themeName, b.themeName, System.StringComparison.Ordinal);
-            });
-
-            string[] names = new string[sorted.Count];
-            for (int i = 0; i < sorted.Count; i++)
-                names[i] = sorted[i].themeName;
-            return names;
-        }
-
-        /// <summary>
-        /// Creates theme dropdown row with lock icon support and ThemeDropdownController
-        /// </summary>
-        private static void CreateThemeDropdownRow(Transform parent, string dropdownName, string labelName,
-            string labelText, string[] options, int defaultIndex)
-        {
-            // Use the standard dropdown builder
-            CreateDropdownRow(parent, dropdownName, labelName, labelText, options, defaultIndex);
-
-            // Find the dropdown we just created and add ThemeDropdownController + lock icon support
-            Transform container = parent.Find($"{dropdownName}Container");
-            if (container == null) return;
-
-            Transform dropdownObj = container.Find(dropdownName);
-            if (dropdownObj == null) return;
-
-            // Add ThemeDropdownController component
-            var controller = dropdownObj.gameObject.AddComponent(
-                System.Type.GetType("DigitPark.UI.Components.ThemeDropdownController, Assembly-CSharp"));
-
-            if (controller != null)
-            {
-                var so = new SerializedObject(controller);
-
-                // Load and assign gold lock icon (paid themes)
-                Sprite goldLock = Resources.Load<Sprite>("UI/Icons/icon_lock_gold");
-                if (goldLock != null)
-                {
-                    var goldProp = so.FindProperty("lockGoldSprite");
-                    if (goldProp != null)
-                        goldProp.objectReferenceValue = goldLock;
-                }
-
-                // Load and assign silver lock icon (earnable themes)
-                Sprite silverLock = Resources.Load<Sprite>("UI/Icons/icon_lock_silver");
-                if (silverLock != null)
-                {
-                    var silverProp = so.FindProperty("lockSilverSprite");
-                    if (silverProp != null)
-                        silverProp.objectReferenceValue = silverLock;
-                }
-
-                so.ApplyModifiedProperties();
-                Debug.Log("[SettingsUIBuilder] ThemeDropdownController added with dual lock icons");
-            }
-
-            // Add lock icons to dropdown item template
-            AddLockIconToDropdownTemplate(dropdownObj, options);
-        }
-
-        /// <summary>
-        /// Adds a lock icon Image to the dropdown item template (right side)
-        /// </summary>
-        private static void AddLockIconToDropdownTemplate(Transform dropdownObj, string[] themeNames)
-        {
-            Transform template = dropdownObj.Find("Template");
-            if (template == null) return;
-
-            // Find the item template inside Content
-            Transform viewport = template.Find("Viewport");
-            if (viewport == null) return;
-            Transform content = viewport.Find("Content");
-            if (content == null) return;
-            Transform item = content.Find("Item");
-            if (item == null) return;
-
-            // Load lock icon
-            Sprite lockSprite = Resources.Load<Sprite>("UI/Icons/icon_lock_gold");
-            if (lockSprite == null)
-            {
-                Debug.LogWarning("[SettingsUIBuilder] Lock icon not found at Resources/UI/Icons/icon_lock_gold");
-                return;
-            }
-
-            // Add lock icon to item template (right side)
-            GameObject lockObj = new GameObject("LockIcon");
-            lockObj.transform.SetParent(item, false);
-
-            RectTransform lockRT = lockObj.AddComponent<RectTransform>();
-            lockRT.anchorMin = new Vector2(1, 0.5f);
-            lockRT.anchorMax = new Vector2(1, 0.5f);
-            lockRT.pivot = new Vector2(1, 0.5f);
-            lockRT.sizeDelta = new Vector2(56, 56);
-            lockRT.anchoredPosition = new Vector2(-8, 0);
-
-            Image lockImg = lockObj.AddComponent<Image>();
-            lockImg.sprite = lockSprite;
-            lockImg.preserveAspect = true;
-            lockImg.raycastTarget = false;
-
-            // Start hidden - ThemeDropdownController.UpdateLockIcons() will show for locked themes
-            lockObj.SetActive(false);
-
-            // Shrink item label to make room for lock icon
-            Transform itemLabel = item.Find("Item Label");
-            if (itemLabel != null)
-            {
-                RectTransform labelRT = itemLabel.GetComponent<RectTransform>();
-                labelRT.offsetMax = new Vector2(-65, 0);
-            }
-
-            Debug.Log("[SettingsUIBuilder] Lock icon added to theme dropdown template");
         }
 
         private static void BuildPremiumCard(Transform parent)
@@ -579,12 +441,6 @@ namespace DigitPark.Editor
             CreateSettingsRow(card, "TermsButton", "Terms and Conditions", ">", CYAN_NEON, true);
             CreateSeparator(card);
             CreateSettingsRow(card, "PrivacyButton", "Privacy Policy", ">", CYAN_NEON, true);
-            CreateSeparator(card);
-            CreateSettingsRow(card, "ResponsibleGamingButton", "Responsible Gaming", ">", CYAN_NEON, true);
-            CreateSeparator(card);
-            CreateSettingsRow(card, "TriumphTermsButton", "Triumph Terms", ">", CYAN_NEON, true);
-            CreateSeparator(card);
-            CreateSettingsRow(card, "SelfExclusionButton", "Self Exclusion", ">", DANGER_RED, true);
         }
 
         private static void BuildDangerZoneCard(Transform parent)
@@ -609,11 +465,6 @@ namespace DigitPark.Editor
             BuildConfirmPanelOverlay(canvas.transform, "DeleteConfirmPanel",
                 "Delete Account", "Are you sure you want to delete your account? This action cannot be undone.",
                 "Delete", "Cancel");
-
-            // SelfExclusion ConfirmPanelUI overlay
-            BuildConfirmPanelOverlay(canvas.transform, "SelfExclusionConfirmPanel",
-                "Self Exclusion", "Are you sure you want to self-exclude? You will not be able to play matches for real money.",
-                "Confirm", "Cancel");
 
             // Change Name InputPanelUI overlay
             BuildInputPanelOverlay(canvas.transform);

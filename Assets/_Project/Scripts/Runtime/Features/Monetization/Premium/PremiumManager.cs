@@ -16,7 +16,6 @@ namespace DigitPark.Managers
     public enum PremiumProduct
     {
         CreateTournaments,      // $3.99 USD - Crear torneos
-        CashBattleCreate,       // $6.99 USD - Crear batallas con dinero real
         TournamentBundle,       // $7.99 USD - Ambos: Crear torneos + Cash Battle (Economy Rebalance V55)
         StylesPro,              // Legacy - Desbloquea todos los temas premium (backwards compat)
         PremiumBundle,          // 3,430 DG - 19 premium themes (30% off) — Economy Rebalance V55: DG pricing
@@ -66,7 +65,6 @@ namespace DigitPark.Managers
 
         [Header("=== PRODUCT IDs - Non-Consumable ===")]
         public const string PRODUCT_ID_CREATE_TOURNAMENTS = "com.matrixsoftware.digitpark.createtournaments";
-        public const string PRODUCT_ID_CASH_BATTLE_CREATE = "com.matrixsoftware.digitpark.cashbattlecreate";
         public const string PRODUCT_ID_TOURNAMENT_BUNDLE = "com.matrixsoftware.digitpark.tournamentbundle";
         public const string PRODUCT_ID_STYLES_PRO = "com.matrixsoftware.digitpark.stylespro"; // Legacy
         public const string PRODUCT_ID_PREMIUM_BUNDLE = "com.matrixsoftware.digitpark.premium_bundle";
@@ -82,7 +80,6 @@ namespace DigitPark.Managers
 
         [Header("=== PRECIOS (Solo para mostrar en UI) ===")]
         public const string PRICE_CREATE_TOURNAMENTS = ""; // C-P1-30: Use IAP localizedPriceString; empty = not yet loaded
-        public const string PRICE_CASH_BATTLE_CREATE = ""; // C-P1-30: Use IAP localizedPriceString
         public const string PRICE_TOURNAMENT_BUNDLE = ""; // C-P1-30: Use IAP localizedPriceString
         public const string PRICE_PREMIUM_BUNDLE = ""; // C-P1-30: Use IAP localizedPriceString
         public const string PRICE_COMPLETE_BUNDLE = ""; // C-P1-30: Use IAP localizedPriceString
@@ -107,12 +104,10 @@ namespace DigitPark.Managers
 
         // Keys para PlayerPrefs (persistencia local)
         private const string CAN_CREATE_TOURNAMENTS_KEY = "Premium_CreateTournaments";
-        private const string CAN_CREATE_CASH_BATTLE_KEY = "Premium_CashBattleCreate";
         private const string STYLES_PRO_KEY = "Premium_StylesPro";
 
         // Estado premium
         private bool _canCreateTournaments = false;
-        private bool _canCreateCashBattle = false;
         private bool _hasStylesPro = false;
 
         // Unity IAP
@@ -131,11 +126,6 @@ namespace DigitPark.Managers
         public bool CanCreateTournaments => _canCreateTournaments;
 
         /// <summary>
-        /// Indica si el usuario puede crear Cash Battles
-        /// </summary>
-        public bool CanCreateCashBattle => _canCreateCashBattle;
-
-        /// <summary>
         /// Indica si el usuario tiene los estilos/temas premium desbloqueados (legacy)
         /// </summary>
         public bool HasStylesPro => _hasStylesPro;
@@ -143,7 +133,7 @@ namespace DigitPark.Managers
         /// <summary>
         /// Indica si el usuario tiene algún tipo de premium
         /// </summary>
-        public bool IsPremium => _canCreateTournaments || _canCreateCashBattle || _hasStylesPro || IsPremiumPass;
+        public bool IsPremium => _canCreateTournaments || _hasStylesPro || IsPremiumPass;
 
         /// <summary>
         /// Indica si el usuario ha comprado Ad-Free permanente.
@@ -166,7 +156,7 @@ namespace DigitPark.Managers
                 LoadPremiumStatus();
                 RestoreFromFirebaseAsync();
                 InitializePurchasing();
-                Debug.Log($"[Premium] Manager iniciado - Tournaments: {_canCreateTournaments}, CashBattle: {_canCreateCashBattle}");
+                Debug.Log($"[Premium] Manager iniciado - Tournaments: {_canCreateTournaments}");
             }
             else if (_instance != this)
             {
@@ -184,7 +174,6 @@ namespace DigitPark.Managers
 
             // NonConsumable products (purchased once, kept forever)
             builder.AddProduct(PRODUCT_ID_CREATE_TOURNAMENTS, ProductType.NonConsumable);
-            builder.AddProduct(PRODUCT_ID_CASH_BATTLE_CREATE, ProductType.NonConsumable);
             builder.AddProduct(PRODUCT_ID_TOURNAMENT_BUNDLE, ProductType.NonConsumable);
             builder.AddProduct(PRODUCT_ID_PREMIUM_BUNDLE, ProductType.NonConsumable);
             builder.AddProduct(PRODUCT_ID_COMPLETE_BUNDLE, ProductType.NonConsumable);
@@ -208,14 +197,12 @@ namespace DigitPark.Managers
         private void LoadPremiumStatus()
         {
             _canCreateTournaments = PlayerPrefs.GetInt(CAN_CREATE_TOURNAMENTS_KEY, 0) == 1;
-            _canCreateCashBattle = PlayerPrefs.GetInt(CAN_CREATE_CASH_BATTLE_KEY, 0) == 1;
             _hasStylesPro = PlayerPrefs.GetInt(STYLES_PRO_KEY, 0) == 1;
         }
 
         private void SavePremiumStatus()
         {
             PlayerPrefs.SetInt(CAN_CREATE_TOURNAMENTS_KEY, _canCreateTournaments ? 1 : 0);
-            PlayerPrefs.SetInt(CAN_CREATE_CASH_BATTLE_KEY, _canCreateCashBattle ? 1 : 0);
             PlayerPrefs.SetInt(STYLES_PRO_KEY, _hasStylesPro ? 1 : 0);
             PlayerPrefs.Save();
         }
@@ -229,15 +216,9 @@ namespace DigitPark.Managers
                     Debug.Log("[Premium] Desbloqueado: Crear Torneos");
                     break;
 
-                case PremiumProduct.CashBattleCreate:
-                    _canCreateCashBattle = true;
-                    Debug.Log("[Premium] Desbloqueado: Crear Cash Battles");
-                    break;
-
                 case PremiumProduct.TournamentBundle:
                     _canCreateTournaments = true;
-                    _canCreateCashBattle = true;
-                    Debug.Log("[Premium] Desbloqueado: Tournament Bundle (Torneos + Cash Battle)");
+                    Debug.Log("[Premium] Desbloqueado: Tournament Bundle (Torneos)");
                     break;
 
                 case PremiumProduct.StylesPro:
@@ -280,7 +261,6 @@ namespace DigitPark.Managers
                 var updates = new Dictionary<string, object>
                 {
                     { "premium_createTournaments", _canCreateTournaments },
-                    { "premium_cashBattleCreate", _canCreateCashBattle },
                     { "premium_stylesPro", _hasStylesPro }
                 };
 
@@ -336,13 +316,6 @@ namespace DigitPark.Managers
                     changed = true;
                 }
 
-                string fbCashBattle = await db.GetPlayerField(userId, "premium_cashBattleCreate");
-                if (string.Equals(fbCashBattle, "True", StringComparison.OrdinalIgnoreCase) && !_canCreateCashBattle)
-                {
-                    _canCreateCashBattle = true;
-                    changed = true;
-                }
-
                 string fbStylesPro = await db.GetPlayerField(userId, "premium_stylesPro");
                 if (string.Equals(fbStylesPro, "True", StringComparison.OrdinalIgnoreCase) && !_hasStylesPro)
                 {
@@ -354,7 +327,7 @@ namespace DigitPark.Managers
                 {
                     SavePremiumStatus();
                     OnPremiumStatusChanged?.Invoke();
-                    Debug.Log($"[Premium] Restaurado desde Firebase - Tournaments: {_canCreateTournaments}, CashBattle: {_canCreateCashBattle}, StylesPro: {_hasStylesPro}");
+                    Debug.Log($"[Premium] Restaurado desde Firebase - Tournaments: {_canCreateTournaments}, StylesPro: {_hasStylesPro}");
                 }
             }
             catch (Exception e)
@@ -374,15 +347,6 @@ namespace DigitPark.Managers
         {
             Debug.Log("[Premium] Iniciando compra: Crear Torneos");
             BuyProduct(PRODUCT_ID_CREATE_TOURNAMENTS, PremiumProduct.CreateTournaments, onComplete);
-        }
-
-        /// <summary>
-        /// Compra: Crear Cash Battles ($6.99 USD)
-        /// </summary>
-        public void PurchaseCashBattleCreate(Action<bool> onComplete = null)
-        {
-            Debug.Log("[Premium] Iniciando compra: Cash Battle Create");
-            BuyProduct(PRODUCT_ID_CASH_BATTLE_CREATE, PremiumProduct.CashBattleCreate, onComplete);
         }
 
         /// <summary>
@@ -614,7 +578,6 @@ namespace DigitPark.Managers
             switch (product)
             {
                 case PremiumProduct.CreateTournaments: return PRICE_CREATE_TOURNAMENTS;
-                case PremiumProduct.CashBattleCreate: return PRICE_CASH_BATTLE_CREATE;
                 case PremiumProduct.TournamentBundle: return PRICE_TOURNAMENT_BUNDLE;
                 case PremiumProduct.PremiumBundle: return PRICE_PREMIUM_BUNDLE;
                 case PremiumProduct.CompleteBundle: return PRICE_COMPLETE_BUNDLE;
@@ -627,7 +590,6 @@ namespace DigitPark.Managers
             switch (product)
             {
                 case PremiumProduct.CreateTournaments: return PRODUCT_ID_CREATE_TOURNAMENTS;
-                case PremiumProduct.CashBattleCreate: return PRODUCT_ID_CASH_BATTLE_CREATE;
                 case PremiumProduct.TournamentBundle: return PRODUCT_ID_TOURNAMENT_BUNDLE;
                 case PremiumProduct.StylesPro: return PRODUCT_ID_STYLES_PRO;
                 case PremiumProduct.PremiumBundle: return PRODUCT_ID_PREMIUM_BUNDLE;
@@ -645,15 +607,10 @@ namespace DigitPark.Managers
                         ? "Crea torneos personalizados con tus amigos"
                         : "Create custom tournaments with your friends";
 
-                case PremiumProduct.CashBattleCreate:
-                    return string.Equals(language, "es", System.StringComparison.OrdinalIgnoreCase)
-                        ? "Crea batallas con dinero real y gana premios"
-                        : "Create real money battles and win prizes";
-
                 case PremiumProduct.TournamentBundle:
                     return string.Equals(language, "es", System.StringComparison.OrdinalIgnoreCase)
-                        ? "Crea torneos + Cash Battles - El paquete completo"
-                        : "Create tournaments + Cash Battles - The complete package";
+                        ? "Crea torneos personalizados - El paquete completo"
+                        : "Create custom tournaments - The complete package";
 
                 case PremiumProduct.StylesPro:
                     return string.Equals(language, "es", System.StringComparison.OrdinalIgnoreCase)
@@ -681,10 +638,8 @@ namespace DigitPark.Managers
             {
                 case PremiumProduct.CreateTournaments:
                     return _canCreateTournaments;
-                case PremiumProduct.CashBattleCreate:
-                    return _canCreateCashBattle;
                 case PremiumProduct.TournamentBundle:
-                    return _canCreateTournaments && _canCreateCashBattle;
+                    return _canCreateTournaments;
                 case PremiumProduct.StylesPro:
                 case PremiumProduct.PremiumBundle:
                 case PremiumProduct.CompleteBundle:
@@ -721,21 +676,12 @@ namespace DigitPark.Managers
                 _canCreateTournaments = true;
             }
 
-            // Verificar Cash Battle Create
-            Product cashBattle = _storeController.products.WithID(PRODUCT_ID_CASH_BATTLE_CREATE);
-            if (cashBattle != null && cashBattle.hasReceipt)
-            {
-                Debug.Log("[Premium] Usuario ya tiene Cash Battle Create");
-                _canCreateCashBattle = true;
-            }
-
             // Verificar Tournament Bundle
             Product bundle = _storeController.products.WithID(PRODUCT_ID_TOURNAMENT_BUNDLE);
             if (bundle != null && bundle.hasReceipt)
             {
                 Debug.Log("[Premium] Usuario ya tiene Tournament Bundle");
                 _canCreateTournaments = true;
-                _canCreateCashBattle = true;
             }
 
             SavePremiumStatus();
@@ -797,11 +743,6 @@ namespace DigitPark.Managers
             if (productId == PRODUCT_ID_CREATE_TOURNAMENTS)
             {
                 UnlockProduct(PremiumProduct.CreateTournaments);
-                _purchaseCallback?.Invoke(true);
-            }
-            else if (productId == PRODUCT_ID_CASH_BATTLE_CREATE)
-            {
-                UnlockProduct(PremiumProduct.CashBattleCreate);
                 _purchaseCallback?.Invoke(true);
             }
             else if (productId == PRODUCT_ID_TOURNAMENT_BUNDLE)
@@ -934,12 +875,6 @@ namespace DigitPark.Managers
             UnlockProduct(PremiumProduct.CreateTournaments);
         }
 
-        [ContextMenu("Debug: Unlock Cash Battle Create")]
-        private void DebugUnlockCashBattle()
-        {
-            UnlockProduct(PremiumProduct.CashBattleCreate);
-        }
-
         [ContextMenu("Debug: Unlock Tournament Bundle")]
         private void DebugUnlockBundle()
         {
@@ -950,7 +885,6 @@ namespace DigitPark.Managers
         private void DebugResetPremium()
         {
             _canCreateTournaments = false;
-            _canCreateCashBattle = false;
             _hasStylesPro = false;
             SavePremiumStatus();
             OnPremiumStatusChanged?.Invoke();

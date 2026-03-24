@@ -129,14 +129,6 @@ namespace DigitPark.Managers
                     },
                     new OnboardingStep
                     {
-                        id = "cashbattle",
-                        title = L("onboarding_cashbattle_title"),
-                        description = L("onboarding_cashbattle_desc"),
-                        stepType = OnboardingStepType.Info,
-                        requiresInteraction = false
-                    },
-                    new OnboardingStep
-                    {
                         id = "tournaments",
                         title = L("tournament_button"),
                         description = L("tournaments_description"),
@@ -172,8 +164,7 @@ namespace DigitPark.Managers
             LocalizeSlideTitle(0, "onboarding_welcome_title");
             LocalizeSlideTitle(1, "onboarding_name_title");
             LocalizeSlideTitle(2, "onboarding_games_title");
-            LocalizeSlideTitle(3, "onboarding_cashbattle_title");
-            LocalizeSlideTitle(4, "tournament_button");
+            LocalizeSlideTitle(3, "tournament_button");
             LocalizeSlideTitle(5, "dr_title");
 
             // Slide 1 - Welcome content
@@ -198,18 +189,8 @@ namespace DigitPark.Managers
                 ("onboarding_games_b5", false)
             });
 
-            // Slide 5 - CashBattle content
+            // Slide 5 - Tournaments content
             LocalizeContentTexts(4, new[]
-            {
-                ("onboarding_cashbattle_desc", false),
-                ("onboarding_cashbattle_highlight", true),
-                ("onboarding_cashbattle_b1", false),
-                ("onboarding_cashbattle_b2", false),
-                ("onboarding_cashbattle_b3", false)
-            });
-
-            // Slide 6 - Tournaments content
-            LocalizeContentTexts(5, new[]
             {
                 ("onboarding_tournaments_desc", false),
                 ("onboarding_tournaments_highlight", true),

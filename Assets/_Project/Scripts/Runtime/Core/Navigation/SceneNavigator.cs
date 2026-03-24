@@ -36,17 +36,6 @@ namespace DigitPark.Navigation
             public const string MAIN_MENU = "MainMenu";
             public const string PROFILE = "Profile";
 
-            // Cash Battle
-            public const string CASH_BATTLE_HUB = "CashBattleHub";
-            public const string CASH_BATTLE_1V1 = "CashBattle1v1";
-            public const string CASH_TOURNAMENTS = "CashTournaments";
-            public const string CASH_WALLET = "CashWallet";
-            public const string CASH_HISTORY = "CashHistory";
-            public const string CASH_PROFILE = "CashProfile";
-            public const string CASH_MATCHMAKING = "CashMatchmaking";
-            public const string CASH_TOURNAMENT_CREATE = "CashTournamentCreate";
-            public const string CASH_TOURNAMENT_LOBBY = "CashTournamentLobby";
-
             // Tournaments
             public const string TOURNAMENTS_BROWSER = "TournamentsBrowser";
             public const string TOURNAMENT_CREATE = "TournamentCreate";
@@ -59,8 +48,6 @@ namespace DigitPark.Navigation
             public const string ACHIEVEMENTS = "Achievements";
             public const string ONBOARDING = "Onboarding";
 
-            // Other
-            public const string AGE_VERIFICATION = "AgeVerification";
         }
 
         // ==================== NAVIGATION PARAMETERS ====================

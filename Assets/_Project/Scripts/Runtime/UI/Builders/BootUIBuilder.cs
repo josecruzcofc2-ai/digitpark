@@ -2,7 +2,6 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using DigitPark.Managers;
-using DigitPark.Themes;
 using DigitPark.Localization;
 
 namespace DigitPark.UI
@@ -16,8 +15,6 @@ namespace DigitPark.UI
         private Canvas canvas;
         private BootManager bootManager;
         private BootAnimator bootAnimator;
-        private ThemeData theme;
-
         // Referencias para animaciones
         private RectTransform logoContainer;
         private CanvasGroup logoCanvasGroup;
@@ -35,7 +32,6 @@ namespace DigitPark.UI
             if (!uiAlreadyBuilt)
             {
                 // Fallback: construir UI en runtime (para cuando no se usó el Editor builder)
-                LoadTheme();
                 BuildUI();
                 Debug.Log("[BootUI] UI construida en runtime (fallback)");
             }
@@ -51,29 +47,6 @@ namespace DigitPark.UI
             }
         }
 
-        /// <summary>
-        /// Carga el tema actual del ThemeManager
-        /// </summary>
-        private void LoadTheme()
-        {
-            if (ThemeManager.Instance != null && ThemeManager.Instance.CurrentTheme != null)
-            {
-                theme = ThemeManager.Instance.CurrentTheme;
-                Debug.Log($"[BootUI] Usando tema: {theme.themeName}");
-            }
-            else
-            {
-                Debug.Log("[BootUI] ThemeManager no disponible, usando colores por defecto");
-            }
-        }
-
-        /// <summary>
-        /// Obtiene un color del tema o usa el valor por defecto
-        /// </summary>
-        private Color GetThemeColor(System.Func<ThemeData, Color> themeGetter, Color defaultColor)
-        {
-            return theme != null ? themeGetter(theme) : defaultColor;
-        }
 
         /// <summary>
         /// Construye toda la UI de la escena Boot
@@ -120,7 +93,7 @@ namespace DigitPark.UI
         private void CreateBackground()
         {
             // Unified solid background — same as all normal (non-CashBattle) scenes
-            Color bgColor = GetThemeColor(t => t.primaryBackground, new Color(0.02f, 0.04f, 0.08f));
+            Color bgColor = new Color(0.02f, 0.04f, 0.08f);
             UIFactory.CreatePanel(canvas.transform, "Background", bgColor);
         }
 
@@ -169,8 +142,8 @@ namespace DigitPark.UI
             main.playOnAwake = false;
 
             // Colores del tema
-            Color accent1 = GetThemeColor(t => t.primaryAccent, new Color(0f, 1f, 1f));
-            Color accent2 = GetThemeColor(t => t.secondaryAccent, new Color(1f, 0f, 0.5f));
+            Color accent1 = new Color(0f, 1f, 1f);
+            Color accent2 = new Color(1f, 0f, 0.5f);
             main.startColor = new ParticleSystem.MinMaxGradient(accent1, accent2);
 
             // Emisión
@@ -239,7 +212,7 @@ namespace DigitPark.UI
         /// </summary>
         private void CreateAnimatedTitle()
         {
-            Color accentColor = GetThemeColor(t => t.primaryAccent, new Color(0f, 1f, 1f));
+            Color accentColor = new Color(0f, 1f, 1f);
 
             // Container para ambos logos (para animaciones)
             GameObject logoContainerObj = new GameObject("LogoContainer");
@@ -297,7 +270,7 @@ namespace DigitPark.UI
             else
             {
                 // Fallback: texto TMP si no hay imagen
-                Color titleColor = GetThemeColor(t => t.textTitle, new Color(0f, 1f, 1f));
+                Color titleColor = new Color(0f, 1f, 1f);
                 TextMeshProUGUI title = UIFactory.CreateTitle(logoContainer, "Title", "DIGIT PARK");
                 title.fontSize = FontSizes.Logo;
                 title.fontStyle = FontStyles.Bold;
@@ -334,8 +307,8 @@ namespace DigitPark.UI
         /// </summary>
         private void CreateSubtitle()
         {
-            Color textSecondary = GetThemeColor(t => t.textSecondary, new Color(0.7f, 0.7f, 0.7f));
-            Color accentColor = GetThemeColor(t => t.primaryAccent, new Color(0f, 1f, 1f));
+            Color textSecondary = new Color(0.7f, 0.7f, 0.7f);
+            Color accentColor = new Color(0f, 1f, 1f);
 
             // Obtener textos localizados
             string subtitleText = AutoLocalizer.Get("boot_subtitle");
@@ -388,9 +361,9 @@ namespace DigitPark.UI
         /// </summary>
         private void CreateLoadingBar()
         {
-            Color bgColor = GetThemeColor(t => t.inputBackground, new Color(0.1f, 0.1f, 0.15f));
-            Color accentColor = GetThemeColor(t => t.primaryAccent, new Color(0f, 1f, 1f));
-            Color glowColor = GetThemeColor(t => t.glowColor, new Color(0f, 1f, 1f, 0.5f));
+            Color bgColor = new Color(0.1f, 0.1f, 0.15f);
+            Color accentColor = new Color(0f, 1f, 1f);
+            Color glowColor = new Color(0f, 1f, 1f, 0.5f);
 
             // Container de la barra
             GameObject barContainer = new GameObject("LoadingBarContainer");
@@ -449,7 +422,7 @@ namespace DigitPark.UI
         /// </summary>
         private void CreateLoadingText()
         {
-            Color textColor = GetThemeColor(t => t.textSecondary, new Color(0.8f, 0.8f, 0.8f));
+            Color textColor = new Color(0.8f, 0.8f, 0.8f);
 
             TextMeshProUGUI loadingText = UIFactory.CreateText(
                 canvas.transform,
@@ -479,7 +452,7 @@ namespace DigitPark.UI
         /// </summary>
         private void CreateVersionText()
         {
-            Color textDisabled = GetThemeColor(t => t.textDisabled, new Color(0.4f, 0.4f, 0.4f));
+            Color textDisabled = new Color(0.4f, 0.4f, 0.4f);
 
             TextMeshProUGUI versionText = UIFactory.CreateText(
                 canvas.transform,

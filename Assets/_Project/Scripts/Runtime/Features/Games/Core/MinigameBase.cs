@@ -5,7 +5,6 @@ using DigitPark.UI;
 using DigitPark.Managers;
 using DigitPark.Services;
 using DigitPark.Services.Firebase;
-using DigitPark.Themes;
 using DigitPark.Localization;
 using DigitPark.Navigation;
 
@@ -66,16 +65,6 @@ namespace DigitPark.Games
                 var context = GameSessionManager.Instance.CurrentContext;
                 Debug.Log($"Iniciando {GameType} en modo {context.Mode}");
 
-                // Auto-apply gold theme for CashTournament mode
-                if (context.Mode == GameMode.CashTournament)
-                {
-                    var forcer = GetComponent<CashThemeForcer>();
-                    if (forcer == null)
-                    {
-                        forcer = gameObject.AddComponent<CashThemeForcer>();
-                    }
-                    forcer.ApplyGoldTheme();
-                }
             }
 
             Initialize(config);
@@ -244,21 +233,7 @@ namespace DigitPark.Games
                 return;
             }
 
-            // 3b. CashTournament — submit score and return to lobby
-            if (ctx?.Mode == GameMode.CashTournament)
-            {
-                HandleCashTournamentResult(result, ctx);
-                return;
-            }
-
-            // 4. CashBattle single game (not sprint)
-            if (ctx != null && ctx.EntryFee > 0 && ctx.Mode == GameMode.SingleGame)
-            {
-                HandleCashBattleResult(result, ctx);
-                return;
-            }
-
-            // 5. CognitiveSprint - último juego (practice o cash)
+            // 4. CognitiveSprint - último juego (practice o cash)
             if (ctx?.Mode == GameMode.CognitiveSprint && !ctx.HasMoreGames)
             {
                 if (ResultPanelManager.Instance == null)
@@ -299,164 +274,23 @@ namespace DigitPark.Games
         }
 
         /// <summary>
-        /// Maneja resultado de torneo consultando ITournamentService via ServiceLocator
+        /// Maneja resultado de torneo usando datos del contexto local
         /// </summary>
-        private async void HandleTournamentResult(MinigameResult result, GameContext ctx)
+        private void HandleTournamentResult(MinigameResult result, GameContext ctx)
         {
-            try
-            {
-                var tournamentService = ServiceLocator.Tournament;
+            int attemptsUsed = PlayerPrefs.GetInt($"tournament_{ctx.TournamentId}_attempts", 1);
+            float bestTime = PlayerPrefs.GetFloat($"tournament_{ctx.TournamentId}_best", result.FinalScore);
 
-                if (tournamentService != null && tournamentService.ActiveTournament != null)
-                {
-                    var tournament = tournamentService.ActiveTournament;
-                    int position = tournament.MyPosition ?? 1;
-                    decimal prize = tournament.PrizePool;
-
-                    // Enviar score al torneo y obtener posición actualizada (await en main thread)
-                    var submitResult = await tournamentService.SubmitTournamentScore(ctx.TournamentId, (int)(result.FinalScore * 100f));
-                    if (this == null) return; // MonoBehaviour destroyed during await
-
-                    if (submitResult?.Success == true && submitResult.Tournament != null)
-                    {
-                        position = submitResult.Tournament.MyPosition ?? position;
-                        prize = submitResult.Tournament.PrizePool;
-                    }
-
-                    // Obtener datos del jugador en el torneo
-                    int attemptsUsed = PlayerPrefs.GetInt($"tournament_{ctx.TournamentId}_attempts", 1);
-                    int maxAttempts = 3; // Configurado por torneo
-                    float bestTime = PlayerPrefs.GetFloat($"tournament_{ctx.TournamentId}_best", result.FinalScore);
-
-                    // Actualizar mejor tiempo si mejoró
-                    if (result.FinalScore < bestTime)
-                    {
-                        bestTime = result.FinalScore;
-                        PlayerPrefs.SetFloat($"tournament_{ctx.TournamentId}_best", bestTime);
-                    }
-                    PlayerPrefs.SetInt($"tournament_{ctx.TournamentId}_attempts", attemptsUsed + 1);
-                    PlayerPrefs.Save();
-
-                    if (ResultPanelManager.Instance == null) { Debug.LogWarning("[MinigameBase] ResultPanelManager not found"); return; }
-                    ResultPanelManager.Instance.ShowTournamentResult(
-                        result, position, attemptsUsed, maxAttempts, bestTime, prize);
-                }
-                else
-                {
-                    // Fallback: sin servicio de torneo, usar datos del contexto
-                    int attemptsUsed = PlayerPrefs.GetInt($"tournament_{ctx.TournamentId}_attempts", 1);
-                    float bestTime = PlayerPrefs.GetFloat($"tournament_{ctx.TournamentId}_best", result.FinalScore);
-                    decimal prize = ctx.EntryFee > 0 ? ctx.EntryFee * 5m : 0;
-
-                    if (ResultPanelManager.Instance == null) { Debug.LogWarning("[MinigameBase] ResultPanelManager not found"); return; }
-                    ResultPanelManager.Instance.ShowTournamentResult(
-                        result, 1, attemptsUsed, 3, bestTime, prize);
-                }
-            }
-            catch (Exception ex)
-            {
-                Debug.LogError($"[MinigameBase] HandleTournamentResult error: {ex.Message}");
-            }
-        }
-
-        /// <summary>
-        /// Maneja resultado de CashTournament: guarda score, actualiza best time,
-        /// muestra panel de torneo y regresa al lobby.
-        /// </summary>
-        private void HandleCashTournamentResult(MinigameResult result, GameContext ctx)
-        {
-            string tournamentId = ctx.TournamentId ?? PlayerPrefs.GetString("CashGame_TournamentId", "");
-            int attemptNumber = PlayerPrefs.GetInt("CashGame_AttemptNumber", 1);
-            int maxAttempts = PlayerPrefs.GetInt("CashGame_MaxAttempts", 3);
-
-            // Update best time
-            float bestTime = PlayerPrefs.GetFloat($"CashTournament_{tournamentId}_BestTime", float.MaxValue);
             if (result.FinalScore < bestTime)
             {
                 bestTime = result.FinalScore;
-                PlayerPrefs.SetFloat($"CashTournament_{tournamentId}_BestTime", bestTime);
+                PlayerPrefs.SetFloat($"tournament_{ctx.TournamentId}_best", bestTime);
             }
-
-            // Save best score (lower time = better, so lower score value = better)
-            int bestScore = PlayerPrefs.GetInt($"CashTournament_{tournamentId}_BestScore", int.MaxValue);
-            int currentScore = Mathf.RoundToInt(result.FinalScore * 100f);
-            if (currentScore < bestScore)
-            {
-                bestScore = currentScore;
-                PlayerPrefs.SetInt($"CashTournament_{tournamentId}_BestScore", bestScore);
-            }
+            PlayerPrefs.SetInt($"tournament_{ctx.TournamentId}_attempts", attemptsUsed + 1);
             PlayerPrefs.Save();
 
-            // Submit to tournament service if available
-            var tournamentService = ServiceLocator.Tournament;
-            if (tournamentService != null)
-            {
-                _ = tournamentService.SubmitTournamentScore(tournamentId, bestScore).ContinueWith(task =>
-                {
-                    if (task.IsFaulted)
-                        Debug.LogError($"[MinigameBase] SubmitTournamentScore failed: {task.Exception?.Message}");
-                });
-            }
-
-            // Show tournament result panel then return to lobby
-            decimal prize = ctx.EntryFee > 0 ? ctx.EntryFee * 5m : 0;
-            // TODO: D-20 — retrieve actual position from tournament leaderboard once
-            // SubmitTournamentScore returns it; for now use the service if available
-            int position = 1;
-            var ts = ServiceLocator.Tournament;
-            if (ts?.ActiveTournament?.MyPosition != null)
-                position = ts.ActiveTournament.MyPosition.Value;
             if (ResultPanelManager.Instance == null) { Debug.LogWarning("[MinigameBase] ResultPanelManager not found"); return; }
-            ResultPanelManager.Instance.ShowTournamentResult(
-                result, position, attemptNumber, maxAttempts, bestTime, prize);
-
-            Debug.Log($"[MinigameBase] CashTournament attempt {attemptNumber}/{maxAttempts} complete. Score: {currentScore}, Best: {bestScore}");
-        }
-
-        /// <summary>
-        /// Maneja resultado de cash battle 1v1 via MatchmakingService (Firebase)
-        /// Envía resultado y espera al oponente para comparar
-        /// </summary>
-        private void HandleCashBattleResult(MinigameResult result, GameContext ctx)
-        {
-            string matchId = ctx.MatchId ?? OnlineResultManager.GetCurrentMatchId();
-            string opponentName = ctx.OpponentName ?? OnlineResultManager.GetCurrentOpponentName();
-
-            if (MatchmakingService.Instance != null && !string.IsNullOrEmpty(matchId))
-            {
-                // Enviar resultado a Firebase
-                MatchmakingService.Instance.SubmitMatchResult(
-                    matchId, result.FinalScore, result.TotalTime, result.Errors);
-
-                // Escuchar resultado del oponente
-                MatchmakingService.Instance.ListenForOpponentResult(matchId,
-                    (opponentScore, opponentTime) =>
-                    {
-                        var opponentResult = new MinigameResult
-                        {
-                            TotalTime = opponentTime,
-                            PenaltyTime = opponentScore - opponentTime,
-                            Errors = 0,
-                            Completed = true
-                        };
-
-                        bool playerWon = result.FinalScore < opponentScore;
-
-                        if (ResultPanelManager.Instance == null) { Debug.LogWarning("[MinigameBase] ResultPanelManager not found"); return; }
-                        ResultPanelManager.Instance.ShowCashBattleResult(
-                            result, opponentResult, ctx.EntryFee, playerWon, opponentName);
-                    });
-            }
-            else
-            {
-                // Fallback: sin matchmaking, mostrar resultado local
-                Debug.LogWarning("[MinigameBase] MatchmakingService not available for cash battle result");
-                bool playerWon = result.Completed;
-
-                if (ResultPanelManager.Instance == null) { Debug.LogWarning("[MinigameBase] ResultPanelManager not found"); return; }
-                ResultPanelManager.Instance.ShowCashBattleResult(
-                    result, null, ctx.EntryFee, playerWon, opponentName);
-            }
+            ResultPanelManager.Instance.ShowTournamentResult(result, 1, attemptsUsed, 3, bestTime, 0m);
         }
 
         /// <summary>

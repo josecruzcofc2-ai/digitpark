@@ -130,16 +130,7 @@ namespace DigitPark.Editor
                 new AchievementTestData("streak_10", "Domination", "Win 10 matches in a row", "Streaks", 75, "Logro_Demoledor"),
                 new AchievementTestData("streak_20", "Invincible", "Win 20 matches in a row", "Streaks", 150, "Logro_Victoria_Racha_30", true),
 
-                // ==================== CASH BATTLE (7) ====================
-                new AchievementTestData("cash_first", "Bettor", "Complete your first Cash Battle", "CashBattle", 25, "Logro_Ficha_Cash"),
-                new AchievementTestData("cash_first_win", "Real Winner", "Win your first Cash Battle", "CashBattle", 35, "Logro_Rey_Monedas"),
-                new AchievementTestData("cash_10_wins", "Serious Player", "Win 10 Cash Battles", "CashBattle", 50, "Logro_VIP_1000"),
-                new AchievementTestData("cash_50_wins", "High Roller", "Win 50 Cash Battles", "CashBattle", 100, "Logro_VIP_Dados"),
-                new AchievementTestData("cash_100_wins", "Shark", "Win 100 Cash Battles", "CashBattle", 200, "Logro_Tiburon_Cash"),
-                new AchievementTestData("cash_earnings_100", "First $100", "Accumulate $100 in earnings", "CashBattle", 75, "Logro_Bolsa_100"),
-                new AchievementTestData("cash_earnings_1000", "Thousand Club", "Accumulate $1,000 in earnings", "CashBattle", 250, "Logro_Millonario", true),
-
-                // ==================== TOURNAMENTS (5) ====================
+// ==================== TOURNAMENTS (5) ====================
                 new AchievementTestData("tournament_first", "Participant", "Participate in your first tournament", "Tournaments", 20, "Logro_Torneo_Bracket"),
                 new AchievementTestData("tournament_top3", "Podium", "Finish in Top 3", "Tournaments", 50, "Logro_Coleccion_Trofeos"),
                 new AchievementTestData("tournament_win", "Champion", "Win a tournament", "Tournaments", 100, "Logro_Campeon_1"),
@@ -502,8 +493,7 @@ namespace DigitPark.Editor
                 "Mastery" => new Color(0.5f, 1f, 0.5f, 0.5f),
                 "Victories" => new Color(0.2f, 0.8f, 0.4f, 0.5f),
                 "Streaks" => new Color(1f, 0.5f, 0.2f, 0.5f),
-                "CashBattle" => new Color(0.4f, 0.8f, 0.2f, 0.5f),
-                "Tournaments" => new Color(1f, 0.6f, 0.2f, 0.5f),
+"Tournaments" => new Color(1f, 0.6f, 0.2f, 0.5f),
                 "Social" => new Color(0.4f, 0.6f, 1f, 0.5f),
                 "Progression" => new Color(0.8f, 0.6f, 1f, 0.5f),
                 "Collector" => new Color(1f, 0.7f, 0.3f, 0.5f),

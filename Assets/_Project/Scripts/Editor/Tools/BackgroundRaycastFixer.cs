@@ -56,11 +56,12 @@ namespace DigitPark.Editor
                 scenesProcessed++;
             }
 
-            EditorUtility.DisplayDialog("Background Raycast Fix - All Scenes",
-                $"Processed {scenesProcessed} scenes.\n" +
-                $"Fixed {totalFixed} Background Image(s) total.\n\n" +
-                "All scenes have been saved.",
-                "OK");
+            if (!AllScenesBatchBuilder.SilentMode)
+                EditorUtility.DisplayDialog("Background Raycast Fix - All Scenes",
+                    $"Processed {scenesProcessed} scenes.\n" +
+                    $"Fixed {totalFixed} Background Image(s) total.\n\n" +
+                    "All scenes have been saved.",
+                    "OK");
         }
 
         private static int FixBackgroundsInCurrentScene()

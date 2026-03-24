@@ -6,14 +6,7 @@ using DigitPark.Payments.Entitlements;
 namespace DigitPark.Payments
 {
     /// <summary>
-    /// Orquestador central del sistema de pagos cosméticos.
-    /// Decide si usar Stripe o Apple IAP basado en PaymentFeatureFlag.
-    ///
-    /// REGLA CRÍTICA: Este manager NUNCA importa ni referencia:
-    ///   - TriumphManager
-    ///   - ServiceLocator (el de CashBattle)
-    ///   - IWalletService, IKYCService, IMatchmakingService, ITournamentService
-    ///   - Cualquier namespace DigitPark.Services.Triumph
+    /// Orquestador central del sistema de pagos cosméticos (Apple IAP).
     /// </summary>
     public class PaymentManager : MonoBehaviour
     {
@@ -32,10 +25,7 @@ namespace DigitPark.Payments
         [Header("Configuración")]
         [SerializeField] private PaymentConfig _config = new PaymentConfig();
 
-        private IPaymentProvider _stripeProvider;
         private IPaymentProvider _iapProvider;
-        private int _stripeFailureCount = 0;
-        private const int MAX_STRIPE_FAILURES = 3;
         private bool _isPurchaseInProgress = false;
         private bool _isInitialized = false;
 
@@ -73,40 +63,28 @@ namespace DigitPark.Payments
                 return;
             }
 
-            // Apple IAP siempre se inicializa (es el failsafe)
             _iapProvider = new AppleIAP.AppleIAPProvider();
             await _iapProvider.Initialize(_config);
             Debug.Log($"[PaymentManager] AppleIAP disponible: {_iapProvider.IsAvailable}");
-
-#if HAS_STRIPE || UNITY_EDITOR
-            // Stripe solo en versión Pro
-            if (PaymentFeatureFlag.IsStripeEnabled)
-            {
-                _stripeProvider = new Stripe.StripePaymentProvider();
-                await _stripeProvider.Initialize(_config);
-                Debug.Log($"[PaymentManager] Stripe disponible: {_stripeProvider?.IsAvailable}");
-            }
-#endif
 
             _isInitialized = true;
             Debug.Log("[PaymentManager] Sistema de pagos inicializado correctamente");
         }
 
         /// <summary>
-        /// Compra un producto cosmético. Usa Stripe como primario, Apple IAP como fallback.
+        /// Compra un producto cosmético via Apple IAP.
         /// </summary>
         public async Task<PaymentResult> PurchaseCosmetic(string productId)
         {
             if (_isPurchaseInProgress)
             {
                 return PaymentResult.Failed(productId, "purchase_in_progress",
-                    "Ya hay una compra en progreso", PaymentFeatureFlag.ActiveCosmeticProvider);
+                    "Ya hay una compra en progreso", PaymentProvider.None);
             }
 
             var product = ProductCatalog.FindProduct(productId);
             if (product == null)
             {
-                // Intentar por Apple Product ID
                 product = ProductCatalog.FindByAppleProductId(productId);
             }
             if (product == null)
@@ -124,66 +102,24 @@ namespace DigitPark.Payments
             }
 
             _isPurchaseInProgress = true;
-            PaymentEvents.EmitPurchaseStarted(productId, PaymentFeatureFlag.ActiveCosmeticProvider);
+            PaymentEvents.EmitPurchaseStarted(productId, PaymentProvider.AppleIAP);
 
             try
             {
-                PaymentResult result = null;
-                bool usedFallback = false;
+                PaymentResult result;
 
-                // Intentar con el provider activo
-                if (PaymentFeatureFlag.ActiveCosmeticProvider == PaymentProvider.Stripe
-                    && _stripeProvider != null && _stripeProvider.IsAvailable)
-                {
-                    result = await _stripeProvider.PurchaseProduct(product, userId);
-
-                    if (!result.Success)
-                    {
-                        _stripeFailureCount++;
-                        Debug.LogWarning($"[PaymentManager] Stripe falló ({_stripeFailureCount}/{MAX_STRIPE_FAILURES}): {result.ErrorMessage}");
-
-                        if (_stripeFailureCount >= MAX_STRIPE_FAILURES)
-                        {
-                            PaymentFeatureFlag.ForceSwitch(PaymentProvider.AppleIAP,
-                                $"Stripe falló {MAX_STRIPE_FAILURES} veces");
-                        }
-
-                        // BUG-04: Solo hacer fallback si el fallo ocurrió ANTES de que el usuario pagara.
-                        // session_expired y session_creation_failed pueden significar que Stripe ya procesó
-                        // el cobro — hacer fallback a Apple IAP causaría un doble cargo.
-                        bool safeToFallback = result.ErrorCode != "session_expired"
-                            && result.ErrorCode != "session_creation_failed";
-
-                        if (safeToFallback && _iapProvider != null && _iapProvider.IsAvailable)
-                        {
-                            Debug.Log("[PaymentManager] Haciendo fallback a Apple IAP...");
-                            result = await _iapProvider.PurchaseProduct(product, userId);
-                            usedFallback = true;
-                        }
-                        else if (!safeToFallback)
-                        {
-                            Debug.LogWarning($"[PaymentManager] Fallback omitido (errorCode='{result.ErrorCode}'). " +
-                                "El pago puede estar procesándose en Stripe. El usuario debe revisar su correo de confirmación.");
-                        }
-                    }
-                    else
-                    {
-                        _stripeFailureCount = 0;
-                    }
-                }
-                else if (_iapProvider != null && _iapProvider.IsAvailable)
+                if (_iapProvider != null && _iapProvider.IsAvailable)
                 {
                     result = await _iapProvider.PurchaseProduct(product, userId);
                 }
                 else
                 {
                     result = PaymentResult.Failed(productId, "no_provider_available",
-                        "Ningún proveedor de pago disponible", PaymentProvider.None);
+                        "Apple IAP no disponible", PaymentProvider.None);
                 }
 
                 if (result != null && result.Success)
                 {
-                    result.WasProviderSwitched = usedFallback;
                     await OnPurchaseSuccess(result, product);
                     PaymentEvents.EmitPurchaseCompleted(result);
                 }
@@ -237,13 +173,7 @@ namespace DigitPark.Payments
             return result;
         }
 
-        public PaymentProvider GetActiveProvider() => PaymentFeatureFlag.ActiveCosmeticProvider;
-
-        public void ResetStripeFailureCount()
-        {
-            _stripeFailureCount = 0;
-            Debug.Log("[PaymentManager] Contador de fallos de Stripe reiniciado");
-        }
+        public PaymentProvider GetActiveProvider() => PaymentProvider.AppleIAP;
 
         private string GetCurrentUserId()
         {

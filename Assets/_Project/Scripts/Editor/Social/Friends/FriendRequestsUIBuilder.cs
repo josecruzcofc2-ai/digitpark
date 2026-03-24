@@ -3,8 +3,6 @@ using UnityEngine.UI;
 using UnityEditor;
 using TMPro;
 using DigitPark.UI;
-using DigitPark.Themes;
-using ET = DigitPark.Themes.ThemeApplier.ElementType;
 
 namespace DigitPark.Editor
 {
@@ -155,7 +153,6 @@ namespace DigitPark.Editor
             rt.offsetMax = Vector2.zero;
             var bgImg = GetOrAdd<Image>(bg);
             bgImg.color = Color.white; // ThemeApplier tints at runtime
-            ThemeApplierHelper.Apply(bg, ET.PrimaryBackground);
         }
 
         #endregion

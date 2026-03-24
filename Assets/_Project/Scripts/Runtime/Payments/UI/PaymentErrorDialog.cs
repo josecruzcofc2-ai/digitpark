@@ -4,10 +4,6 @@ namespace DigitPark.Payments.UI
 {
     /// <summary>
     /// Diálogo de error para pagos fallidos.
-    /// Casos:
-    ///   - Stripe falló pero IAP funcionó → NO mostrar error (seamless fallback)
-    ///   - Ambos fallaron → mostrar "payment_unavailable" con Retry
-    ///   - Maintenance mode → mostrar "store_maintenance" sin botón
     /// </summary>
     public class PaymentErrorDialog : MonoBehaviour
     {
@@ -33,27 +29,6 @@ namespace DigitPark.Payments.UI
             if (this == null) return;
             if (result == null) return;
 
-            // Si hubo fallback exitoso, no mostrar error
-            if (result.WasProviderSwitched) return;
-
-            // Maintenance mode
-            if (PaymentFeatureFlag.IsMaintenanceMode)
-            {
-                ShowDialog("Store under maintenance", null, null);
-                return;
-            }
-
-            // BUG-04: session_expired — el pago puede haberse procesado en Stripe.
-            // NO ofrecer Retry (evita doble cargo). Informar al usuario que revise su correo.
-            if (result.ErrorCode == "session_expired")
-            {
-                ShowDialog(
-                    "Your payment may be processing. Check your Stripe confirmation email before trying again.",
-                    "OK", null);
-                return;
-            }
-
-            // Error de pago general
             ShowDialog("Payment unavailable", "Retry", OnRetryClicked);
         }
 

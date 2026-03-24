@@ -52,7 +52,7 @@ namespace DigitPark.Payments.AppleIAP
                 receiptData = receiptData,
                 productId = productId,
                 userId = userId,
-                appVersion = PaymentFeatureFlag.IsProVersion ? "pro" : "global",
+                appVersion = "global",
                 bundleId = Application.identifier
             };
 

@@ -13,7 +13,6 @@ using DigitPark.UI;
 using DigitPark.Games;
 using DigitPark.Services;
 using DigitPark.Animations;
-using DigitPark.Themes;
 
 namespace DigitPark.Managers
 {
@@ -210,9 +209,8 @@ namespace DigitPark.Managers
         {
             if (toggle == null) return;
             var bg = toggle.GetComponent<Image>();
-            var theme = ThemeManager.Instance?.CurrentTheme;
             if (bg != null)
-                bg.color = isOn ? (theme?.tabActive ?? new Color(0f, 1f, 1f, 1f)) : (theme?.tabInactive ?? new Color(0.08f, 0.12f, 0.18f, 1f));
+                bg.color = isOn ? new Color(0f, 1f, 1f, 1f) : new Color(0.08f, 0.12f, 0.18f, 1f);
 
             var label = toggle.GetComponentInChildren<TextMeshProUGUI>();
             if (label != null)
@@ -1034,12 +1032,7 @@ namespace DigitPark.Managers
             {
                 HandleTournamentResult(result, ctx);
             }
-            // 4. CashBattle single game
-            else if (ctx != null && ctx.EntryFee > 0 && ctx.Mode == GameMode.SingleGame)
-            {
-                HandleCashBattleResult(result, ctx);
-            }
-            // 5. CognitiveSprint final (practice or cash)
+            // 4. CognitiveSprint final
             else if (ctx?.Mode == GameMode.CognitiveSprint && !ctx.HasMoreGames)
             {
                 ResultPanelManager.Instance.ShowSprintSummary(ctx);
@@ -1203,22 +1196,9 @@ namespace DigitPark.Managers
 
         private void HandleTournamentResult(MinigameResult result, GameContext ctx)
         {
-            var tournamentService = ServiceLocator.Tournament;
-
-            int position = 1;
-            decimal prize = ctx.EntryFee > 0 ? ctx.EntryFee * 5m : 0;
             int attemptsUsed = PlayerPrefs.GetInt($"tournament_{ctx.TournamentId}_attempts", 1);
             int maxAttempts = 3;
             float bestTime = PlayerPrefs.GetFloat($"tournament_{ctx.TournamentId}_best", result.FinalScore);
-
-            if (tournamentService?.ActiveTournament != null)
-            {
-                var tournament = tournamentService.ActiveTournament;
-                position = tournament.MyPosition ?? 1;
-                prize = tournament.PrizePool;
-
-                tournamentService.SubmitTournamentScore(ctx.TournamentId, (int)(result.FinalScore * 100f));
-            }
 
             if (result.FinalScore < bestTime)
             {
@@ -1228,42 +1208,7 @@ namespace DigitPark.Managers
             PlayerPrefs.SetInt($"tournament_{ctx.TournamentId}_attempts", attemptsUsed + 1);
             PlayerPrefs.Save();
 
-            ResultPanelManager.Instance.ShowTournamentResult(
-                result, position, attemptsUsed, maxAttempts, bestTime, prize);
-        }
-
-        private void HandleCashBattleResult(MinigameResult result, GameContext ctx)
-        {
-            string matchId = ctx.MatchId ?? OnlineResultManager.GetCurrentMatchId();
-            string opponentName = ctx.OpponentName ?? OnlineResultManager.GetCurrentOpponentName();
-
-            if (MatchmakingService.Instance != null && !string.IsNullOrEmpty(matchId))
-            {
-                MatchmakingService.Instance.SubmitMatchResult(
-                    matchId, result.FinalScore, result.TotalTime, result.Errors);
-
-                MatchmakingService.Instance.ListenForOpponentResult(matchId,
-                    (opponentScore, opponentTime) =>
-                    {
-                        var opponentResult = new MinigameResult
-                        {
-                            TotalTime = opponentTime,
-                            PenaltyTime = opponentScore - opponentTime,
-                            Errors = 0,
-                            Completed = true
-                        };
-
-                        bool playerWon = result.FinalScore < opponentScore;
-                        ResultPanelManager.Instance.ShowCashBattleResult(
-                            result, opponentResult, ctx.EntryFee, playerWon, opponentName);
-                    });
-            }
-            else
-            {
-                bool playerWon = result.Completed;
-                ResultPanelManager.Instance.ShowCashBattleResult(
-                    result, null, ctx.EntryFee, playerWon, opponentName);
-            }
+            ResultPanelManager.Instance.ShowTournamentResult(result, 1, attemptsUsed, maxAttempts, bestTime, 0m);
         }
 
         #endregion

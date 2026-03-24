@@ -4,8 +4,6 @@ using UnityEditor;
 using TMPro;
 using DigitPark.UI;
 using DigitPark.Monetization;
-using DigitPark.Themes;
-using ET = DigitPark.Themes.ThemeApplier.ElementType;
 
 namespace DigitPark.Editor
 {
@@ -107,7 +105,6 @@ namespace DigitPark.Editor
             SetupRectTransform(background, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
             Image bgImage = background.AddComponent<Image>();
             bgImage.color = Color.white;
-            ThemeApplierHelper.Apply(background, ET.PrimaryBackground);
             background.transform.SetAsFirstSibling();
 
             // ========== SAFE AREA ==========

@@ -1,7 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
-using DigitPark.Themes;
 
 namespace DigitPark.UI.Components
 {
@@ -96,9 +95,6 @@ namespace DigitPark.UI.Components
 
         private void OnEnable()
         {
-            // Subscribe to theme changes
-            ThemeManager.OnThemeChanged += OnThemeChanged;
-
             // Apply current glow
             UpdateGlowColor();
             ApplyGlow();
@@ -106,7 +102,6 @@ namespace DigitPark.UI.Components
 
         private void OnDisable()
         {
-            ThemeManager.OnThemeChanged -= OnThemeChanged;
         }
 
         private void Update()
@@ -205,12 +200,6 @@ namespace DigitPark.UI.Components
             );
 
             outline.effectColor = glowColor;
-        }
-
-        private void OnThemeChanged(ThemeData newTheme)
-        {
-            UpdateGlowColor();
-            ApplyGlow();
         }
 
         #region Pointer Events

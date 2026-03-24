@@ -6,7 +6,6 @@ namespace DigitPark.Tools
     /// <summary>
     /// Configuracion de testing para la escena Boot.
     /// Permite saltar el login y ir directo a una escena en modo Editor.
-    /// Agregar al GameObject "EditorBootConfig" en la escena Boot.
     /// </summary>
     public class EditorBootConfig : MonoBehaviour
     {
@@ -21,9 +20,6 @@ namespace DigitPark.Tools
         [Tooltip("Simular usuario autenticado (para escenas que lo requieren)")]
         [SerializeField] private bool simulateAuthenticated = true;
 
-        [Tooltip("Activar bypass de auth en CashBattle (ServiceLocator Mock)")]
-        [SerializeField] private bool cashBattleBypassAuth = true;
-
         [Header("=== INFO ===")]
         #pragma warning disable 0414
         [SerializeField] [TextArea(2, 4)]
@@ -34,8 +30,6 @@ namespace DigitPark.Tools
         {
             MainMenu,
             GameSelector,
-            CashBattleHub,
-            CashBattle1v1,
             Settings,
             Profile,
             Shop,
@@ -53,15 +47,6 @@ namespace DigitPark.Tools
 
             Debug.Log($"[EditorBootConfig] Skip Boot activado -> {targetScene}");
 
-            if (cashBattleBypassAuth)
-            {
-                PlayerPrefs.SetInt("CashBattleBypassAuth", 1);
-                PlayerPrefs.SetInt("Mock_KYC_Status", 3); // KYCStatus.FullyVerified
-                PlayerPrefs.SetInt("AgeVerified", 1);     // Legacy fallback
-                PlayerPrefs.Save();
-                Debug.Log("[EditorBootConfig] CashBattle bypass auth ENABLED (KYC set to FullyVerified)");
-            }
-
             if (simulateAuthenticated)
             {
                 PlayerPrefs.SetInt("EditorSimulateAuth", 1);
@@ -69,15 +54,12 @@ namespace DigitPark.Tools
                 Debug.Log("[EditorBootConfig] Simulating authenticated user");
             }
 
-            // Cargar escena destino en el siguiente frame
             StartCoroutine(LoadTargetScene());
         }
 
         private System.Collections.IEnumerator LoadTargetScene()
         {
-            // Esperar un frame para que otros Awake() terminen
             yield return null;
-
             string sceneName = targetScene.ToString();
             Debug.Log($"[EditorBootConfig] Loading scene: {sceneName}");
             SceneManager.LoadScene(sceneName);

@@ -1,7 +1,6 @@
 using UnityEngine;
 using UnityEditor;
 using DigitPark.Managers;
-using DigitPark.Themes;
 
 namespace DigitPark.Editor
 {
@@ -27,20 +26,6 @@ namespace DigitPark.Editor
             }
         }
 
-        [MenuItem("Tools/DigitPark Debug/Premium/Unlock Cash Battle Create")]
-        private static void UnlockCashBattleCreate()
-        {
-            if (PremiumManager.Instance != null)
-            {
-                PremiumManager.Instance.UnlockProduct(PremiumProduct.CashBattleCreate);
-                Debug.Log("[Debug] Cash Battle Create desbloqueado");
-            }
-            else
-            {
-                SetPremiumPlayerPref("Premium_CashBattleCreate", true);
-            }
-        }
-
         [MenuItem("Tools/DigitPark Debug/Premium/Unlock Tournament Bundle")]
         private static void UnlockTournamentBundle()
         {
@@ -52,7 +37,6 @@ namespace DigitPark.Editor
             else
             {
                 SetPremiumPlayerPref("Premium_CreateTournaments", true);
-                SetPremiumPlayerPref("Premium_CashBattleCreate", true);
             }
         }
 
@@ -82,7 +66,6 @@ namespace DigitPark.Editor
         private static void ResetAllPremium()
         {
             PlayerPrefs.DeleteKey("Premium_CreateTournaments");
-            PlayerPrefs.DeleteKey("Premium_CashBattleCreate");
             PlayerPrefs.DeleteKey("Premium_StylesPro");
             PlayerPrefs.Save();
             Debug.Log("[Debug] Estado premium reseteado");
@@ -93,32 +76,6 @@ namespace DigitPark.Editor
             PlayerPrefs.SetInt(key, value ? 1 : 0);
             PlayerPrefs.Save();
             Debug.Log($"[Debug] PlayerPref '{key}' = {value}");
-        }
-
-        #endregion
-
-        #region Themes
-
-        [MenuItem("Tools/DigitPark Debug/Themes/Refresh Current Theme")]
-        private static void RefreshTheme()
-        {
-            if (ThemeManager.Instance != null)
-            {
-                ThemeManager.Instance.RefreshTheme();
-                Debug.Log("[Debug] Tema refrescado");
-            }
-            else
-            {
-                Debug.LogWarning("[Debug] ThemeManager no disponible (ejecutar en Play Mode)");
-            }
-        }
-
-        [MenuItem("Tools/DigitPark Debug/Themes/Reset Theme to Default")]
-        private static void ResetThemeToDefault()
-        {
-            PlayerPrefs.DeleteKey("SelectedTheme");
-            PlayerPrefs.Save();
-            Debug.Log("[Debug] Tema reseteado a default (reinicia la app)");
         }
 
         #endregion
@@ -243,7 +200,6 @@ namespace DigitPark.Editor
         {
             // Desbloquear premium
             SetPremiumPlayerPref("Premium_CreateTournaments", true);
-            SetPremiumPlayerPref("Premium_CashBattleCreate", true);
             SetPremiumPlayerPref("Premium_StylesPro", true);
 
             Debug.Log("[Debug] Configuracion rapida aplicada: Premium completo desbloqueado");

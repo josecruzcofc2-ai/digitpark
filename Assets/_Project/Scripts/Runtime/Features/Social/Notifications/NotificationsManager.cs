@@ -9,7 +9,6 @@ using DigitPark.Services.Firebase;
 using DG.Tweening;
 using DigitPark.UI;
 using DigitPark.Localization;
-using DigitPark.Themes;
 
 namespace DigitPark.Managers
 {
@@ -185,7 +184,6 @@ namespace DigitPark.Managers
             tmp.color = new Color(0.5f, 0.5f, 0.55f, 1f);
             tmp.fontStyle = FontStyles.Bold;
             tmp.alignment = TextAlignmentOptions.Center;
-            separator.AddComponent<ThemeApplier>().Configure(ThemeApplier.ElementType.TextSecondary, false, true);
         }
 
         private void CreateNotificationCard(StoredNotification notification, int index)
@@ -549,7 +547,7 @@ namespace DigitPark.Managers
             if (!string.IsNullOrEmpty(tournamentId))
                 PlayerPrefs.SetString("DP_OpenTournamentId", tournamentId);
 
-            SceneManager.LoadScene("CashBattleHub");
+            SceneManager.LoadScene("MainMenu");
         }
 
         private void OnViewTournamentResults(string tournamentId)
@@ -557,7 +555,7 @@ namespace DigitPark.Managers
             if (!string.IsNullOrEmpty(tournamentId))
                 PlayerPrefs.SetString("DP_OpenTournamentId", tournamentId);
 
-            SceneManager.LoadScene("CashBattleHub");
+            SceneManager.LoadScene("MainMenu");
         }
 
         private void OnClaimDailyReward()

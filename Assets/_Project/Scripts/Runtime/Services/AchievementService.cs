@@ -382,99 +382,6 @@ namespace DigitPark.Services
                 isHidden = true
             });
 
-            // ==================== CASH BATTLE - 7 logros ====================
-            achievements.Add(new AchievementData
-            {
-                id = "cash_first",
-                titleKey = "ach_cash_first",
-                descriptionKey = "ach_cash_first_desc",
-                category = AchievementCategory.CashBattle,
-                targetValue = 1,
-                rewardCoins = 75,
-                rewardGems = 2, // Economy Rebalance: gem drip
-                points = 25,
-                iconName = "Logro_Ficha_Cash"
-            });
-
-            achievements.Add(new AchievementData
-            {
-                id = "cash_first_win",
-                titleKey = "ach_cash_first_win",
-                descriptionKey = "ach_cash_first_win_desc",
-                category = AchievementCategory.CashBattle,
-                targetValue = 1,
-                rewardCoins = 175,
-                rewardGems = 4, // Economy Rebalance: gem drip
-                points = 35,
-                iconName = "Logro_Rey_Monedas"
-            });
-
-            achievements.Add(new AchievementData
-            {
-                id = "cash_10_wins",
-                titleKey = "ach_cash_10_wins",
-                descriptionKey = "ach_cash_10_wins_desc",
-                category = AchievementCategory.CashBattle,
-                targetValue = 10,
-                rewardCoins = 175,
-                rewardGems = 4, // Economy Rebalance: gem drip
-                points = 50,
-                iconName = "Logro_VIP_1000"
-            });
-
-            achievements.Add(new AchievementData
-            {
-                id = "cash_50_wins",
-                titleKey = "ach_cash_50_wins",
-                descriptionKey = "ach_cash_50_wins_desc",
-                category = AchievementCategory.CashBattle,
-                targetValue = 50,
-                rewardCoins = 400,
-                rewardGems = 7, // Economy Rebalance: gem drip
-                points = 100,
-                iconName = "Logro_VIP_Dados"
-            });
-
-            achievements.Add(new AchievementData
-            {
-                id = "cash_100_wins",
-                titleKey = "ach_cash_100_wins",
-                descriptionKey = "ach_cash_100_wins_desc",
-                category = AchievementCategory.CashBattle,
-                targetValue = 100,
-                rewardCoins = 600,
-                rewardGems = 12, // Economy Rebalance: gem drip
-                points = 200,
-                iconName = "Logro_Tiburon_Cash"
-            });
-
-            achievements.Add(new AchievementData
-            {
-                id = "cash_earnings_100",
-                titleKey = "ach_cash_earnings_100",
-                descriptionKey = "ach_cash_earnings_100_desc",
-                category = AchievementCategory.CashBattle,
-                targetValue = 100,
-                rewardCoins = 400,
-                rewardGems = 12, // Economy Rebalance: gem drip
-                points = 75,
-                iconName = "Logro_Bolsa_100"
-            });
-
-            achievements.Add(new AchievementData
-            {
-                id = "cash_earnings_1000",
-                titleKey = "ach_cash_earnings_1000",
-                descriptionKey = "ach_cash_earnings_1000_desc",
-                category = AchievementCategory.CashBattle,
-                targetValue = 1000,
-                rewardCoins = 600,
-                rewardGems = 12, // Economy Rebalance: gem drip
-                points = 250,
-                iconName = "Logro_Millonario",
-                isHidden = true
-            });
-
             // ==================== TOURNAMENTS - 5 logros ====================
             achievements.Add(new AchievementData
             {
@@ -1265,33 +1172,6 @@ namespace DigitPark.Services
         }
 
         /// <summary>
-        /// Llamar cuando se completa una Cash Battle
-        /// </summary>
-        public void OnCashBattleCompleted(bool won, decimal earnings)
-        {
-            // Primera cash battle
-            AddProgress("cash_first", 1);
-
-            if (won)
-            {
-                AddProgress("cash_first_win", 1);
-                AddProgress("cash_10_wins", 1);
-                AddProgress("cash_50_wins", 1);
-                AddProgress("cash_100_wins", 1);
-            }
-
-            // Ganancias acumuladas
-            if (earnings > 0)
-            {
-                int currentEarnings100 = GetCurrentValue("cash_earnings_100");
-                SetProgress("cash_earnings_100", currentEarnings100 + (int)earnings);
-
-                int currentEarnings1000 = GetCurrentValue("cash_earnings_1000");
-                SetProgress("cash_earnings_1000", currentEarnings1000 + (int)earnings);
-            }
-        }
-
-        /// <summary>
         /// Llamar para eventos de torneo
         /// </summary>
         public void OnTournamentEvent(string eventType, int placement = 0)
@@ -1457,7 +1337,6 @@ namespace DigitPark.Services
         Mastery,        // Per-game mastery
         Victories,      // Win-based
         Streaks,        // Win streaks
-        CashBattle,     // Cash battle
         Tournaments,    // Tournament
         Social,         // Friends
         Progression,    // Level/rank

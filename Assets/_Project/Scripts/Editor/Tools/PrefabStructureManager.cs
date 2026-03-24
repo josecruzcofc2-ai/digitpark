@@ -27,12 +27,7 @@ namespace DigitPark.Editor
             // Games - Paneles de victoria/derrota
             { "Games/WinPanels", new[] { "WinPanel_Normal", "LosePanel_Normal", "WinPanel_RealMoney", "LosePanel_RealMoney" } },
 
-            // CashBattle - Sistema de dinero real
-            { "CashBattle/Wallet", new[] { "TransactionItemUI", "DepositOptionUI" } },
-            { "CashBattle/History", new[] { "MatchHistoryItem" } },
-            { "CashBattle/Tournaments", new[] { "TournamentCardUI" } },
-
-            // Monetization - Sistema de monetización
+// Monetization - Sistema de monetización
             { "Monetization", new[] { "TrophyCard" } },
             { "Monetization/Achievements", new[] { "AchievementItem", "CategoryHeader" } },
             { "Monetization/DailyMissions", new[] { "MissionItem" } },
@@ -223,15 +218,7 @@ namespace DigitPark.Editor
             int moved = 0;
 
             // Mover prefabs a sus ubicaciones correctas
-            // CashBattle/TournamentCardUI -> CashBattle/Tournaments/
-            moved += TryMovePrefab("CashBattle/TournamentCardUI.prefab", "CashBattle/Tournaments/TournamentCardUI.prefab");
-
-            // CashBattle raíz -> Wallet
-            moved += TryMovePrefab("CashBattle/TransactionItemUI.prefab", "CashBattle/Wallet/TransactionItemUI.prefab");
-            moved += TryMovePrefab("CashBattle/DepositOptionUI.prefab", "CashBattle/Wallet/DepositOptionUI.prefab");
-            moved += TryMovePrefab("CashBattle/HistoryEntryItemUI.prefab", "CashBattle/History/MatchHistoryItem.prefab");
-
-            // UI/Scores -> Social
+// UI/Scores -> Social
             moved += TryMovePrefab("UI/Scores/LeaderboardEntry.prefab", "Social/LeaderboardEntry.prefab");
 
             // UI/Tournaments -> Tournaments/Browser

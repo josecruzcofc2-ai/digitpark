@@ -1,7 +1,6 @@
 using UnityEngine;
 using System;
 using DigitPark.Managers;
-using DigitPark.Themes;
 using DigitPark.Games;
 using DigitPark.Services.Firebase;
 using DigitPark.Data;
@@ -33,7 +32,7 @@ namespace DigitPark.DevTools
         private string[] _logMessages = new string[10];
         private int _logIndex = 0;
         private int _selectedTab = 0;
-        private readonly string[] _tabNames = { "General", "Premium", "Games", "Firebase", "Themes" };
+        private readonly string[] _tabNames = { "General", "Premium", "Games", "Firebase" };
 
         // Cache de datos
         #pragma warning disable 0414
@@ -115,7 +114,6 @@ namespace DigitPark.DevTools
                 case 1: DrawPremiumTab(); break;
                 case 2: DrawGamesTab(); break;
                 case 3: DrawFirebaseTab(); break;
-                case 4: DrawThemesTab(); break;
             }
 
             GUILayout.EndScrollView();
@@ -159,7 +157,6 @@ namespace DigitPark.DevTools
             DrawServiceStatus("AnalyticsService", AnalyticsService.Instance != null);
             DrawServiceStatus("NotificationService", NotificationService.Instance != null);
             DrawServiceStatus("PremiumManager", PremiumManager.Instance != null);
-            DrawServiceStatus("ThemeManager", ThemeManager.Instance != null);
             DrawServiceStatus("GameSessionManager", GameSessionManager.Instance != null);
 
             GUILayout.Space(10);
@@ -210,7 +207,6 @@ namespace DigitPark.DevTools
             if (PremiumManager.Instance != null)
             {
                 GUILayout.Label($"Create Tournaments: {PremiumManager.Instance.CanCreateTournaments}");
-                GUILayout.Label($"Cash Battle Create: {PremiumManager.Instance.CanCreateCashBattle}");
                 GUILayout.Label($"Styles PRO: {PremiumManager.Instance.HasStylesPro}");
                 GUILayout.Label($"Is Premium: {PremiumManager.Instance.IsPremium}");
 
@@ -227,11 +223,6 @@ namespace DigitPark.DevTools
                     PremiumManager.Instance.UnlockProduct(PremiumProduct.TournamentBundle);
                 }
 
-                if (GUILayout.Button("Desbloquear: Cash Battle Create"))
-                {
-                    PremiumManager.Instance.UnlockProduct(PremiumProduct.CashBattleCreate);
-                }
-
                 if (GUILayout.Button("Desbloquear: Styles PRO"))
                 {
                     PremiumManager.Instance.UnlockProduct(PremiumProduct.StylesPro);
@@ -242,7 +233,6 @@ namespace DigitPark.DevTools
                 if (GUILayout.Button("Resetear Todo Premium"))
                 {
                     PlayerPrefs.DeleteKey("DP_Premium_CreateTournaments");
-                    PlayerPrefs.DeleteKey("DP_Premium_CashBattleCreate");
                     PlayerPrefs.DeleteKey("DP_Premium_StylesPro");
                     PlayerPrefs.Save();
                     UnityEngine.Debug.Log("[Debug] Estado premium reseteado - reinicia la app");
@@ -458,60 +448,7 @@ namespace DigitPark.DevTools
 
         #endregion
 
-        #region Themes Tab
 
-        private void DrawThemesTab()
-        {
-            GUILayout.Label("=== Temas ===", GUI.skin.box);
-
-            if (ThemeManager.Instance != null)
-            {
-                var current = ThemeManager.Instance.CurrentTheme;
-                GUILayout.Label($"Tema actual: {current?.themeName ?? "N/A"}");
-                GUILayout.Label($"Total temas: {ThemeManager.Instance.AvailableThemes.Count}");
-                GUILayout.Label($"Temas desbloqueados: {ThemeManager.Instance.GetAvailableThemes().Count}");
-                GUILayout.Label($"Temas bloqueados: {ThemeManager.Instance.GetLockedThemes().Count}");
-
-                GUILayout.Space(10);
-                GUILayout.Label("=== Cambiar Tema ===", GUI.skin.box);
-
-                foreach (var theme in ThemeManager.Instance.AvailableThemes)
-                {
-                    bool isAvailable = ThemeManager.Instance.IsThemeAvailable(theme);
-                    bool isCurrent = theme == current;
-
-                    string label = theme.themeName;
-                    if (theme.isPremium) label += " [PRO]";
-                    if (!isAvailable) label += " (Bloqueado)";
-                    if (isCurrent) label += " *";
-
-                    if (GUILayout.Button(label))
-                    {
-                        if (isAvailable)
-                        {
-                            ThemeManager.Instance.SetTheme(theme);
-                        }
-                        else
-                        {
-                            UnityEngine.Debug.Log($"[Debug] Tema bloqueado: {theme.themeName}");
-                        }
-                    }
-                }
-
-                GUILayout.Space(10);
-
-                if (GUILayout.Button("Forzar Refresh de Tema"))
-                {
-                    ThemeManager.Instance.RefreshTheme();
-                }
-            }
-            else
-            {
-                GUILayout.Label("ThemeManager no disponible");
-            }
-        }
-
-        #endregion
 
         #region Public Debug Methods
 

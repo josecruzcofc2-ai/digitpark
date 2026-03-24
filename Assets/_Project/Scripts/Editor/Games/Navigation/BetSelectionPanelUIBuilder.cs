@@ -5,8 +5,6 @@ using UnityEditor.SceneManagement;
 using TMPro;
 using DigitPark.UI;
 using DigitPark.Monetization;
-using DigitPark.Themes;
-using ET = DigitPark.Themes.ThemeApplier.ElementType;
 
 namespace DigitPark.Editor
 {
@@ -151,7 +149,6 @@ namespace DigitPark.Editor
             var bgImg = bg.AddComponent<Image>();
             bgImg.color = Color.white;
             bgImg.raycastTarget = false;
-            ThemeApplierHelper.Apply(bg, ET.PrimaryBackground);
 
             // === HEADER ===
             CreateHeader(canvas.transform);

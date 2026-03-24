@@ -113,7 +113,7 @@ namespace DigitPark.Payments.Entitlements
                 provider = provider,
                 transactionId = transactionId,
                 grantedAt = System.DateTime.UtcNow.ToString("O"),
-                appVersion = PaymentFeatureFlag.IsProVersion ? "pro" : "global",
+                appVersion = "global",
                 hasTournamentBenefit = false,
                 isCosmetic = true
             };

@@ -15,7 +15,6 @@ namespace DigitPark.Navigation
         // Auth
         public const string Login       = "Login";
         public const string Register    = "Register";
-        public const string AgeVerification = "AgeVerification";
 
         // Games
         public const string GameSelector   = "GameSelector";
@@ -45,11 +44,5 @@ namespace DigitPark.Navigation
         // Monetization
         public const string Shop            = "Shop";
 
-        // CashBattle
-        public const string CashBattleHub      = "CashBattleHub";
-        public const string CashHistory        = "CashHistory";
-        public const string CashMatchmaking    = "CashMatchmaking";
-        public const string CashTournament     = "CashTournament";
-        public const string CashTournamentLobby = "CashTournamentLobby";
     }
 }

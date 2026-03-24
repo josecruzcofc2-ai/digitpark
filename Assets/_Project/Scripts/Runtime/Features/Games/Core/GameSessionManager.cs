@@ -264,17 +264,6 @@ namespace DigitPark.Games
                                 );
                             }
 
-                            // SEC-06 Option A: CashBattle scores go through server-side validation
-                            if (CurrentContext.Mode == GameMode.CashTournament && !string.IsNullOrEmpty(CurrentContext.TournamentId))
-                            {
-                                await DatabaseService.Instance.SubmitCashScore(
-                                    playerData.userId,
-                                    gameId,
-                                    result.TotalTime,
-                                    (int)result.FinalScore,
-                                    CurrentContext.TournamentId
-                                );
-                            }
                         }
                         else
                         {
@@ -391,8 +380,6 @@ namespace DigitPark.Games
                         SyncWinStreakToFirebase(0);
                     }
 
-                    // XP — cosmético, no afecta matchmaking. CashBattle da 50% del rate normal.
-                    bool isCashMode = CurrentContext.Mode == GameMode.CashTournament;
                     // scorePercentile requiere datos comparativos reales (ranking backend).
                     // Se mantiene en 0 hasta tener esos datos — sin bonus especulativo.
                     const float scorePercentile = 0f;
@@ -403,8 +390,7 @@ namespace DigitPark.Games
                         isWin      = isWin,
                         isPerfect  = result.Errors == 0 && result.Completed,
                         score      = (int)result.FinalScore,
-                        scorePercentile = scorePercentile,
-                        isCashBattle = isCashMode
+                        scorePercentile = scorePercentile
                     };
                     if (PlayerProgressionSystem.Instance != null)
                     {
@@ -565,9 +551,6 @@ namespace DigitPark.Games
                 case GameMode.CognitiveSprint:
                     return result.Completed ? EconomyConstants.COINS_SPRINT_WIN : EconomyConstants.COINS_SPRINT_LOSS;
 
-                case GameMode.CashTournament:
-                    return 0; // No coin rewards for cash tournaments (real money only)
-
                 default:
                     return 0;
             }
@@ -641,7 +624,6 @@ namespace DigitPark.Games
             if (ctx == null || ctx.Results.Count == 0) return;
 
             // Solo Practice y Online van al historial general
-            // SingleGame/Tournament/CashBattle van a CashHistory
             if (ctx.Mode != GameMode.Practice && ctx.Mode != GameMode.Online)
                 return;
 

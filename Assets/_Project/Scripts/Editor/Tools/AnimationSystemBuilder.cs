@@ -25,7 +25,8 @@ namespace DigitPark.Editor
             CreateMaterials();
 
             Debug.Log("<color=cyan>[DigitPark]</color> Animation System setup complete!");
-            EditorUtility.DisplayDialog("Animation System", "Animation system has been set up successfully!\n\nCreated:\n- UIAnimationManager\n- SceneTransitionManager\n- ParticleEffectSpawner\n- UI Materials", "OK");
+            if (!AllScenesBatchBuilder.SilentMode)
+                EditorUtility.DisplayDialog("Animation System", "Animation system has been set up successfully!\n\nCreated:\n- UIAnimationManager\n- SceneTransitionManager\n- ParticleEffectSpawner\n- UI Materials", "OK");
         }
 
         [MenuItem("DigitPark/Polish/Animation/Create Button3D Prefab", false, 401)]
@@ -253,7 +254,8 @@ namespace DigitPark.Editor
             CreateRewardClaimAnimatorPrefab();
 
             Debug.Log("<color=cyan>[DigitPark]</color> All animation prefabs created!");
-            EditorUtility.DisplayDialog("Animation System", "All animation prefabs have been created!", "OK");
+            if (!AllScenesBatchBuilder.SilentMode)
+                EditorUtility.DisplayDialog("Animation System", "All animation prefabs have been created!", "OK");
         }
 
         private static void CreateParticleSpawnerPrefab()

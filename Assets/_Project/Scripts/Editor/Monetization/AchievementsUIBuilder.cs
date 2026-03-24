@@ -4,8 +4,6 @@ using UnityEditor;
 using TMPro;
 using DigitPark.UI;
 using DigitPark.Monetization;
-using DigitPark.Themes;
-using ET = DigitPark.Themes.ThemeApplier.ElementType;
 
 namespace DigitPark.Editor
 {
@@ -262,7 +260,6 @@ namespace DigitPark.Editor
             Image bgImage = GetOrAddComponent<Image>(bg);
             bgImage.color = Color.white; // ThemeApplier tints at runtime
             bgImage.raycastTarget = false;
-            ThemeApplierHelper.Apply(bg, ET.PrimaryBackground);
 
             // Ambient particles effect (visual layer)
             GameObject particles = FindOrCreateChild(bg, "AmbientParticles");

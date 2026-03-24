@@ -3,7 +3,6 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEditor;
 using UnityEditor.SceneManagement;
-using DigitPark.Themes;
 
 namespace DigitPark.Editor
 {
@@ -32,8 +31,7 @@ namespace DigitPark.Editor
             "Assets/_Project/Scenes/Games/Minigames/MemoryPairs.unity",
             "Assets/_Project/Scenes/Games/Minigames/QuickMath.unity",
             "Assets/_Project/Scenes/Games/Minigames/FlashTap.unity",
-            "Assets/_Project/Scenes/Games/Minigames/OddOneOut.unity",
-            "Assets/_Project/Scenes/CashBattle/CashBattleHub.unity"
+            "Assets/_Project/Scenes/Games/Minigames/OddOneOut.unity"
         };
 
         [MenuItem("DigitPark/Polish/UI/Background to All Scenes")]
@@ -79,14 +77,15 @@ namespace DigitPark.Editor
                 }
             }
 
-            EditorUtility.DisplayDialog("Background Setup Completado",
-                $"Resultados:\n\n" +
-                $"✓ Backgrounds agregados: {added}\n" +
-                $"- Ya existían: {skipped}\n" +
-                $"✗ Errores: {errors}\n\n" +
-                $"Color aplicado: #0A1428\n" +
-                $"ThemeApplier: PrimaryBackground",
-                "OK");
+            if (!AllScenesBatchBuilder.SilentMode)
+                EditorUtility.DisplayDialog("Background Setup Completado",
+                    $"Resultados:\n\n" +
+                    $"✓ Backgrounds agregados: {added}\n" +
+                    $"- Ya existían: {skipped}\n" +
+                    $"✗ Errores: {errors}\n\n" +
+                    $"Color aplicado: #0A1428\n" +
+                    $"Color: #0A1428",
+                    "OK");
         }
 
         [MenuItem("DigitPark/Polish/UI/Background to Current Scene")]
@@ -100,8 +99,7 @@ namespace DigitPark.Editor
                 EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
                 EditorUtility.DisplayDialog("Background Agregado",
                     $"Background agregado a: {sceneName}\n\n" +
-                    "Color: #0A1428\n" +
-                    "ThemeApplier: PrimaryBackground\n\n" +
+                    "Color: #0A1428\n\n" +
                     "No olvides guardar la escena.",
                     "OK");
             }
@@ -128,25 +126,6 @@ namespace DigitPark.Editor
             Transform existingBG = canvas.transform.Find("Background");
             if (existingBG != null)
             {
-                // Ya existe, verificar si tiene ThemeApplier
-                ThemeApplier applier = existingBG.GetComponent<ThemeApplier>();
-                if (applier == null)
-                {
-                    // Agregar ThemeApplier al existente
-                    applier = existingBG.gameObject.AddComponent<ThemeApplier>();
-                    SetupThemeApplier(applier);
-
-                    // Actualizar color
-                    Image img = existingBG.GetComponent<Image>();
-                    if (img != null)
-                    {
-                        img.color = BACKGROUND_COLOR;
-                        EditorUtility.SetDirty(img);
-                    }
-
-                    EditorUtility.SetDirty(applier);
-                    Debug.Log($"[Background] ThemeApplier agregado al Background existente en: {sceneName}");
-                }
                 return false;
             }
 
@@ -170,50 +149,10 @@ namespace DigitPark.Editor
             rt.offsetMax = Vector2.zero;
             rt.pivot = new Vector2(0.5f, 0.5f);
 
-            // Agregar ThemeApplier
-            ThemeApplier themeApplier = background.AddComponent<ThemeApplier>();
-            SetupThemeApplier(themeApplier);
-
             EditorUtility.SetDirty(background);
             EditorUtility.SetDirty(canvas.gameObject);
 
             return true;
-        }
-
-        private static void SetupThemeApplier(ThemeApplier applier)
-        {
-            // Usar SerializedObject para configurar campos privados
-            SerializedObject so = new SerializedObject(applier);
-
-            // Element Type = PrimaryBackground (index 1 en el enum)
-            SerializedProperty elementTypeProp = so.FindProperty("elementType");
-            if (elementTypeProp != null)
-            {
-                elementTypeProp.enumValueIndex = 1; // PrimaryBackground
-            }
-
-            // Apply to Image = true
-            SerializedProperty applyToImageProp = so.FindProperty("applyToImage");
-            if (applyToImageProp != null)
-            {
-                applyToImageProp.boolValue = true;
-            }
-
-            // Apply to Text = false
-            SerializedProperty applyToTextProp = so.FindProperty("applyToText");
-            if (applyToTextProp != null)
-            {
-                applyToTextProp.boolValue = false;
-            }
-
-            // Animate Transition = true
-            SerializedProperty animateProp = so.FindProperty("animateTransition");
-            if (animateProp != null)
-            {
-                animateProp.boolValue = true;
-            }
-
-            so.ApplyModifiedProperties();
         }
 
         [MenuItem("DigitPark/Polish/UI/Check Backgrounds Status")]
@@ -243,12 +182,10 @@ namespace DigitPark.Editor
                 Transform bg = canvas.transform.Find("Background");
                 if (bg != null)
                 {
-                    ThemeApplier applier = bg.GetComponent<ThemeApplier>();
                     Image img = bg.GetComponent<Image>();
                     string colorHex = img != null ? ColorUtility.ToHtmlStringRGB(img.color) : "N/A";
-                    string hasApplier = applier != null ? "✓" : "✗";
 
-                    report += $"✓ {sceneName}: Background #{colorHex} (ThemeApplier: {hasApplier})\n";
+                    report += $"✓ {sceneName}: Background #{colorHex}\n";
                     withBG++;
                 }
                 else

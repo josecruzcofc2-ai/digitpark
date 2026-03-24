@@ -537,7 +537,7 @@ namespace DigitPark.Services.Firebase
             {
                 PlayerPrefs.SetString("DP_OpenTournamentId", tournamentId);
             }
-            SceneNavigator.Instance?.NavigateTo("CashBattleHub");
+            SceneNavigator.Instance?.NavigateTo("MainMenu");
         }
 
         private void NavigateToDailyRewards()

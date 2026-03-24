@@ -9,7 +9,6 @@ namespace DigitPark.Games
         SingleGame,         // 1v1 un solo juego
         CognitiveSprint,    // 1v1 multiples juegos (2-5)
         Tournament,         // Torneo con multiples jugadores
-        Online,             // 1v1 online (gratis, sin dinero)
-        CashTournament      // Torneo con dinero real (tema gold forzado)
+        Online              // 1v1 online (gratis, sin dinero)
     }
 }

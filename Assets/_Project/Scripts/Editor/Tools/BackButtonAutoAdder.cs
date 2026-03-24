@@ -22,8 +22,6 @@ namespace DigitPark.Editor
         // Note: CashMatchmaking excluded — has Cancel button, no back button needed
         private static readonly HashSet<string> GOLD_SCENES = new HashSet<string>
         {
-            "CashBattle1v1",
-            "CashBattleHub",
             "CashHistory",
             "CashTournaments",
             "CashTournamentCreate",
@@ -57,7 +55,6 @@ namespace DigitPark.Editor
 
             // Onboarding scenes (have own navigation)
             "Onboarding",
-            "CashBattleOnboarding",
 
             // Boot scene
             "Boot"
@@ -179,7 +176,7 @@ namespace DigitPark.Editor
 
                 // Determine parent: gold buttons go inside the Header GO for perfect alignment
                 // with TitleText and currency pill. Header may live at different depths:
-                //   SafeArea > Header  (most CashBattle scenes)
+                //   SafeArea > Header
                 //   WalletUI > Header  (CashWallet — no SafeArea)
                 Transform parent;
 

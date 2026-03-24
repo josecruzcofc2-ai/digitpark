@@ -632,73 +632,12 @@ namespace DigitPark.Services.Firebase
             return "";
         }
 
-        /// <summary>
-        /// SEC-06 Option A: Submit CashBattle score via server-side Cloud Function.
-        /// Server validates and writes directly — client CANNOT write to cash_scores path.
-        /// </summary>
-        public async Task<bool> SubmitCashScore(string userId, string gameId, float time, int score, string tournamentId)
-        {
-            string url = _submitCashScoreUrl;
-            if (string.IsNullOrEmpty(url))
-            {
-                Debug.LogError("[Database] submitCashScoreUrl not configured");
-                return false;
-            }
-
-            try
-            {
-                string idToken = null;
-                if (Payments.PaymentBridge.GetFirebaseIdToken != null)
-                {
-                    try { idToken = await Payments.PaymentBridge.GetFirebaseIdToken(); }
-                    catch { }
-                }
-
-                string json = JsonUtility.ToJson(new CashScoreRequestBody
-                {
-                    gameType = gameId, score = score, timeSeconds = time, tournamentId = tournamentId
-                });
-                byte[] bytes = System.Text.Encoding.UTF8.GetBytes(json);
-
-                using (var request = new UnityEngine.Networking.UnityWebRequest(url, "POST"))
-                {
-                    request.uploadHandler = new UnityEngine.Networking.UploadHandlerRaw(bytes);
-                    request.downloadHandler = new UnityEngine.Networking.DownloadHandlerBuffer();
-                    request.SetRequestHeader("Content-Type", "application/json");
-                    if (!string.IsNullOrEmpty(idToken))
-                        request.SetRequestHeader("Authorization", $"Bearer {idToken}");
-                    request.timeout = 10;
-
-                    var op = request.SendWebRequest();
-                    while (!op.isDone) await Task.Yield();
-
-                    if (request.result == UnityEngine.Networking.UnityWebRequest.Result.Success)
-                    {
-                        Debug.Log($"[Database] CashScore submitted server-side: {gameId} {time}s tournament={tournamentId}");
-                        return true;
-                    }
-                    else
-                    {
-                        Debug.LogError($"[Database] CashScore submission failed: {request.error} — {request.downloadHandler.text}");
-                        return false;
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                Debug.LogError($"[Database] CashScore submission error: {e.Message}");
-                return false;
-            }
-        }
-
-        // URL config — set from PaymentConfig or BootManager
+        // URL config
         private string _validateScoreUrl;
-        private string _submitCashScoreUrl;
 
-        public void SetScoreEndpoints(string validateUrl, string cashScoreUrl)
+        public void SetScoreEndpoints(string validateUrl)
         {
             _validateScoreUrl = validateUrl;
-            _submitCashScoreUrl = cashScoreUrl;
         }
 
         [Serializable]
@@ -714,15 +653,6 @@ namespace DigitPark.Services.Firebase
         {
             public bool valid;
             public string validationToken;
-        }
-
-        [Serializable]
-        private class CashScoreRequestBody
-        {
-            public string gameType;
-            public int score;
-            public float timeSeconds;
-            public string tournamentId;
         }
 
         // ==================== Leaderboard Queries ====================

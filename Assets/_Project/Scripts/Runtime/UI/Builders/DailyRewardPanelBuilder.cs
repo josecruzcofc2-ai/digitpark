@@ -3,7 +3,6 @@ using UnityEngine.UI;
 using TMPro;
 using System.Collections;
 using DigitPark.Services;
-using DigitPark.Themes;
 using DigitPark.Localization;
 using DigitPark.UI;
 
@@ -47,7 +46,6 @@ namespace DigitPark.UI.Builders
             {
                 DailyRewardService.Instance.OnRewardClaimed += OnRewardClaimed;
             }
-            ThemeManager.OnThemeChanged += ApplyTheme;
             LocalizationManager.OnLanguageChanged += UpdateTexts;
 
             RefreshUI();
@@ -60,7 +58,6 @@ namespace DigitPark.UI.Builders
             {
                 DailyRewardService.Instance.OnRewardClaimed -= OnRewardClaimed;
             }
-            ThemeManager.OnThemeChanged -= ApplyTheme;
             LocalizationManager.OnLanguageChanged -= UpdateTexts;
 
             StopTimer();
@@ -71,7 +68,6 @@ namespace DigitPark.UI.Builders
             SetupButtons();
             GenerateDayItems();
             RefreshUI();
-            ApplyTheme(ThemeManager.Instance?.CurrentTheme);
         }
 
         #region Setup
@@ -419,25 +415,7 @@ namespace DigitPark.UI.Builders
 
         #endregion
 
-        #region Theme
 
-        private void ApplyTheme(ThemeData theme)
-        {
-            if (theme == null) return;
-
-            if (titleText != null)
-                titleText.color = theme.textTitle;
-
-            if (streakText != null)
-                streakText.color = theme.primaryAccent;
-
-            if (timerText != null)
-                timerText.color = theme.textSecondary;
-
-            currentColor = theme.primaryAccent;
-        }
-
-        #endregion
     }
 
     #region Day Item Component

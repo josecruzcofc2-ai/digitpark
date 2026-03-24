@@ -256,30 +256,6 @@ namespace DigitPark.Services.Firebase
             LogDebug($"spend_virtual_currency: {amount} {currencyType} on {itemName}");
         }
 
-        public void LogDeposit(decimal amount, string paymentMethod)
-        {
-            if (!_isInitialized) return;
-
-            FirebaseAnalytics.LogEvent("cash_deposit",
-                new Parameter("amount", (double)amount),
-                new Parameter("payment_method", paymentMethod)
-            );
-
-            LogDebug($"cash_deposit: ${amount} via {paymentMethod}");
-        }
-
-        public void LogWithdrawal(decimal amount, string paymentMethod)
-        {
-            if (!_isInitialized) return;
-
-            FirebaseAnalytics.LogEvent("cash_withdrawal",
-                new Parameter("amount", (double)amount),
-                new Parameter("payment_method", paymentMethod)
-            );
-
-            LogDebug($"cash_withdrawal: ${amount} via {paymentMethod}");
-        }
-
         #endregion
 
         #region IAP Events

@@ -2,7 +2,6 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using DG.Tweening;
-using DigitPark.Themes;
 
 namespace DigitPark.Cosmetics
 {
@@ -102,20 +101,7 @@ namespace DigitPark.Cosmetics
         {
             // 1. Real money scenes — gold tint, always, regardless of active theme.
             //    These scenes never use ThemeApplier so there's no theme context to read.
-            string sceneName = SceneManager.GetActiveScene().name;
-            if (sceneName.StartsWith("Cash") || sceneName == "AgeVerification")
-                return new Color(1f, 0.843f, 0f, opacity); // #FFD700 gold tenue
-
-            // 2. Chromatic themes — use the accent color defined per theme
-            var theme = ThemeManager.Instance?.CurrentTheme;
-            if (theme != null && theme.isChromatic)
-                return new Color(
-                    theme.patternTintColor.r,
-                    theme.patternTintColor.g,
-                    theme.patternTintColor.b,
-                    opacity);
-
-            // 3. Standard — classic subtle white shimmer
+            // Standard — classic subtle white shimmer
             return new Color(1f, 1f, 1f, opacity);
         }
     }

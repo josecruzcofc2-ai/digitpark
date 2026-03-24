@@ -4,8 +4,6 @@ using UnityEditor;
 using TMPro;
 using DigitPark.UI;
 using DigitPark.Monetization;
-using DigitPark.Themes;
-using ET = DigitPark.Themes.ThemeApplier.ElementType;
 
 namespace DigitPark.Editor
 {
@@ -186,7 +184,6 @@ namespace DigitPark.Editor
             StretchFull(bg);
             SetImage(bg, Color.white); // ThemeApplier tints at runtime
             bg.transform.SetAsFirstSibling();
-            ThemeApplierHelper.Apply(bg, ET.PrimaryBackground);
         }
 
         private static GameObject CreateSafeArea(Canvas canvas)

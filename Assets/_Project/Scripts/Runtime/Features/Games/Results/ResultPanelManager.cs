@@ -8,7 +8,7 @@ namespace DigitPark.Managers
 {
     /// <summary>
     /// Manager singleton para mostrar paneles de resultado post-minijuego
-    /// Maneja Sprint Summary, Tournament Result y CashBattle Result
+    /// Maneja Sprint Summary y Tournament Result
     /// </summary>
     public class ResultPanelManager : MonoBehaviour
     {
@@ -33,10 +33,6 @@ namespace DigitPark.Managers
         [Header("Tournament Result Prefabs")]
         [SerializeField] private GameObject tournamentResultWinPrefab;
         [SerializeField] private GameObject tournamentResultLosePrefab;
-
-        [Header("Cash Battle Result Prefabs")]
-        [SerializeField] private GameObject cashBattleWinPrefab;
-        [SerializeField] private GameObject cashBattleLosePrefab;
 
         // Panel activo actual
         private GameObject currentPanel;
@@ -66,19 +62,12 @@ namespace DigitPark.Managers
                 tournamentResultWinPrefab = Resources.Load<GameObject>(PREFAB_BASE + "TournamentResultWin");
             if (tournamentResultLosePrefab == null)
                 tournamentResultLosePrefab = Resources.Load<GameObject>(PREFAB_BASE + "TournamentResultLose");
-            if (cashBattleWinPrefab == null)
-                cashBattleWinPrefab = Resources.Load<GameObject>(PREFAB_BASE + "CashBattleWin");
-            if (cashBattleLosePrefab == null)
-                cashBattleLosePrefab = Resources.Load<GameObject>(PREFAB_BASE + "CashBattleLose");
-
             // Log de verificación
             int loaded = 0;
             if (sprintSummaryPrefab != null) loaded++;
             if (tournamentResultWinPrefab != null) loaded++;
             if (tournamentResultLosePrefab != null) loaded++;
-            if (cashBattleWinPrefab != null) loaded++;
-            if (cashBattleLosePrefab != null) loaded++;
-            Debug.Log($"[ResultPanelManager] Prefabs loaded from Resources: {loaded}/5");
+            Debug.Log($"[ResultPanelManager] Prefabs loaded from Resources: {loaded}/3");
         }
 
         private void OnDestroy()
@@ -114,14 +103,7 @@ namespace DigitPark.Managers
             }
 
             // Detectar tipo de sprint y mostrar variante correcta
-            if (ctx.EntryFee > 0)
-            {
-                // Cash sprint
-                sprintController.ShowCashSummary(ctx, ctx.EntryFee);
-                sprintController.OnContinueClicked += () => NavigateTo("CashBattleHub");
-                sprintController.OnNewMatchClicked += () => NavigateTo("Matchmaking");
-            }
-            else if (ctx.OpponentResults != null && ctx.OpponentResults.Count > 0)
+            if (ctx.OpponentResults != null && ctx.OpponentResults.Count > 0)
             {
                 // Online sprint (has opponent data)
                 sprintController.ShowOnlineSummary(ctx);
@@ -188,44 +170,6 @@ namespace DigitPark.Managers
             };
 
             Debug.Log($"[ResultPanelManager] Tournament result shown - Position: {position}, Attempts: {attemptsUsed}/{maxAttempts}");
-        }
-
-        // ====================================================================
-        // CASH BATTLE RESULT (Single 1v1)
-        // ====================================================================
-
-        /// <summary>
-        /// Muestra el resultado de un cash battle 1v1 single game
-        /// </summary>
-        public void ShowCashBattleResult(MinigameResult playerResult, MinigameResult opponentResult,
-            decimal entryFee, bool playerWon, string opponentName)
-        {
-            GameObject prefab = playerWon ? cashBattleWinPrefab : cashBattleLosePrefab;
-
-            var panel = InstantiatePanel(prefab, "CashBattleResult");
-            if (panel == null) return;
-
-            var controller = panel.GetComponent<CashBattleResultPanelController>();
-            if (controller == null)
-            {
-                Debug.LogError("[ResultPanelManager] CashBattleResultPanelController not found on prefab");
-                return;
-            }
-
-            controller.ShowCashResult(playerResult, opponentResult, entryFee, playerWon, opponentName);
-
-            controller.OnContinueClicked += () =>
-            {
-                CleanupCurrentPanel();
-                NavigateTo("CashBattleHub");
-            };
-            controller.OnNewMatchClicked += () =>
-            {
-                CleanupCurrentPanel();
-                NavigateTo("Matchmaking");
-            };
-
-            Debug.Log($"[ResultPanelManager] Cash battle result shown - Won: {playerWon}, Fee: ${entryFee}");
         }
 
         // ====================================================================

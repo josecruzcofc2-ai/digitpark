@@ -272,23 +272,13 @@ namespace DigitPark.UI.Panels
             if (PremiumManager.Instance == null) return;
 
             bool canCreateTournaments = PremiumManager.Instance.CanCreateTournaments;
-            bool canCreateCashBattle = PremiumManager.Instance.CanCreateCashBattle;
-            bool hasBundle = canCreateTournaments && canCreateCashBattle;
             bool hasStylesPro = PremiumManager.Instance.HasStylesPro;
 
-            // Si ya tiene Tournament Bundle, deshabilitar ambos botones
-            if (hasBundle)
+            if (canCreateTournaments)
             {
                 SetCreateTournamentsCardState(false, AutoLocalizer.Get("premium_active"));
                 SetBundleCardState(false, AutoLocalizer.Get("premium_active"));
             }
-            // Si solo tiene Create Tournaments
-            else if (canCreateTournaments)
-            {
-                SetCreateTournamentsCardState(false, AutoLocalizer.Get("already_purchased"));
-                SetBundleCardState(true, null);
-            }
-            // No tiene ninguno
             else
             {
                 SetCreateTournamentsCardState(true, null);
@@ -306,7 +296,7 @@ namespace DigitPark.UI.Panels
             }
 
             // Ocultar boton de Restore Purchases si tiene TODOS los productos
-            bool hasAllProducts = hasBundle && hasStylesPro;
+            bool hasAllProducts = canCreateTournaments && hasStylesPro;
             if (restoreButton != null)
             {
                 restoreButton.gameObject.SetActive(!hasAllProducts);

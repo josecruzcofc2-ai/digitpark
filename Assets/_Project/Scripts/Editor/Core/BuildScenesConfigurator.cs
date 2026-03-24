@@ -30,7 +30,6 @@ namespace DigitPark.Editor
             // === 1-3: AUTH FLOW ===
             new[] { "Auth/Login" },
             new[] { "Auth/Register" },
-            new[] { "Auth/AgeVerification" },
 
             // === 4: ONBOARDING ===
             new[] { "Onboarding/Onboarding" },
@@ -72,17 +71,6 @@ namespace DigitPark.Editor
             new[] { "Tournaments/TournamentCreate" },
             new[] { "Tournaments/TournamentLobby" },
 
-            // === 30-36: CASH BATTLE ===
-            new[] { "CashBattle/CashBattleHub" },
-            new[] { "CashBattle/CashBattle1v1" },
-            new[] { "CashBattle/CashTournaments/CashTournaments" },
-            new[] { "CashBattle/CashWallet" },
-            new[] { "CashBattle/CashHistory" },
-            new[] { "CashBattle/CashProfile" },
-            new[] { "CashBattle/CashMatchmaking" },
-            new[] { "CashBattle/CashTournaments/CashTournamentCreate" },
-            new[] { "CashBattle/CashTournaments/CashTournamentLobby" },
-            new[] { "Onboarding/CashBattleOnboarding" },
         };
 
         private const string SCENES_ROOT = "Assets/_Project/Scenes/";
@@ -124,7 +112,7 @@ namespace DigitPark.Editor
             EditorGUILayout.HelpBox(
                 "Configura el orden de escenas en Build Settings.\n" +
                 "Indice 0 = Boot (entry point). Orden por flujo de navegacion.\n" +
-                "40 escenas totales: Auth > Core > Games > Social > Monetization > Tournaments > CashBattle",
+                "30 escenas totales: Auth > Core > Games > Social > Monetization > Tournaments",
                 MessageType.Info);
 
             GUILayout.Space(10);
@@ -247,7 +235,7 @@ namespace DigitPark.Editor
                 case "_Core": return "CORE";
                 case "Auth": return "AUTH";
                 case "Onboarding":
-                    return path.Contains("CashBattle") ? "CASH BATTLE" : "ONBOARDING";
+                    return "ONBOARDING";
                 case "Games":
                     if (path.Contains("Navigation/")) return "GAME NAVIGATION";
                     if (path.Contains("Minigames/")) return "MINIGAMES";
@@ -259,7 +247,6 @@ namespace DigitPark.Editor
                     return "SOCIAL";
                 case "Monetization": return "MONETIZATION";
                 case "Tournaments": return "TOURNAMENTS";
-                case "CashBattle": return "CASH BATTLE";
                 default: return "OTHER";
             }
         }

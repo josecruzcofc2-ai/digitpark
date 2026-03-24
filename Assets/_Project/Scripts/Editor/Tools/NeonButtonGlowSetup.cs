@@ -107,6 +107,19 @@ namespace DigitPark.Editor
             window.minSize = new Vector2(550, 700);
         }
 
+        /// <summary>
+        /// Public static entry point for batch runners (PolishScenesBatchRunner, AllScenesBatchBuilder).
+        /// Creates a temporary instance with overwriteExisting=false and runs AddGlowToAllScenes.
+        /// </summary>
+        public static void AddGlowToAllScenes()
+        {
+            var instance = CreateInstance<NeonButtonGlowSetup>();
+            instance.overwriteExisting = false;
+            instance.includeInactiveButtons = true;
+            instance.AddGlowToAllScenesInternal();
+            DestroyImmediate(instance);
+        }
+
         private void OnGUI()
         {
             EditorGUILayout.Space(10);
@@ -240,7 +253,7 @@ namespace DigitPark.Editor
                     "Continue?",
                     "Yes, Add to UI Buttons Only", "Cancel"))
                 {
-                    AddGlowToAllScenes();
+                    AddGlowToAllScenesInternal();
                 }
             }
             GUI.backgroundColor = Color.white;
@@ -643,7 +656,7 @@ namespace DigitPark.Editor
             return true;
         }
 
-        private void AddGlowToAllScenes()
+        private void AddGlowToAllScenesInternal()
         {
             string currentScenePath = EditorSceneManager.GetActiveScene().path;
             int totalAdded = 0;
@@ -707,11 +720,12 @@ namespace DigitPark.Editor
                 }
             }
 
-            EditorUtility.DisplayDialog("Complete",
-                $"Added NeonButtonGlow to {totalAdded} UI buttons.\n" +
-                $"Skipped {totalSkipped} gameplay buttons.\n" +
-                $"Modified {scenesModified} scenes.",
-                "OK");
+            if (!AllScenesBatchBuilder.SilentMode)
+                EditorUtility.DisplayDialog("Complete",
+                    $"Added NeonButtonGlow to {totalAdded} UI buttons.\n" +
+                    $"Skipped {totalSkipped} gameplay buttons.\n" +
+                    $"Modified {scenesModified} scenes.",
+                    "OK");
         }
 
         private bool AddGlowToButtonNoUndo(Button button)

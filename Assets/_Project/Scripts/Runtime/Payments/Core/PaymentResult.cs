@@ -13,10 +13,9 @@ namespace DigitPark.Payments
         public string ErrorCode { get; set; }
         public string ErrorMessage { get; set; }
         public System.DateTime Timestamp { get; set; }
-        public bool WasProviderSwitched { get; set; }
 
         public static PaymentResult Successful(string productId, string transactionId,
-            PaymentProvider provider, bool wasSwitched = false)
+            PaymentProvider provider)
         {
             return new PaymentResult
             {
@@ -25,7 +24,6 @@ namespace DigitPark.Payments
                 TransactionId = transactionId,
                 ProviderUsed = provider,
                 Timestamp = System.DateTime.UtcNow,
-                WasProviderSwitched = wasSwitched
             };
         }
 

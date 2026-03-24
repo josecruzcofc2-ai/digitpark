@@ -5,8 +5,6 @@ using UnityEditor.Events;
 using TMPro;
 using DigitPark.UI;
 using DigitPark.UI.Common;
-using DigitPark.Themes;
-using ET = DigitPark.Themes.ThemeApplier.ElementType;
 
 namespace DigitPark.Editor
 {
@@ -168,7 +166,6 @@ namespace DigitPark.Editor
             Image image = bg.AddComponent<Image>();
             image.sprite = WhiteSprite;
             image.color = Color.white; // ThemeApplier tints at runtime
-            ThemeApplierHelper.Apply(bg, ET.PrimaryBackground);
 
             bg.transform.SetAsFirstSibling();
         }
@@ -214,13 +211,11 @@ namespace DigitPark.Editor
             Image cardBg = card.AddComponent<Image>();
             cardBg.sprite = WhiteSprite;
             cardBg.color = CardBackground;
-            ThemeApplierHelper.Apply(card, ET.CardBackground);
 
             // Neon border
             Outline outline = card.AddComponent<Outline>();
             outline.effectColor = CyanNeon;
             outline.effectDistance = new Vector2(3, -3);
-            ThemeApplierHelper.ApplyOutline(card, ET.Glow);
 
             // Content container
             GameObject content = new GameObject("Content");
@@ -278,7 +273,6 @@ namespace DigitPark.Editor
             question.fontSizeMin = FontSizes.AutoMinBody;
             question.fontSizeMax = FontSizes.Body;
             question.overflowMode = TextOverflowModes.Ellipsis;
-            ThemeApplierHelper.ApplyText(footer, ET.TextSecondary);
         }
 
         private static void BuildRegisterButton(Canvas canvas)
@@ -297,7 +291,6 @@ namespace DigitPark.Editor
             Image btnBg = registerBtn.AddComponent<Image>();
             btnBg.sprite = WhiteSprite;
             btnBg.color = CyanNeon;
-            ThemeApplierHelper.Apply(registerBtn, ET.ButtonPrimary);
 
             Button btn = registerBtn.AddComponent<Button>();
             btn.targetGraphic = btnBg;
@@ -322,7 +315,6 @@ namespace DigitPark.Editor
             btnText.fontSizeMin = FontSizes.AutoMinBody;
             btnText.fontSizeMax = FontSizes.H1;
             btnText.overflowMode = TextOverflowModes.Ellipsis;
-            ThemeApplierHelper.ApplyText(textObj, ET.TextOnPrimary);
 
             Debug.Log("✅ RegisterButton creado. Ahora puedes moverlo manualmente en la escena.");
         }
@@ -343,7 +335,6 @@ namespace DigitPark.Editor
             titleText.fontSizeMin = FontSizes.AutoMinTitle;
             titleText.fontSizeMax = FontSizes.H4;
             titleText.overflowMode = TextOverflowModes.Ellipsis;
-            ThemeApplierHelper.ApplyText(title, ET.Accent);
 
             LayoutElement layout = title.AddComponent<LayoutElement>();
             layout.preferredHeight = 120;
@@ -358,12 +349,10 @@ namespace DigitPark.Editor
             Image bg = inputObj.AddComponent<Image>();
             bg.sprite = WhiteSprite;
             bg.color = InputBackground;
-            ThemeApplierHelper.Apply(inputObj, ET.InputBackground);
 
             Outline outline = inputObj.AddComponent<Outline>();
             outline.effectColor = CyanNeon;
             outline.effectDistance = new Vector2(2, -2);
-            ThemeApplierHelper.ApplyOutline(inputObj, ET.InputBorder);
 
             LayoutElement inputLayout = inputObj.AddComponent<LayoutElement>();
             inputLayout.preferredHeight = INPUT_HEIGHT;
@@ -403,7 +392,6 @@ namespace DigitPark.Editor
             placeholderText.fontSizeMin = FontSizes.AutoMinBody;
             placeholderText.fontSizeMax = FontSizes.H3;
             placeholderText.overflowMode = TextOverflowModes.Ellipsis;
-            ThemeApplierHelper.ApplyText(placeholderObj, ET.InputPlaceholder);
 
             // Input text
             GameObject textObj = new GameObject("Text");
@@ -451,7 +439,6 @@ namespace DigitPark.Editor
             Image eyeImage = eyeBtn.AddComponent<Image>();
             eyeImage.sprite = EyeOpenIcon;
             eyeImage.color = CyanNeon;
-            ThemeApplierHelper.Apply(eyeBtn, ET.Accent);
 
             Button btn = eyeBtn.AddComponent<Button>();
             btn.transition = Selectable.Transition.None;
@@ -486,7 +473,6 @@ namespace DigitPark.Editor
             linkText.fontSizeMin = FontSizes.AutoMinBody;
             linkText.fontSizeMax = FontSizes.Body;
             linkText.overflowMode = TextOverflowModes.Ellipsis;
-            ThemeApplierHelper.ApplyText(linkBtn, ET.Accent);
             btn.targetGraphic = linkText;
 
             LayoutElement layout = linkBtn.AddComponent<LayoutElement>();
@@ -527,12 +513,10 @@ namespace DigitPark.Editor
             Image bgImage = bg.AddComponent<Image>();
             bgImage.sprite = WhiteSprite;
             bgImage.color = InputBackground;
-            ThemeApplierHelper.Apply(bg, ET.ToggleBackground);
 
             Outline bgOutline = bg.AddComponent<Outline>();
             bgOutline.effectColor = CyanNeon;
             bgOutline.effectDistance = new Vector2(2, -2);
-            ThemeApplierHelper.ApplyOutline(bg, ET.Glow);
 
             // Checkmark
             GameObject checkmark = new GameObject("Checkmark");
@@ -546,7 +530,6 @@ namespace DigitPark.Editor
             Image checkImage = checkmark.AddComponent<Image>();
             checkImage.sprite = WhiteSprite;
             checkImage.color = CyanNeon;
-            ThemeApplierHelper.Apply(checkmark, ET.ToggleCheckmark);
 
             toggle.targetGraphic = bgImage;
             toggle.graphic = checkImage;
@@ -566,7 +549,6 @@ namespace DigitPark.Editor
             labelText.fontSizeMin = FontSizes.Caption;
             labelText.fontSizeMax = FontSizes.Body;
             labelText.overflowMode = TextOverflowModes.Ellipsis;
-            ThemeApplierHelper.ApplyText(label, ET.TextPrimary);
             LayoutElement labelLayout = label.AddComponent<LayoutElement>();
             labelLayout.preferredWidth = 500;
             labelLayout.preferredHeight = 60;
@@ -589,7 +571,6 @@ namespace DigitPark.Editor
             Image bg = button.AddComponent<Image>();
             bg.sprite = WhiteSprite;
             bg.color = CyanNeon;
-            ThemeApplierHelper.Apply(button, ET.ButtonPrimary);
 
             Button btn = button.AddComponent<Button>();
             btn.targetGraphic = bg;
@@ -617,7 +598,6 @@ namespace DigitPark.Editor
             buttonText.fontSizeMin = FontSizes.AutoMinBody;
             buttonText.fontSizeMax = FontSizes.H1;
             buttonText.overflowMode = TextOverflowModes.Ellipsis;
-            ThemeApplierHelper.ApplyText(textObj, ET.TextOnPrimary);
         }
 
 
@@ -644,7 +624,6 @@ namespace DigitPark.Editor
             Image leftImg = leftLine.AddComponent<Image>();
             leftImg.sprite = WhiteSprite;
             leftImg.color = TextGray;
-            ThemeApplierHelper.Apply(leftLine, ET.Glow);
 
             // "or" text
             GameObject orText = new GameObject("OrText");
@@ -666,7 +645,6 @@ namespace DigitPark.Editor
             text.fontSizeMin = FontSizes.AutoMinBody;
             text.fontSizeMax = FontSizes.Body;
             text.overflowMode = TextOverflowModes.Ellipsis;
-            ThemeApplierHelper.ApplyText(orText, ET.TextSecondary);
 
             // Right line
             GameObject rightLine = new GameObject("RightLine");
@@ -680,7 +658,6 @@ namespace DigitPark.Editor
             Image rightImg = rightLine.AddComponent<Image>();
             rightImg.sprite = WhiteSprite;
             rightImg.color = TextGray;
-            ThemeApplierHelper.Apply(rightLine, ET.Glow);
         }
 
         /// <summary>

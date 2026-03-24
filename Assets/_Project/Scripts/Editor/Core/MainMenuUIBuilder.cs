@@ -5,8 +5,6 @@ using TMPro;
 using DigitPark.UI;
 using DigitPark.Animations;
 using DigitPark.Monetization;
-using DigitPark.Themes;
-using ET = DigitPark.Themes.ThemeApplier.ElementType;
 
 namespace DigitPark.Editor
 {
@@ -86,8 +84,7 @@ namespace DigitPark.Editor
         private const string ICON_SEARCH = ICONS_BASE + "/Navigation/SearchIcon.png";
         private const string ICON_MISSIONS = ICONS_BASE + "/Missions/MissionsIcon.png";
         private const string ICON_PLAY = ICONS_BASE + "/UI/PlayIcon.png";
-        private const string ICON_CASH_BATTLE = ICONS_BASE + "/CashBattle/UI/CashBattleIcon.png";
-        private const string ICON_DAILY_REWARD = ICONS_BASE + "/DailyRewards/DailyRewardIcon.png";
+private const string ICON_DAILY_REWARD = ICONS_BASE + "/DailyRewards/DailyRewardIcon.png";
         private const string ICON_ACHIEVEMENTS = ICONS_BASE + "/UI/AchievementsIcon.png";
         private const string ICON_SHOP = ICONS_BASE + "/UI/ShopIcon.png";
         private const string ICON_PREMIUM = ICONS_BASE + "/UI/PremiumIcon.png";
@@ -133,8 +130,7 @@ namespace DigitPark.Editor
             if (GUILayout.Button("3. Daily Reward", GUILayout.Height(25))) CreateDailyReward();
             if (GUILayout.Button("4. Quick Access", GUILayout.Height(25))) CreateQuickAccess();
             if (GUILayout.Button("5. JUGAR", GUILayout.Height(25))) CreatePlayCard();
-            if (GUILayout.Button("6. CASH BATTLE", GUILayout.Height(25))) CreateCashBattleCard();
-            if (GUILayout.Button("7. Extra Row", GUILayout.Height(25))) CreateExtraRow();
+if (GUILayout.Button("7. Extra Row", GUILayout.Height(25))) CreateExtraRow();
             if (GUILayout.Button("8. Paneles", GUILayout.Height(25))) CreatePanels();
 
             GUILayout.Space(15);
@@ -182,7 +178,6 @@ namespace DigitPark.Editor
             CreateDailyReward();
             CreateQuickAccess();
             CreatePlayCard();
-            CreateCashBattleCard();
             CreateExtraRow();
             CreatePanels();
             SetupManagerReferences();
@@ -203,7 +198,6 @@ namespace DigitPark.Editor
             rt.offsetMin = Vector2.zero;
             rt.offsetMax = Vector2.zero;
             GetOrAdd<Image>(bg).color = Color.white;
-            ThemeApplierHelper.Apply(bg, ET.PrimaryBackground);
         }
 
         #endregion
@@ -759,8 +753,8 @@ namespace DigitPark.Editor
 
         #endregion
 
-        #region Cash Battle Card (DORADO - Card Principal)
-
+        #region _CashBattle_DELETED_
+        /*
         private static void CreateCashBattleCard()
         {
             Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
@@ -909,6 +903,7 @@ namespace DigitPark.Editor
 
             Debug.Log("[MainMenuUI] Cash Battle Card DORADO creado");
         }
+        */
 
         #endregion
 
@@ -1066,8 +1061,7 @@ namespace DigitPark.Editor
             SetRef(so, "titleText", FindInPath<TextMeshProUGUI>(r, "Header/LogoText"));
             SetRef(so, "playButton", FindInPath<Button>(r, "PlayCard"));
             SetRef(so, "scoresButton", FindInPath<Button>(r, "QuickActionsPanel/RankingsCard"));
-            SetRef(so, "cashBattleButton", FindInPath<Button>(r, "CashBattleCard"));
-            SetRef(so, "settingsButton", FindInPath<Button>(r, "Header/SettingsButton"));
+SetRef(so, "settingsButton", FindInPath<Button>(r, "Header/SettingsButton"));
             SetRef(so, "userButton", FindInPath<Button>(r, "ProfileCard"));
             SetRef(so, "userText", FindInPath<TextMeshProUGUI>(r, "ProfileCard/Username"));
             SetRef(so, "searchButton", FindInPath<Button>(r, "QuickActionsPanel/SearchCard"));
@@ -1146,15 +1140,14 @@ namespace DigitPark.Editor
             a += TryAssignIcon(canvas.transform, "QuickActionsPanel/SearchCard/Icon", ICON_SEARCH);
             a += TryAssignIcon(canvas.transform, "QuickActionsPanel/MissionsCard/Icon", ICON_MISSIONS);
             a += TryAssignIcon(canvas.transform, "PlayCard/Icon", ICON_PLAY);
-            a += TryAssignIcon(canvas.transform, "CashBattleCard/Icon", ICON_CASH_BATTLE);
-            a += TryAssignIcon(canvas.transform, "DailyRewardCard/DailyRewardIcon", ICON_DAILY_REWARD);
+a += TryAssignIcon(canvas.transform, "DailyRewardCard/DailyRewardIcon", ICON_DAILY_REWARD);
             a += TryAssignIcon(canvas.transform, "ExtraRow/AchievementsCard/Icon", ICON_ACHIEVEMENTS);
             a += TryAssignIcon(canvas.transform, "ExtraRow/ShopCard/Icon", ICON_SHOP);
             a += TryAssignIcon(canvas.transform, "ExtraRow/PremiumCard/Icon", ICON_PREMIUM);
 
             AssignNotificationSprites();
 
-            Debug.Log($"[MainMenuUI] Iconos asignados: {a}/14");
+            Debug.Log($"[MainMenuUI] Iconos asignados: {a}/13");
             EditorUtility.SetDirty(canvas.gameObject);
             UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(canvas.gameObject.scene);
             return a;

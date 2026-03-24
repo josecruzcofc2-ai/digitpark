@@ -260,7 +260,6 @@ namespace DigitPark.Monetization
 
                 case ShopItemType.Theme:
                     if (!string.IsNullOrEmpty(themeId))
-                        DigitPark.Themes.ThemeManager.Instance?.UnlockTheme(themeId);
                     break;
 
                 case ShopItemType.Avatar:
@@ -330,7 +329,6 @@ namespace DigitPark.Monetization
                     if (coinsAmount > 0) currency.AddCoins(GetTotalCoins());
                     if (!string.IsNullOrEmpty(themeId))
                     {
-                        DigitPark.Themes.ThemeManager.Instance?.UnlockTheme(themeId);
                     }
                     break;
 
@@ -340,7 +338,6 @@ namespace DigitPark.Monetization
                     if (coinsAmount > 0) currency.AddCoins(GetTotalCoins());
                     if (!string.IsNullOrEmpty(themeId))
                     {
-                        DigitPark.Themes.ThemeManager.Instance?.UnlockTheme(themeId);
                     }
                     // Frame exclusivo del Starter Pack
                     if (!string.IsNullOrEmpty(itemId))

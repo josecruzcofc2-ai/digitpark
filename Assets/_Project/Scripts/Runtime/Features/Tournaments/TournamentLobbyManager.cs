@@ -9,7 +9,6 @@ using DigitPark.Data;
 using DigitPark.Localization;
 using DigitPark.UI;
 using DigitPark.UI.Items;
-using DigitPark.Themes;
 using DigitPark.Games;
 using DG.Tweening;
 using DigitPark.Animations;
@@ -155,9 +154,8 @@ namespace DigitPark.Managers
             if (participantsContent) participantsContent.SetActive(tabIndex == 0);
             if (chatContent) chatContent.SetActive(tabIndex == 1);
 
-            var theme = ThemeManager.Instance?.CurrentTheme;
-            Color activeColor = theme?.tabActive ?? new Color(0f, 1f, 1f);
-            Color inactiveColor = theme?.tabInactive ?? new Color(0.5f, 0.5f, 0.5f, 0.3f);
+            Color activeColor = new Color(0f, 1f, 1f);
+            Color inactiveColor = new Color(0.5f, 0.5f, 0.5f, 0.3f);
 
             if (participantsTabIndicator) participantsTabIndicator.color = tabIndex == 0 ? activeColor : inactiveColor;
             if (chatTabIndicator) chatTabIndicator.color = tabIndex == 1 ? activeColor : inactiveColor;

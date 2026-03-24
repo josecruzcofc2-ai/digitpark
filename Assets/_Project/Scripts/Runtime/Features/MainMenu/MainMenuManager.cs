@@ -26,7 +26,6 @@ namespace DigitPark.Managers
         [SerializeField] public TextMeshProUGUI titleText;
         [SerializeField] public Button playButton;
         [SerializeField] public Button scoresButton;
-        [SerializeField] public Button cashBattleButton;
         [SerializeField] public Button settingsButton;
 
         [Header("UI - User Info")]
@@ -73,10 +72,6 @@ namespace DigitPark.Managers
             // Configurar listeners
             SetupListeners();
 
-            // Ocultar CashBattle si Triumph SDK no está disponible via RemoteConfig
-            bool cashEnabled = DigitPark.Payments.RemoteConfigService.Instance?.GetCurrentConfig()?.TriumphEnabled ?? false;
-            cashBattleButton?.gameObject.SetActive(cashEnabled);
-
             // Cargar datos del jugador
             LoadPlayerData();
 
@@ -104,7 +99,6 @@ namespace DigitPark.Managers
         {
             playButton?.onClick.AddListener(OnPlayButtonClicked);
             scoresButton?.onClick.AddListener(OnScoresButtonClicked);
-            cashBattleButton?.onClick.AddListener(OnCashBattleButtonClicked);
             settingsButton?.onClick.AddListener(OnSettingsButtonClicked);
             premiumButton?.onClick.AddListener(OnPremiumButtonClicked);
             shopButton?.onClick.AddListener(OnShopButtonClicked);
@@ -358,46 +352,6 @@ namespace DigitPark.Managers
             // AudioManager.Instance?.PlaySFX("ButtonClick");
 
             SceneNavigator.Instance?.NavigateTo("Scores");
-        }
-
-        /// <summary>
-        /// Navega a la escena de Cash Battle (dinero real - 18+)
-        /// Verifica primero si el usuario tiene 18+ años
-        /// </summary>
-        private void OnCashBattleButtonClicked()
-        {
-            Debug.Log("[MainMenu] Intentando acceder a Cash Battle");
-
-            // Verificar bypass de autenticación (opción de desarrollo)
-            if (SettingsManager.IsCashBattleAuthBypassed())
-            {
-                Debug.Log("[MainMenu] Bypass de autenticación ACTIVO - navegando directo a CashBattleHub");
-                SceneNavigator.Instance?.NavigateTo("CashBattleHub");
-                return;
-            }
-
-            // Verificar si el usuario esta verificado (18+)
-            if (!DigitPark.Services.ServiceLocator.Exists)
-            {
-                Debug.Log("[MainMenu] ServiceLocator no disponible - navegando a AgeVerification");
-                SceneNavigator.Instance?.NavigateTo("AgeVerification");
-                return;
-            }
-            var kycService = DigitPark.Services.ServiceLocator.KYC;
-            bool isVerified = kycService?.CanAccessCashBattle ?? false;
-
-            if (!isVerified)
-            {
-                // Usuario NO verificado - ir a verificacion de edad primero
-                Debug.Log("[MainMenu] Usuario no verificado - navegando a AgeVerification");
-                SceneNavigator.Instance?.NavigateTo("AgeVerification");
-            }
-            else
-            {
-                // Usuario verificado - ir directo al Hub
-                Debug.Log("[MainMenu] Usuario verificado - navegando a CashBattleHub");
-                SceneNavigator.Instance?.NavigateTo("CashBattleHub");
-            }
         }
 
         /// <summary>

@@ -6,7 +6,7 @@
 // Groups mirror the Scenes/ folder structure:
 //   Core > Auth > Onboarding > Games/Navigation > Games/Minigames >
 //   Social/Profile > Social/Friends > Social/Notifications >
-//   Monetization > Tournaments > CashBattle > Prefab Builders
+//   Monetization > Tournaments > Prefab Builders
 //
 // Menu: DigitPark/Tools/Batch Build All Scenes
 // ============================================================
@@ -75,7 +75,6 @@ namespace DigitPark.Editor
 
             // ── ONBOARDING ──
             E("Onboarding", S + "Onboarding/Onboarding.unity",             "Onboarding",             "OnboardingUIBuilder",             "RebuildOnboarding"),
-            E("Onboarding", S + "Onboarding/CashBattleOnboarding.unity",   "CashBattleOnboarding",   "CashBattleOnboardingUIBuilder",   "RebuildCashBattleOnboarding"),
 
             // ── GAMES - NAVIGATION ──
             E("Games / Navigation", S + "Games/Navigation/GameSelector.unity",      "GameSelector",       "GameSelectorUIBuilder",          "RebuildGameSelectorUI"),
@@ -115,15 +114,6 @@ namespace DigitPark.Editor
             E("Tournaments", S + "Tournaments/TournamentLobby.unity",    "TournamentLobby",    "TournamentLobbyUIBuilder",    "BuildCompleteUI"),
 
             // ── CASH BATTLE ──
-            E("CashBattle", S + "CashBattle/CashBattleHub.unity",         "CashBattleHub",         "CashBattleUIBuilder",              "BuildPremiumUI"),
-            E("CashBattle", S + "CashBattle/CashBattle1v1.unity",         "CashBattle1v1",         "CashBattle1v1UIBuilder",           "BuildCashBattle1v1UI"),
-            E("CashBattle", S + "CashBattle/CashTournaments/CashTournaments.unity",       "CashTournaments",       "CashTournamentsUIBuilder",         "BuildCashTournamentsUI"),
-            E("CashBattle", S + "CashBattle/CashWallet.unity",                          "CashWallet",            "WalletUIBuilder",                  "BuildWalletUI"),
-            E("CashBattle", S + "CashBattle/CashHistory.unity",                         "CashHistory",           "CashHistoryUIBuilder",             "BuildCashHistoryUI"),
-            E("CashBattle", S + "CashBattle/CashProfile.unity",                         "CashProfile",           "CashProfileUIBuilder",             "BuildAndAssign"),
-            E("CashBattle", S + "CashBattle/CashMatchmaking.unity",                     "CashMatchmaking",       "CashMatchmakingUIBuilder",         "BuildUI"),
-            E("CashBattle", S + "CashBattle/CashTournaments/CashTournamentCreate.unity", "CashTournamentCreate",  "CashTournamentCreateUIBuilder",    "BuildGoldUI"),
-            E("CashBattle", S + "CashBattle/CashTournaments/CashTournamentLobby.unity",  "CashTournamentLobby",   "CashTournamentLobbyUIBuilder",     "BuildGoldUI"),
 
             // ── PREFAB BUILDERS (no scene required) ──
             // Win Panels
@@ -135,8 +125,6 @@ namespace DigitPark.Editor
             // Online Result Panels
             E("Prefabs / Result Panels", null, "Online Result (Win)",       "OnlineResultPanelUIBuilder",     "BuildWinPanel"),
             E("Prefabs / Result Panels", null, "Online Result (Lose)",      "OnlineResultPanelUIBuilder",     "BuildLosePanel"),
-            E("Prefabs / Result Panels", null, "CashBattle Result (Win)",   "CashBattleResultPanelUIBuilder", "BuildWinPanel"),
-            E("Prefabs / Result Panels", null, "CashBattle Result (Lose)",  "CashBattleResultPanelUIBuilder", "BuildLosePanel"),
             E("Prefabs / Result Panels", null, "Tournament Result (Win)",   "TournamentResultPanelUIBuilder", "BuildWinPanel"),
             E("Prefabs / Result Panels", null, "Tournament Result (Lose)",  "TournamentResultPanelUIBuilder", "BuildLosePanel"),
             E("Prefabs / Result Panels", null, "Sprint Summary Panel",      "SprintSummaryPanelUIBuilder",    "BuildSprintSummaryPanel"),
@@ -164,26 +152,21 @@ namespace DigitPark.Editor
             E("Prefabs / Social", null, "Player Card",         "SearchPlayersUIBuilder",  "CreatePlayerCardPrefab"),
 
             // Monetization extras (builders live inside scene UIBuilders)
-            E("Prefabs / Items", null, "Trophy Card",          "AchievementsUIBuilder",   "CreateTrophyCardPrefab"),
 
-            // CashBattle Item Prefabs
-            E("Prefabs / CashBattle", null, "Cash Match History Item", "CashHistoryUIBuilder", "CreateMatchHistoryItem"),
+            // Progression Prefabs
+            E("Prefabs / Progression", null, "LevelUp Panel",          "LevelUpPanelBuilder",  "BuildPrefab"),
+
+            // Animation Prefabs (Button3D, TransitionCanvas, UIAnimationManager)
+            E("Prefabs / Animations",  null, "Animation System Prefabs", "AnimationSystemBuilder", "CreateAllPrefabs"),
+
+            // Shop ScriptableObject Assets
+            E("Assets / Shop", null, "Background Shop Items (13)",  "BackgroundShopItemBuilder",   "BuildAll"),
+            E("Assets / Shop", null, "Shop Catalog — All Items (~89)", "CreateAllShopItemsCatalog", "CreateAll"),
+
+            // Cosmetics ScriptableObject Assets
+            E("Assets / Cosmetics", null, "BattleCard Catalog (19)", "BattleCardCatalogBuilder", "BuildAll"),
         };
 
-        // ==================== POLISH ENTRIES ====================
-        // Setup scripts that iterate scenes internally (no scene opening needed).
-        // Order matters: Background → Pattern → ThemeApplier → BackButton → Effects → Glow → Animations
-
-        private static readonly Entry[] POLISH_ENTRIES = new Entry[]
-        {
-            E("Polish / Backgrounds", null, "Background (Image + ThemeApplier)",  "BackgroundSetup",            "AddBackgroundToAllScenes"),
-            E("Polish / Backgrounds", null, "Background Pattern Layer",           "BackgroundPatternSetup",     "AddPatternLayerToAllScenes"),
-            E("Polish / Theme",       null, "ThemeApplier to All Scenes",         "ThemeApplierSetup",          "AddToAllScenes"),
-            E("Polish / UI",          null, "BackButtons (cyan + gold)",          "BackButtonAutoAdder",        "AddBackButtonsToAllScenes"),
-            E("Polish / Effects",     null, "FeedbackManager + ButtonEffects",    "EffectsSetup",               "SetupAllScenes"),
-            E("Polish / Effects",     null, "Neon Glow on Buttons",               "NeonButtonGlowSetup",        "AddGlowToAllScenes"),
-            E("Polish / Animations",  null, "Animation System (managers + 3D)",   "AnimationSystemBatchSetup",  "ApplyAllAnimationsToAllScenes"),
-        };
 
         // ==================== MENU ====================
 
@@ -208,30 +191,16 @@ namespace DigitPark.Editor
             EditorGUILayout.HelpBox(
                 $"Builds every scene and prefab in the app without dialog interruptions.\n" +
                 $"Opens each scene, runs its UIBuilder silently, and saves.\n\n" +
-                $"{sceneCount} scenes + {prefabCount} prefab builders = {ALL_ENTRIES.Length} total entries\n" +
-                $"{POLISH_ENTRIES.Length} polish setup steps",
+                $"{sceneCount} scenes + {prefabCount} prefab/asset builders = {ALL_ENTRIES.Length} total entries",
                 MessageType.Info);
 
             GUILayout.Space(10);
 
             EditorGUI.BeginDisabledGroup(isRunning);
 
-            // === MASTER: BUILD + POLISH ===
-            GUI.backgroundColor = new Color(0.9f, 0.5f, 1f);
-            if (GUILayout.Button("★  BUILD EVERYTHING  (Scenes + Prefabs + Polish)", GUILayout.Height(55)))
-            {
-                results.Clear();
-                BuildAll();
-                BuildEntries(POLISH_ENTRIES);
-                Repaint();
-            }
-            GUI.backgroundColor = Color.white;
-
-            GUILayout.Space(5);
-
             // === BUILD ALL (Scenes + Prefabs) ===
             GUI.backgroundColor = new Color(0.3f, 0.85f, 0.4f);
-            if (GUILayout.Button("BUILD ALL SCENES + PREFABS", GUILayout.Height(40)))
+            if (GUILayout.Button("★  BUILD ALL SCENES + PREFABS", GUILayout.Height(50)))
             {
                 results.Clear();
                 BuildAll();
@@ -239,17 +208,6 @@ namespace DigitPark.Editor
             }
             GUI.backgroundColor = Color.white;
 
-            GUILayout.Space(3);
-
-            // === POLISH ALL ===
-            GUI.backgroundColor = new Color(0f, 0.85f, 1f);
-            if (GUILayout.Button("POLISH ALL SCENES  (Theme + BackButton + Effects + Animations)", GUILayout.Height(40)))
-            {
-                results.Clear();
-                BuildEntries(POLISH_ENTRIES);
-                Repaint();
-            }
-            GUI.backgroundColor = Color.white;
 
             GUILayout.Space(5);
 
@@ -277,26 +235,6 @@ namespace DigitPark.Editor
 
             // === PER-GROUP BUTTONS ===
             DrawGroupButtons();
-
-            // === POLISH PER-STEP BUTTONS ===
-            GUILayout.Space(5);
-            GUILayout.Label("Polish steps (individual):", EditorStyles.boldLabel);
-            EditorGUILayout.BeginHorizontal();
-            int col = 0;
-            foreach (var pe in POLISH_ENTRIES)
-            {
-                if (col > 0 && col % 3 == 0) { EditorGUILayout.EndHorizontal(); EditorGUILayout.BeginHorizontal(); }
-                GUI.backgroundColor = new Color(0f, 0.85f, 1f);
-                if (GUILayout.Button(pe.displayName, GUILayout.Height(22)))
-                {
-                    results.Clear();
-                    BuildEntries(new[] { pe });
-                    Repaint();
-                }
-                col++;
-            }
-            EditorGUILayout.EndHorizontal();
-            GUI.backgroundColor = Color.white;
 
             EditorGUI.EndDisabledGroup();
 
@@ -351,24 +289,6 @@ namespace DigitPark.Editor
 
             scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition, GUILayout.Height(200));
 
-            // Polish entries header
-            GUI.color = new Color(0f, 0.85f, 1f);
-            GUILayout.Label("--- Polish / Setup ---", EditorStyles.miniLabel);
-            GUI.color = Color.white;
-            foreach (var pe in POLISH_ENTRIES)
-            {
-                EditorGUILayout.BeginHorizontal();
-                GUI.color = new Color(0f, 0.85f, 1f);
-                GUILayout.Label("SET", EditorStyles.miniLabel, GUILayout.Width(30));
-                GUI.color = Color.yellow;
-                GUILayout.Label("---", EditorStyles.miniLabel, GUILayout.Width(35));
-                GUI.color = Color.white;
-                GUILayout.Label(pe.displayName, GUILayout.Width(200));
-                GUI.color = new Color(0.6f, 0.6f, 0.6f);
-                GUILayout.Label(pe.className, EditorStyles.miniLabel);
-                GUI.color = Color.white;
-                EditorGUILayout.EndHorizontal();
-            }
             GUILayout.Space(4);
 
             string currentGroup = "";

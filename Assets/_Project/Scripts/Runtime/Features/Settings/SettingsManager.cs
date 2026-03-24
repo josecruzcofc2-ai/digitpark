@@ -11,7 +11,6 @@ using DigitPark.Localization;
 using DigitPark.UI;
 using DigitPark.UI.Panels;
 using DigitPark.UI.Components;
-using DigitPark.Themes;
 using DigitPark.Monetization;
 using DigitPark.Navigation;
 
@@ -37,10 +36,6 @@ namespace DigitPark.Managers
         [SerializeField] private TMP_Dropdown languageDropdown;
         [SerializeField] private TextMeshProUGUI changeLangLabel;
         [SerializeField] private LanguageDropdownStyler languageStyler;
-
-        [Header("UI - Theme")]
-        [SerializeField] private TMP_Dropdown themeDropdown;
-        [SerializeField] private TextMeshProUGUI changeThemeLabel;
 
         [Header("UI - Buttons")]
         [SerializeField] private Button changeNameButton;
@@ -83,30 +78,17 @@ namespace DigitPark.Managers
         [SerializeField] private Button termsButton;
         [SerializeField] private Button privacyButton;
         [SerializeField] private Button responsibleGamingButton;
-        [SerializeField] private Button triumphTermsButton;
-        [SerializeField] private Button selfExclusionButton;
-        [SerializeField] private ConfirmPanelUI selfExclusionConfirmPanel;
 
-        // URLs Legales — configurable via Firebase Remote Config, hardcoded fallback
-        private const string FALLBACK_TERMS = "https://digitpark.com/terms";
-        private const string FALLBACK_PRIVACY = "https://digitpark.com/privacy";
-        private const string FALLBACK_RESPONSIBLE_GAMING = "https://digitpark.com/responsible-gaming";
-
-        private static string URL_TERMS =>
-            DigitPark.Payments.RemoteConfigService.Instance?.GetCurrentConfig()?.TermsUrl ?? FALLBACK_TERMS;
-        private static string URL_PRIVACY =>
-            DigitPark.Payments.RemoteConfigService.Instance?.GetCurrentConfig()?.PrivacyUrl ?? FALLBACK_PRIVACY;
-        private static string URL_RESPONSIBLE_GAMING =>
-            DigitPark.Payments.RemoteConfigService.Instance?.GetCurrentConfig()?.ResponsibleGamingUrl ?? FALLBACK_RESPONSIBLE_GAMING;
-        private static string URL_TRIUMPH_TERMS => URL_TERMS;
+        // URLs Legales — hardcoded fallback
+        private const string URL_TERMS = "https://digitpark.com/terms";
+        private const string URL_PRIVACY = "https://digitpark.com/privacy";
+        private const string URL_RESPONSIBLE_GAMING = "https://digitpark.com/responsible-gaming";
 
         // Keys para PlayerPrefs
         private const string SOUND_VOLUME_KEY = "SoundVolume";
         private const string EFFECTS_VOLUME_KEY = "EffectsVolume";
         private const string VIBRATION_KEY = "VibrationEnabled";
         private const string NOTIFICATIONS_KEY = "NotificationsEnabled";
-        // CashBattleBypassAuth solo se puede activar desde EditorBootConfig (Editor-only)
-        private const string CASHBATTLE_BYPASS_AUTH_KEY = "CashBattleBypassAuth";
         private const string NAME_CHANGE_COUNT_KEY = "NameChangeCount";
         private const int NAME_CHANGE_GEM_COST = 100;
 
@@ -126,7 +108,6 @@ namespace DigitPark.Managers
             InitVibrationToggle();
             SetupLanguageDropdown();
             SetupLanguageStyler();
-            SetupThemeDropdown();
             SetupListeners();
             HidePanels();
             UpdatePremiumUI();
@@ -258,55 +239,6 @@ namespace DigitPark.Managers
             }
         }
 
-        private void SetupThemeDropdown()
-        {
-            if (themeDropdown == null) return;
-
-            // Limpiar opciones existentes
-            themeDropdown.ClearOptions();
-
-            // Verificar que ThemeManager existe
-            if (ThemeManager.Instance == null)
-            {
-                Debug.LogWarning("[Settings] ThemeManager no disponible");
-                return;
-            }
-
-            // Agregar todas las opciones de temas disponibles
-            var themes = ThemeManager.Instance.AvailableThemes;
-            var options = new System.Collections.Generic.List<TMP_Dropdown.OptionData>();
-
-            foreach (var theme in themes)
-            {
-                string themeName = AutoLocalizer.Get($"theme_{theme.themeId}");
-                if (string.IsNullOrEmpty(themeName) || themeName.StartsWith("theme_"))
-                {
-                    themeName = theme.themeName; // Fallback al nombre original
-                }
-                options.Add(new TMP_Dropdown.OptionData(themeName));
-            }
-
-            themeDropdown.AddOptions(options);
-
-            // Establecer el valor actual
-            int currentIndex = ThemeManager.Instance.CurrentThemeIndex;
-            currentIndex = Mathf.Clamp(currentIndex, 0, themeDropdown.options.Count - 1);
-
-            // Remover listener temporalmente para evitar que se dispare al establecer el valor
-            themeDropdown.onValueChanged.RemoveListener(OnThemeDropdownChanged);
-            themeDropdown.value = currentIndex;
-            themeDropdown.RefreshShownValue();
-            themeDropdown.onValueChanged.AddListener(OnThemeDropdownChanged);
-
-            // Actualizar label si existe
-            if (changeThemeLabel != null)
-            {
-                changeThemeLabel.text = AutoLocalizer.Get("change_theme");
-            }
-
-            Debug.Log($"[Settings] Tema actual: {ThemeManager.Instance.CurrentTheme?.themeName ?? "Ninguno"}");
-        }
-
         private void SetupListeners()
         {
             // Sliders
@@ -339,8 +271,6 @@ namespace DigitPark.Managers
             termsButton?.onClick.AddListener(() => OpenURL(URL_TERMS));
             privacyButton?.onClick.AddListener(() => OpenURL(URL_PRIVACY));
             responsibleGamingButton?.onClick.AddListener(() => OpenURL(URL_RESPONSIBLE_GAMING));
-            triumphTermsButton?.onClick.AddListener(() => OpenURL(URL_TRIUMPH_TERMS));
-            selfExclusionButton?.onClick.AddListener(OnSelfExclusionClicked);
 
             // Suscribirse a cambios de estado premium
             PremiumManager.OnPremiumStatusChanged += UpdatePremiumUI;
@@ -351,71 +281,11 @@ namespace DigitPark.Managers
         private void OnEnable()
         {
             LocalizationManager.OnLanguageChanged += OnLanguageChanged;
-            ThemeManager.OnThemeChanged += OnThemeChanged;
         }
 
         private void OnDisable()
         {
             LocalizationManager.OnLanguageChanged -= OnLanguageChanged;
-            ThemeManager.OnThemeChanged -= OnThemeChanged;
-        }
-
-        private void OnThemeChanged(ThemeData newTheme)
-        {
-            // Actualizar estilos de los dropdowns cuando cambia el tema
-            ApplyThemeToDropdowns(newTheme);
-        }
-
-        private void ApplyThemeToDropdowns(ThemeData theme)
-        {
-            if (theme == null) return;
-
-            Color accentColor = theme.primaryAccent;
-            Color bgColor = theme.cardBackground;
-
-            // Aplicar al theme dropdown
-            if (themeDropdown != null)
-            {
-                // Label del dropdown de tema
-                var themeLabelTransform = themeDropdown.transform.Find("Label");
-                if (themeLabelTransform != null)
-                {
-                    var themeLabel = themeLabelTransform.GetComponent<TextMeshProUGUI>();
-                    if (themeLabel != null)
-                    {
-                        themeLabel.color = accentColor;
-                    }
-                }
-
-                // Flecha del dropdown de tema
-                var themeArrow = themeDropdown.transform.Find("Arrow");
-                if (themeArrow != null)
-                {
-                    var arrowImg = themeArrow.GetComponent<Image>();
-                    if (arrowImg != null)
-                    {
-                        arrowImg.color = accentColor;
-                    }
-                }
-            }
-
-            // Actualizar label de "Change Theme"
-            if (changeThemeLabel != null)
-            {
-                changeThemeLabel.color = accentColor;
-            }
-
-            // Actualizar label de "Change Language"
-            if (changeLangLabel != null)
-            {
-                changeLangLabel.color = accentColor;
-            }
-
-            // Forzar actualización del language styler
-            if (languageStyler != null)
-            {
-                languageStyler.SetThemeColor(accentColor);
-            }
         }
 
         private void OnDestroy()
@@ -426,8 +296,6 @@ namespace DigitPark.Managers
 
         private void OnLanguageChanged()
         {
-            RefreshThemeDropdownLabels();
-
             // Refresh all texts in Settings when language changes
             if (AutoLocalizer.Instance != null)
             {
@@ -443,24 +311,6 @@ namespace DigitPark.Managers
             deleteConfirmPanel?.Hide();
             logoutConfirmPanel?.Hide();
             errorPanel?.Hide();
-        }
-
-        #endregion
-
-        #region CashBattle Bypass
-
-        /// <summary>
-        /// Verifica si el bypass está habilitado.
-        /// Solo puede activarse desde EditorBootConfig (Editor-only).
-        /// En builds de producción siempre retorna false.
-        /// </summary>
-        public static bool IsCashBattleAuthBypassed()
-        {
-#if UNITY_EDITOR
-            return PlayerPrefs.GetInt(CASHBATTLE_BYPASS_AUTH_KEY, 0) == 1;
-#else
-            return false;
-#endif
         }
 
         #endregion
@@ -482,46 +332,6 @@ namespace DigitPark.Managers
                 // Guardar en PlayerPrefs si LocalizationManager no existe
                 PlayerPrefs.SetInt("DP_Language", index);
                 PlayerPrefs.Save();
-            }
-        }
-
-        #endregion
-
-        #region Theme
-
-        private void OnThemeDropdownChanged(int index)
-        {
-            // Theme change is handled by ThemeDropdownController (which checks locks).
-            // This listener is intentionally empty to avoid bypassing lock checks.
-            // ThemeDropdownController.OnThemeSelected() handles lock verification,
-            // revert to last valid index, and showing the purchase panel.
-        }
-
-        /// <summary>
-        /// Actualiza el dropdown de temas cuando cambia el idioma
-        /// </summary>
-        private void RefreshThemeDropdownLabels()
-        {
-            if (themeDropdown == null || ThemeManager.Instance == null) return;
-
-            int currentIndex = themeDropdown.value;
-            var themes = ThemeManager.Instance.AvailableThemes;
-
-            for (int i = 0; i < themeDropdown.options.Count && i < themes.Count; i++)
-            {
-                string themeName = AutoLocalizer.Get($"theme_{themes[i].themeId}");
-                if (string.IsNullOrEmpty(themeName) || themeName.StartsWith("theme_"))
-                {
-                    themeName = themes[i].themeName;
-                }
-                themeDropdown.options[i].text = themeName;
-            }
-
-            themeDropdown.RefreshShownValue();
-
-            if (changeThemeLabel != null)
-            {
-                changeThemeLabel.text = AutoLocalizer.Get("change_theme");
             }
         }
 
@@ -1013,8 +823,7 @@ namespace DigitPark.Managers
             if (PremiumManager.Instance == null) return;
 
             bool canCreateTournaments = PremiumManager.Instance.CanCreateTournaments;
-            bool canCreateCashBattle = PremiumManager.Instance.CanCreateCashBattle;
-            bool hasBundle = canCreateTournaments && canCreateCashBattle;
+            bool hasBundle = canCreateTournaments;
 
             // Actualizar boton de crear torneos
             if (createTournamentsButton != null)
@@ -1059,7 +868,7 @@ namespace DigitPark.Managers
                 // premiumSection.SetActive(false);
             }
 
-            Debug.Log($"[Settings] Premium UI actualizada - CreateTournaments: {canCreateTournaments}, CashBattle: {canCreateCashBattle}");
+            Debug.Log($"[Settings] Premium UI actualizada - CreateTournaments: {canCreateTournaments}");
 
             // Actualizar el badge del boton Pro
             UpdatePremiumBadge();
@@ -1106,7 +915,7 @@ namespace DigitPark.Managers
 
             if (PremiumManager.Instance == null) return;
 
-            bool hasBundle = PremiumManager.Instance.CanCreateTournaments && PremiumManager.Instance.CanCreateCashBattle;
+            bool hasBundle = PremiumManager.Instance.CanCreateTournaments;
             if (hasBundle)
             {
                 errorPanel?.Show(AutoLocalizer.Get("already_purchased"));
@@ -1172,8 +981,7 @@ namespace DigitPark.Managers
             if (premiumBadge == null) return;
 
             bool isPremium = PremiumManager.Instance != null &&
-                            PremiumManager.Instance.CanCreateTournaments &&
-                            PremiumManager.Instance.CanCreateCashBattle;
+                            PremiumManager.Instance.CanCreateTournaments;
 
             if (isPremium && !premiumBadge.activeSelf)
             {
@@ -1211,34 +1019,6 @@ namespace DigitPark.Managers
         {
             Debug.Log($"[Settings] Abriendo URL: {url}");
             Application.OpenURL(url);
-        }
-
-        /// <summary>
-        /// Muestra confirmacion de auto-exclusion de Cash Battle
-        /// </summary>
-        private void OnSelfExclusionClicked()
-        {
-            Debug.Log("[Settings] Mostrando panel de auto-exclusion");
-
-            if (selfExclusionConfirmPanel != null)
-            {
-                selfExclusionConfirmPanel.Show(
-                    AutoLocalizer.Get("self_exclusion_title"),
-                    AutoLocalizer.Get("self_exclusion_message"),
-                    OnConfirmSelfExclusion,
-                    null
-                );
-            }
-        }
-
-        private void OnConfirmSelfExclusion()
-        {
-            Debug.Log("[Settings] Usuario solicito auto-exclusion");
-
-            // TODO: Implementar llamada a Triumph SDK para auto-exclusion
-            // Por ahora, mostrar mensaje de contacto
-            selfExclusionConfirmPanel?.Hide();
-            errorPanel?.Show(AutoLocalizer.Get("self_exclusion_contact_message"));
         }
 
         #endregion

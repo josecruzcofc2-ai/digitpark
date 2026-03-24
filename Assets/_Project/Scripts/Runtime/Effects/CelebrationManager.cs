@@ -1,6 +1,5 @@
 using UnityEngine;
 using System.Collections;
-using DigitPark.Themes;
 
 namespace DigitPark.Effects
 {
@@ -44,18 +43,7 @@ namespace DigitPark.Effects
             ApplyThemePalette();
         }
 
-        /// <summary>
-        /// Aplica la paleta de confetti del tema activo si tiene una definida.
-        /// </summary>
-        private void ApplyThemePalette()
-        {
-            if (ThemeManager.Instance == null) return;
-            var theme = ThemeManager.Instance.CurrentTheme;
-            if (theme != null && theme.confettiPalette != null && theme.confettiPalette.Length >= 3)
-            {
-                confettiColors = theme.confettiPalette;
-            }
-        }
+        private void ApplyThemePalette() { } // Themes removed
 
         private void OnDestroy()
         {

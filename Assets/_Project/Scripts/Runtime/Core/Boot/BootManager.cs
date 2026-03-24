@@ -14,7 +14,6 @@ using DigitPark.Payments;
 using DigitPark.Payments.Entitlements;
 using Firebase.Database;
 using DigitPark.Navigation;
-using DigitPark.Themes;
 using DigitPark.Progression;
 using DigitPark.Cosmetics;
 
@@ -40,10 +39,6 @@ namespace DigitPark.Managers
 
         private void Start()
         {
-#if !UNITY_EDITOR
-            // S3-NEW-01: Ensure debug bypass key never persists in production builds
-            PlayerPrefs.DeleteKey("CashBattleBypassAuth");
-#endif
             Debug.Log("[Boot] Iniciando BootManager...");
 
             // Buscar BootAnimator en la escena
@@ -393,11 +388,9 @@ namespace DigitPark.Managers
                 string uid = playerData.userId;
                 var restoreTasks = new List<Task>
                 {
-                    ThemeManager.Instance?.RestoreFromFirebaseAsync(uid) ?? Task.CompletedTask,
                     PlayerFrameService.Instance?.RestoreFromFirebaseAsync(uid) ?? Task.CompletedTask,
                     PlayerTitleService.Instance?.RestoreFromFirebaseAsync(uid) ?? Task.CompletedTask,
                     PlayerProgressionSystem.Instance?.RestoreFromFirebaseAsync(uid) ?? Task.CompletedTask,
-                    // B4-E: BackgroundPatternManager restore
                     BackgroundPatternManager.Instance?.RestoreFromFirebaseAsync(uid) ?? Task.CompletedTask,
                 };
                 var restoreTask = Task.WhenAll(restoreTasks);
@@ -450,17 +443,8 @@ namespace DigitPark.Managers
                     updates["progression/level"] = level;
                 }
 
-                // B4-F: Cosmetics migration — trigger each service to sync its owned data to Firebase.
-                // Each service's Save method already writes the correct format.
                 PlayerFrameService.Instance?.TriggerFirebaseSync();
                 PlayerTitleService.Instance?.TriggerFirebaseSync();
-                var themeManager = ThemeManager.Instance;
-                if (themeManager != null)
-                {
-                    var ownedThemeIds = themeManager.GetOwnedThemeIds();
-                    if (ownedThemeIds != null && ownedThemeIds.Count > 0)
-                        updates["ownedThemes"] = string.Join(",", ownedThemeIds);
-                }
             }
             catch (System.Exception e)
             {
@@ -493,29 +477,7 @@ namespace DigitPark.Managers
         {
             Debug.Log("[Boot] Inicializando sistema de pagos...");
 
-            // 1. Crear RemoteConfigService
-            if (RemoteConfigService.Instance == null)
-            {
-                GameObject remoteConfigObj = new GameObject("RemoteConfigService");
-                remoteConfigObj.AddComponent<RemoteConfigService>();
-                Debug.Log("[Boot] RemoteConfigService creado");
-            }
-
-            // Esperar a que RemoteConfig esté listo (máximo 5 segundos, usa cache si offline)
-            float timeout = 5f;
-            float elapsed = 0f;
-            while (RemoteConfigService.Instance != null &&
-                   !RemoteConfigService.Instance.IsReady && elapsed < timeout)
-            {
-                elapsed += Time.deltaTime;
-                yield return null;
-            }
-
-            // 2. Inicializar PaymentFeatureFlag
-            PaymentFeatureFlag.Initialize(RemoteConfigService.Instance?.GetCurrentConfig());
-            Debug.Log($"[Boot] FeatureFlag inicializado. Provider: {PaymentFeatureFlag.ActiveCosmeticProvider}");
-
-            // 3. Crear PaymentManager
+            // 1. Crear PaymentManager
             if (PaymentManager.Instance == null)
             {
                 GameObject paymentObj = new GameObject("PaymentManager");
@@ -523,7 +485,7 @@ namespace DigitPark.Managers
                 Debug.Log("[Boot] PaymentManager creado");
             }
 
-            // 4. Crear EntitlementService
+            // 2. Crear EntitlementService
             if (EntitlementService.Instance == null)
             {
                 GameObject entitlementObj = new GameObject("EntitlementService");
@@ -531,17 +493,7 @@ namespace DigitPark.Managers
                 Debug.Log("[Boot] EntitlementService creado");
             }
 
-#if DIGIT_PARK_PRO || UNITY_EDITOR
-            // 5. Crear TriumphIsolationGuard (solo en versión Pro)
-            if (DigitPark.Payments.Compliance.TriumphIsolationGuard.Instance == null)
-            {
-                GameObject guardObj = new GameObject("TriumphIsolationGuard");
-                guardObj.AddComponent<DigitPark.Payments.Compliance.TriumphIsolationGuard>();
-                Debug.Log("[Boot] TriumphIsolationGuard creado");
-            }
-#endif
-
-            // 6. Sync entitlements con retry — B4-G
+            // 3. Sync entitlements con retry
             if (EntitlementService.Instance != null)
             {
                 _ = SyncEntitlementsWithRetry();

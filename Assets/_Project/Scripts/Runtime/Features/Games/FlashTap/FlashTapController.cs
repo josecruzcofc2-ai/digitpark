@@ -8,7 +8,6 @@ using DigitPark.UI;
 using DigitPark.Effects;
 using DigitPark.Localization;
 using DigitPark.Animations;
-using DigitPark.Themes;
 
 namespace DigitPark.Games
 {
@@ -148,9 +147,8 @@ namespace DigitPark.Games
         private void UpdateToggleVisual(Toggle toggle, bool active)
         {
             if (toggle == null) return;
-            var theme = ThemeManager.Instance?.CurrentTheme;
             var img = toggle.GetComponent<Image>();
-            if (img != null) img.color = active ? (theme?.tabActive ?? new Color(0f, 1f, 1f, 0.3f)) : (theme?.tabInactive ?? new Color(0.2f, 0.2f, 0.3f, 0.8f));
+            if (img != null) img.color = active ? new Color(0f, 1f, 1f, 0.3f) : new Color(0.2f, 0.2f, 0.3f, 0.8f);
             var outline = toggle.GetComponent<Outline>();
             if (outline != null) outline.effectColor = active ? (theme?.tabActive ?? new Color(0f, 1f, 1f, 1f)) : new Color(0.3f, 0.3f, 0.4f, 0.5f);
             var text = toggle.GetComponentInChildren<TextMeshProUGUI>();

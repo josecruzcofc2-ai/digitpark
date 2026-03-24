@@ -90,7 +90,6 @@ namespace DigitPark.Managers
             Mastery,        // Game mastery achievements
             Victories,      // Win-based achievements
             Streaks,        // Win streak achievements
-            CashBattle,     // Cash battle achievements
             Tournaments,    // Tournament achievements
             Social,         // Friend-based achievements
             Progression,    // Level/rank achievements
@@ -128,7 +127,6 @@ namespace DigitPark.Managers
                     AutoLocalizer.Get("ach_category_mastery"),
                     AutoLocalizer.Get("ach_category_victories"),
                     AutoLocalizer.Get("ach_category_streaks"),
-                    AutoLocalizer.Get("ach_category_cashbattle"),
                     AutoLocalizer.Get("ach_category_tournaments"),
                     AutoLocalizer.Get("ach_category_social"),
                     AutoLocalizer.Get("ach_category_progression"),
@@ -236,7 +234,6 @@ namespace DigitPark.Managers
                 ServiceCategory.Mastery => AchievementCategory.Mastery,
                 ServiceCategory.Victories => AchievementCategory.Victories,
                 ServiceCategory.Streaks => AchievementCategory.Streaks,
-                ServiceCategory.CashBattle => AchievementCategory.CashBattle,
                 ServiceCategory.Tournaments => AchievementCategory.Tournaments,
                 ServiceCategory.Social => AchievementCategory.Social,
                 ServiceCategory.Progression => AchievementCategory.Progression,
@@ -368,7 +365,6 @@ namespace DigitPark.Managers
             AchievementCategory.Mastery,
             AchievementCategory.Victories,
             AchievementCategory.Streaks,
-            AchievementCategory.CashBattle,
             AchievementCategory.Tournaments,
             AchievementCategory.Social,
             AchievementCategory.Progression,
@@ -426,7 +422,6 @@ namespace DigitPark.Managers
                 AchievementCategory.Mastery => allAchievements.FindAll(a => a.category == AchievementCategory.Mastery),
                 AchievementCategory.Victories => allAchievements.FindAll(a => a.category == AchievementCategory.Victories),
                 AchievementCategory.Streaks => allAchievements.FindAll(a => a.category == AchievementCategory.Streaks),
-                AchievementCategory.CashBattle => allAchievements.FindAll(a => a.category == AchievementCategory.CashBattle),
                 AchievementCategory.Tournaments => allAchievements.FindAll(a => a.category == AchievementCategory.Tournaments),
                 AchievementCategory.Social => allAchievements.FindAll(a => a.category == AchievementCategory.Social),
                 AchievementCategory.Progression => allAchievements.FindAll(a => a.category == AchievementCategory.Progression),

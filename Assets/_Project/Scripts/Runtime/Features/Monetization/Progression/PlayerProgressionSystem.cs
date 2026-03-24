@@ -29,7 +29,6 @@ namespace DigitPark.Progression
         [SerializeField] private int xpTournamentParticipation = 75;
         [SerializeField] private int xpTournamentTop3 = 200;
         [SerializeField] private int xpTournamentWin = 500;
-        [SerializeField] [Range(0f, 1f)] private float cashBattleXPMultiplier = 0.5f;
 
         // Player Data
         private int _currentLevel = 1;
@@ -122,9 +121,6 @@ namespace DigitPark.Progression
         {
             int xpGained = CalculateGameXP(result);
 
-            if (result.isCashBattle)
-                xpGained = Mathf.RoundToInt(xpGained * cashBattleXPMultiplier);
-
             // Premium Pass — 2x XP multiplier
             float premiumMultiplier = DigitPark.Managers.PremiumManager.Instance?.IsPremiumPass == true ? 2f : 1f;
             xpGained = Mathf.RoundToInt(xpGained * premiumMultiplier);
@@ -150,9 +146,6 @@ namespace DigitPark.Progression
                 xpGained += xpTournamentWin;
             else if (result.placement <= 3)
                 xpGained += xpTournamentTop3;
-
-            if (result.isCashTournament)
-                xpGained = Mathf.RoundToInt(xpGained * cashBattleXPMultiplier);
 
             AddXP(xpGained);
             SaveProgress();
@@ -509,7 +502,6 @@ namespace DigitPark.Progression
         public bool isPerfect;
         public int score;
         public float scorePercentile; // 0-100
-        public bool isCashBattle;
     }
 
     [Serializable]
@@ -518,7 +510,6 @@ namespace DigitPark.Progression
         public string tournamentId;
         public int placement;
         public int totalParticipants;
-        public bool isCashTournament;
     }
 
     [Serializable]

@@ -2,7 +2,6 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using DigitPark.Themes;
 
 namespace DigitPark.UI
 {
@@ -27,7 +26,6 @@ namespace DigitPark.UI
         [SerializeField] private float glowPulseDuration = 1.2f;
         [SerializeField] private float typewriterSpeed = 0.03f;
 
-        private ThemeData currentTheme;
         private Coroutine typewriterCoroutine;
         private Coroutine glowCoroutine;
         private string targetLoadingText = "";
@@ -39,32 +37,9 @@ namespace DigitPark.UI
 
         private void Awake()
         {
-            // Obtener tema actual
-            if (ThemeManager.Instance != null)
-            {
-                currentTheme = ThemeManager.Instance.CurrentTheme;
-                ApplyThemeColors();
-            }
-            else
-            {
-                // Colores por defecto si no hay ThemeManager
-                accentColor = new Color(0f, 1f, 1f, 1f); // Cyan
-                glowColor = new Color(0f, 1f, 1f, 0.5f);
-                secondaryAccent = new Color(1f, 0f, 0.5f, 1f); // Magenta
-            }
-        }
-
-        /// <summary>
-        /// Aplica los colores del tema actual a las variables locales
-        /// </summary>
-        private void ApplyThemeColors()
-        {
-            if (currentTheme != null)
-            {
-                accentColor = currentTheme.primaryAccent;
-                glowColor = currentTheme.glowColor;
-                secondaryAccent = currentTheme.secondaryAccent;
-            }
+            accentColor = new Color(0f, 1f, 1f, 1f); // Cyan
+            glowColor = new Color(0f, 1f, 1f, 0.5f);
+            secondaryAccent = new Color(1f, 0f, 0.5f, 1f); // Magenta
         }
 
         /// <summary>

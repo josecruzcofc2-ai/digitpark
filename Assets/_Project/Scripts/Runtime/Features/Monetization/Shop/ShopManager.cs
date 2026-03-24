@@ -450,10 +450,7 @@ namespace DigitPark.Monetization
                     OnItemPurchased?.Invoke(itemData.itemId);
                     PlayPurchaseCelebration(_currentPurchaseItem);
 
-                    if (result.WasProviderSwitched)
-                        Debug.Log($"[ShopManager] Compra exitosa via fallback ({result.ProviderUsed}): {itemData.displayName}");
-                    else
-                        Debug.Log($"[ShopManager] Compra exitosa via {result.ProviderUsed}: {itemData.displayName}");
+                    Debug.Log($"[ShopManager] Compra exitosa via {result.ProviderUsed}: {itemData.displayName}");
                 }
                 else
                 {

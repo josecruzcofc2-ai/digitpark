@@ -4,8 +4,6 @@ using UnityEditor;
 using TMPro;
 using DigitPark.UI;
 using DigitPark.Monetization;
-using DigitPark.Themes;
-using ET = DigitPark.Themes.ThemeApplier.ElementType;
 
 namespace DigitPark.Editor
 {
@@ -176,7 +174,6 @@ namespace DigitPark.Editor
             var img = GetOrAdd<Image>(bg);
             img.color = Color.white; // ThemeApplier tints at runtime
             img.raycastTarget = false;
-            ThemeApplierHelper.Apply(bg, ET.PrimaryBackground);
         }
 
         #endregion

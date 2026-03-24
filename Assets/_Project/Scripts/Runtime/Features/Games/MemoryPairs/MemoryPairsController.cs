@@ -6,7 +6,6 @@ using TMPro;
 using DigitPark.UI;
 using DigitPark.Localization;
 using DigitPark.Animations;
-using DigitPark.Themes;
 
 namespace DigitPark.Games
 {
@@ -152,9 +151,8 @@ namespace DigitPark.Games
         {
             if (toggle == null) return;
             var bg = toggle.GetComponent<UnityEngine.UI.Image>();
-            var theme = ThemeManager.Instance?.CurrentTheme;
             if (bg != null)
-                bg.color = isOn ? (theme?.tabActive ?? new Color(0f, 1f, 1f, 1f)) : (theme?.tabInactive ?? new Color(0.08f, 0.12f, 0.18f, 1f));
+                bg.color = isOn ? new Color(0f, 1f, 1f, 1f) : new Color(0.08f, 0.12f, 0.18f, 1f);
 
             var label = toggle.GetComponentInChildren<TextMeshProUGUI>();
             if (label != null)

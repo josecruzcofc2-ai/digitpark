@@ -1,8 +1,13 @@
 # FIREBASE DEEP REVIEW — DigitPark
 
 > Generado: 2026-03-19 | Consolidado: 2026-03-19 | **ALL FIXES APPLIED: 2026-03-19**
+> **Actualizado post-simplificación: 2026-03-24** — CashBattle, Stripe, Triumph, Themes, RemoteConfig eliminados.
 > 66+ archivos .cs + index.ts + database.rules.json + storage.rules + firebase.json
 > **126 issues resueltos** + 47 DOTween SetLink + SEC-06 score validation implementado
+>
+> **NOTA IMPORTANTE (2026-03-24):** Los sistemas Stripe, Triumph y CashBattle han sido eliminados del proyecto.
+> Los bloques 3 (Payments/Stripe), las referencias a ThemeManager/RemoteConfigService,
+> y el endpoint `submitCashScore` ya no aplican. Este documento se conserva como historial de bugs arreglados.
 
 ---
 

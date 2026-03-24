@@ -8,7 +8,7 @@
       "$uid": {
         // B0-B [2026-03-20]: Cualquier usuario autenticado puede leer perfiles
         // (necesario para búsqueda de jugadores, perfiles de amigos, participantes de torneo)
-        // Datos sensibles de pago están en Stripe/Triumph, no aquí.
+        // Datos sensibles de pago están en Firestore (entitlements), no aquí.
         ".read": "auth != null",
         ".write": "auth != null && auth.uid === $uid"
       }
@@ -154,15 +154,6 @@
       "$uid": {
         ".read": "auth != null && auth.uid === $uid",
         ".write": "auth != null && auth.uid === $uid"
-      }
-    },
-
-    // CashBattle scores — server-only write (via submitCashScore Cloud Function)
-    // Client can read own scores but CANNOT write (prevents score injection in real-money games)
-    "cash_scores": {
-      "$uid": {
-        ".read": "auth != null && auth.uid === $uid",
-        ".write": false
       }
     },
 

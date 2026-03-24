@@ -4,8 +4,6 @@ using UnityEditor;
 using TMPro;
 using DigitPark.UI;
 using DigitPark.Monetization;
-using DigitPark.Themes;
-using ET = DigitPark.Themes.ThemeApplier.ElementType;
 using System.Collections.Generic;
 
 namespace DigitPark.Editor
@@ -83,7 +81,6 @@ namespace DigitPark.Editor
             }
             Image bgImg = background.GetComponent<Image>();
             if (bgImg != null) bgImg.color = Color.white;
-            ThemeApplierHelper.Apply(background.gameObject, ET.PrimaryBackground);
 
             // Limpiar GamesPanel existente si existe
             Transform existingGamesPanel = canvasTransform.Find("GamesPanel");
@@ -202,14 +199,6 @@ namespace DigitPark.Editor
             for (int i = existingOutlines.Length - 1; i >= 0; i--)
             {
                 DestroyImmediate(existingOutlines[i]);
-            }
-
-            // Limpiar ThemeApplier (causa tinte azul al aplicar cardBackground del tema)
-            ThemeApplier themeApplier = card.GetComponent<ThemeApplier>();
-            if (themeApplier != null)
-            {
-                Debug.Log($"Eliminando ThemeApplier de {buttonName} (causaba tinte azul)");
-                DestroyImmediate(themeApplier);
             }
 
             // Limpiar CanvasGroup (GameSelectorAnimator lo agrega con alpha 0.6)

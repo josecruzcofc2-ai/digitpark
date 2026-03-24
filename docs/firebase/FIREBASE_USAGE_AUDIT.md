@@ -1,5 +1,7 @@
 # FIREBASE USAGE AUDIT — DigitPark
-> Generado: 2026-03-19 | Verificado con grep exhaustivo en 66 archivos | Todos los .cs + index.ts
+> Generado: 2026-03-19 | **Actualizado post-simplificación: 2026-03-24**
+> CashBattle, Stripe, Triumph, Themes, RemoteConfig eliminados.
+> Sistemas activos: Auth, Realtime Database, Storage, FCM, Analytics, Firestore (backend), Cloud Functions.
 
 ---
 
@@ -11,21 +13,34 @@
 | Realtime Database | ✅ REAL | SDK directo (DatabaseService) + accesos directos en 4 archivos |
 | Cloud Messaging (FCM) | ✅ REAL (#if guard) | SDK directo (NotificationService) |
 | Analytics | ✅ REAL | SDK directo (AnalyticsService) |
-| Remote Config | ✅ REAL (#if guard, fallback local) | SDK directo (RemoteConfigService) |
 | Storage | ✅ REAL | SDK directo (AvatarService) |
 | Crashlytics | ⚙️ OPCIONAL (#if guard) | SDK directo en AuthenticationService |
 | Firestore | ✅ REAL (solo backend) | Firebase Admin SDK en index.ts |
 | Cloud Functions | ✅ REAL | Node.js backend + HTTP calls desde Unity |
+| Remote Config | ❌ ELIMINADO | RemoteConfigService.cs eliminado en simplificación |
 
-**Total de archivos .cs con algún tipo de uso Firebase**: **55 archivos** (13 con SDK directo, 42 via service wrappers)
+**Total de archivos .cs con algún tipo de uso Firebase**: ~42 archivos
 **Simulación**: NO HAY. El fallback en Editor es PlayerPrefs local.
+
+---
+
+## SISTEMAS ELIMINADOS EN SIMPLIFICACIÓN (2026-03-24)
+
+Los siguientes sistemas y sus archivos Firebase fueron eliminados:
+- **CashBattle**: CashProfileSceneController, WalletManager, CashMatchmakingManager (Auth + DB + Analytics)
+- **Themes**: ThemeManager (DB sync de equippedTheme)
+- **Stripe**: StripePaymentProvider, StripeSessionPoller, StripeCheckoutController, StripeAbortProtocol (HTTP a Cloud Functions)
+- **Triumph**: TriumphManager, TriumphServices
+- **Remote Config**: RemoteConfigService (Firebase Remote Config SDK)
+- **Feature Flags**: LocalFlagCache, PaymentFeatureFlag
+- **ServiceLocator**: Eliminado (ya no hay interfaces CashBattle)
 
 ---
 
 ## CÓMO LEER ESTE DOCUMENTO
 
 - **Nivel A — SDK directo**: El archivo importa `using Firebase.*` y usa clases del SDK de Firebase directamente.
-- **Nivel B — Service wrapper**: El archivo usa `DatabaseService.Instance`, `AuthenticationService.Instance`, etc. (los servicios de DigitPark que envuelven Firebase).
+- **Nivel B — Service wrapper**: El archivo usa `DatabaseService.Instance`, `AuthenticationService.Instance`, etc.
 - **Nivel C — HTTP a Cloud Functions**: El archivo llama a Firebase Cloud Functions via `UnityWebRequest` (sin SDK).
 - **Nivel D — Modelo de datos**: El archivo define estructuras de datos que se serializan a Firebase DB.
 - **Nivel E — Solo comentarios**: Menciona Firebase en comentarios/strings pero no lo usa.
@@ -46,7 +61,7 @@
 - Lee `FirebaseAuth.DefaultInstance.CurrentUser.UserId` al inicializar
 - Fallback anónimo si no hay usuario: `SystemInfo.deviceUniqueIdentifier`
 
-### B — Via AuthenticationService.Instance (40 archivos)
+### B — Via AuthenticationService.Instance
 | Archivo | Qué hace con Auth |
 |---|---|
 | `Core/Boot/BootManager.cs` | Verifica sesión al arrancar |
@@ -74,7 +89,6 @@
 | `Features/Social/Friends/FriendRequestsSceneManager.cs` | Lee userId |
 | `Features/Tournaments/TournamentManager.cs` | Lee userId |
 | `Features/Tournaments/TournamentLobbyManager.cs` | Lee userId |
-| `Features/CashBattle/Profile/CashProfileSceneController.cs` | Lee userId |
 | `Features/Cosmetics/Backgrounds/BackgroundPatternManager.cs` | Lee uid para sync |
 | `Features/Cosmetics/BattleCards/BattleCardService.cs` | Lee uid para sync |
 | `Services/AchievementService.cs` | Lee userId |
@@ -88,10 +102,8 @@
 | `Services/NotificationStorageService.cs` | Lee uid para sync |
 | `Services/RotatingContentService.cs` | Lee userId |
 | `Services/AvatarService.cs` | Lee playerData (incluye userId) |
-| `Themes/ThemeManager.cs` | Lee uid para sync tema equipado |
 | `Services/PaymentBridgeWiring.cs` | Wirea `GetCurrentUserId` delegate |
 | `UI/Components/AvatarUI.cs` | Lee playerData para cargar avatar |
-| `Features/CashBattle/Hub/CashMatchmakingManager.cs` | Carga avatar propio y del oponente vía AvatarService (Firebase Storage) |
 | `DevTools/DebugManager.cs` | Muestra uid en pestaña Firebase |
 
 ---
@@ -104,7 +116,7 @@
 - `FirebaseDatabase.DefaultInstance.RootReference`
 - `Child()`, `GetValueAsync()`, `SetRawJsonValueAsync()`, `UpdateChildrenAsync()`, `OrderByChild()`, `LimitToFirst()`, `Remove()`, `Once()`, `RunTransaction()`
 
-**Accesos directos adicionales (alias `FirebaseDB = global::Firebase.Database`):**
+**Accesos directos adicionales:**
 
 | Archivo | Path directo | Operación |
 |---|---|---|
@@ -114,7 +126,7 @@
 | `Services/RotatingContentService.cs` | `players/{uid}/rotatingContent` | Read (restaurar compras) |
 | `Features/Monetization/Shop/WelcomePackService.cs` | `players/{uid}/welcomePacks` | Read (restaurar firstLogin + flags de compra) |
 
-### Paths en la base de datos
+### Paths activos en la base de datos
 ```
 players/{userId}                         → perfil completo
 players/{userId}/equippedBattleCard      → BattleCard activa
@@ -123,7 +135,6 @@ players/{userId}/rotatingContent         → contenido rotativo comprado
 players/{userId}/welcomePacks            → estado Welcome Packs
 players/{userId}/equippedBackground      → fondo de perfil activo
 players/{userId}/ownedBackgrounds        → fondos desbloqueados
-players/{userId}/equippedTheme           → tema activo
 players/{userId}/equippedEmotes          → emotes equipados
 players/{userId}/ownedEmotePacks         → packs de emotes
 players/{userId}/equippedVictoryEffect   → efecto de victoria
@@ -132,7 +143,7 @@ players/{userId}/equippedTitle           → título activo
 players/{userId}/ownedTitles             → títulos desbloqueados
 players/{userId}/equippedFrame           → marco de perfil
 players/{userId}/ownedFrames             → marcos desbloqueados
-players/{userId}/premium                 → estado premium (tournaments, cashBattle, stylesPro)
+players/{userId}/premium                 → estado premium
 players/{userId}/notifications/stored    → notificaciones persistidas
 leaderboards/global                      → ranking global
 leaderboards/country                     → ranking por país
@@ -144,11 +155,13 @@ notifications/{userId}                   → notificaciones in-app
 friends/{userId}                         → lista de amigos
 tournamentHistory/{userId}               → historial de torneos
 ratelimits/{uid}/lastScoreSubmit         → rate-limiting anti-cheat
-matchmaking_queue/{gameKey}/{entryKey}   → cola de matchmaking
-active_matches/{matchId}                 → partidas en curso (1v1)
+matchmaking_queue/{gameKey}/{entryKey}   → cola de matchmaking (1v1 normal)
+active_matches/{matchId}                 → partidas en curso (1v1 normal)
 ```
 
-### B — Via DatabaseService.Instance (34 archivos)
+> **Eliminados**: `players/{userId}/equippedTheme`, `players/{userId}/premium/cashBattle`, `cash_scores/{uid}`
+
+### B — Via DatabaseService.Instance
 | Archivo | Qué escribe / lee |
 |---|---|
 | `Core/Boot/BootManager.cs` | Carga perfil inicial |
@@ -171,7 +184,6 @@ active_matches/{matchId}                 → partidas en curso (1v1)
 | `Features/Social/Friends/FriendRequestsSceneManager.cs` | Solicitudes de amistad |
 | `Features/Tournaments/TournamentManager.cs` | CRUD torneos |
 | `Features/Tournaments/TournamentLobbyManager.cs` | Estado lobby |
-| `Features/CashBattle/Profile/CashProfileSceneController.cs` | Perfil CashBattle |
 | `Features/Cosmetics/Backgrounds/BackgroundPatternManager.cs` | Sync/restore fondo equipado |
 | `Features/Cosmetics/BattleCards/BattleCardService.cs` | Sync BattleCard equipada |
 | `Services/AchievementService.cs` | Persiste logros |
@@ -185,7 +197,6 @@ active_matches/{matchId}                 → partidas en curso (1v1)
 | `Services/NotificationStorageService.cs` | Persiste notificaciones leídas |
 | `Services/RotatingContentService.cs` | Sync contenido rotativo |
 | `Services/AvatarService.cs` | Guarda avatarUrl tras upload |
-| `Themes/ThemeManager.cs` | Sync tema activo |
 | `Services/PaymentBridgeWiring.cs` | Wirea `UpdatePlayerFields` delegate |
 
 ---
@@ -241,7 +252,9 @@ active_matches/{matchId}                 → partidas en curso (1v1)
 | `rotating_content_purchased` | RotatingContentService |
 | `welcome_pack_purchased` | WelcomePackService |
 
-### B — Via AnalyticsService.Instance (24 archivos)
+> **Eliminados**: `cash_matched`, `cash_won`, `cash_lost`, eventos de wallet/transacciones CashBattle
+
+### B — Via AnalyticsService.Instance
 | Archivo | Qué loguea |
 |---|---|
 | `Core/Boot/BootManager.cs` | `screen_view` en arranque |
@@ -261,32 +274,12 @@ active_matches/{matchId}                 → partidas en curso (1v1)
 | `Services/DailyOfferService.cs` | oferta aceptada |
 | `Services/RotatingContentService.cs` | `rotating_content_purchased` |
 | `Services/FriendService.cs` | friend events |
-| `Features/CashBattle/Wallet/WalletManager.cs` | transacciones wallet |
-| `Features/CashBattle/Hub/CashMatchmakingManager.cs` | carga avatares propio + oponente |
 | `Services/PaymentBridgeWiring.cs` | wirea LogCustomEvent + LogPurchaseCompleted delegates |
 | `Editor/Tools/DebugMenuEditor.cs` | test event manual (solo Editor) |
 
 ---
 
-## 6. FIREBASE REMOTE CONFIG
-
-**`Payments/FeatureFlags/RemoteConfigService.cs`** — `#if FIREBASE_REMOTE_CONFIG`
-- `Firebase.RemoteConfig` → `FetchAsync()`, `ActivateAsync()`, `GetValue().StringValue / BooleanValue`
-- Polling cada 15 min, timeout 10s
-- Fallback: `LocalFlagCache` (JSON local) si no está instalado
-
-| Key | Tipo | Valor |
-|---|---|---|
-| `payment_provider` | string | `stripe` / `apple_iap` |
-| `stripe_enabled` | bool | — |
-| `apple_iap_enabled` | bool | — |
-| `triumph_enabled` | bool | — |
-| `maintenance_mode` | bool | — |
-| `app_version` | string | versión mínima |
-
----
-
-## 7. FIREBASE CRASHLYTICS
+## 6. FIREBASE CRASHLYTICS
 
 **Guard**: `#if FIREBASE_CRASHLYTICS`
 - Solo en `Services/Firebase/AuthenticationService.cs`: `Crashlytics.SetUserId(userId)` al login/registro
@@ -294,182 +287,78 @@ active_matches/{matchId}                 → partidas en curso (1v1)
 
 ---
 
-## 8. FIRESTORE (Solo backend Node.js)
+## 7. FIRESTORE (Solo backend Node.js)
 
 NO se usa desde Unity. Solo en `functions/src/index.ts`:
 
 | Colección | Qué guarda |
 |---|---|
-| `entitlements/{userId}/{productId}` | Grants de productos |
-| `payment_config/admin` | adminKey abort protocol |
-| `payment_config/active` | Proveedor activo |
+| `entitlements/{userId}/{productId}` | Grants de productos IAP |
+
+> **Eliminados**: `payment_config/admin` (adminKey Stripe abort), `payment_config/active` (provider activo Stripe/Triumph)
 
 ---
 
-## 9. CLOUD FUNCTIONS (Backend Node.js)
+## 8. CLOUD FUNCTIONS (Backend Node.js)
 
 **`functions/src/index.ts`** — Firebase Admin SDK, región `us-central1`
 
 | Endpoint | Auth | Descripción |
 |---|---|---|
-| `stripeCreateCheckout` | ✅ Firebase token | Crea sesión Stripe |
-| `stripeWebhook` | ✅ Stripe signature | Recibe eventos Stripe |
-| `stripeSessionStatus` | ⚠️ Sin auth | Polling estado sesión |
-| `iapValidateReceipt` | ✅ Firebase token | Valida receipts Apple |
-| `getEntitlements` | ✅ Firebase token | Obtiene entitlements |
-| `checkEntitlement` | ✅ Firebase token | Verifica producto |
+| `iapValidateReceipt` | ✅ Firebase token | Valida receipts Apple IAP |
+| `getEntitlements` | ✅ Firebase token | Obtiene entitlements del usuario |
+| `checkEntitlement` | ✅ Firebase token | Verifica producto específico |
 | `syncEntitlements` | ✅ Firebase token | Sync bidireccional |
-| `adminForceSwitch` | ✅ adminKey Firestore | Abort protocol. Fail-closed. Slack alert. |
+| `paymentsHealth` | — | Health check |
 | `validateScore` | ✅ Firebase token | Anti-cheat + rate limit (1/30s/user) |
 | `deleteUserData` | ✅ Firebase token | GDPR: elimina todos los datos |
-| `paymentsHealth` | — | Health check |
+
+> **Eliminados**: `stripeCreateCheckout`, `stripeWebhook`, `stripeSessionStatus`, `adminForceSwitch`, `submitCashScore`
 
 ### C — Clientes HTTP de Cloud Functions (sin Firebase SDK)
-| Archivo | Endpoint | Método |
-|---|---|---|
-| `Payments/AppleIAP/AppleReceiptValidator.cs` | `iapValidateReceiptUrl` | POST JSON |
-| `Payments/Stripe/StripeSessionPoller.cs` | `stripeSessionStatusUrl` | GET polling |
-| `Payments/Entitlements/EntitlementService.cs` | `syncEntitlementsUrl` | Via delegate |
+| Archivo | Endpoint |
+|---|---|
+| `Payments/AppleIAP/AppleReceiptValidator.cs` | `iapValidateReceiptUrl` |
+| `Payments/Entitlements/EntitlementService.cs` | `syncEntitlementsUrl` |
 
 ---
 
-## 10. MODELOS DE DATOS PARA FIREBASE
-
-Estos archivos **no usan el SDK** pero definen las estructuras serializadas a/desde Firebase DB:
+## 9. MODELOS DE DATOS PARA FIREBASE
 
 | Archivo | Qué define |
 |---|---|
-| `Runtime/Data/PlayerData.cs` | Modelo completo del jugador. `ToFirebaseDictionary()` para serializar. Todos los campos van a `players/{userId}`. |
+| `Runtime/Data/PlayerData.cs` | Modelo completo del jugador. `ToFirebaseDictionary()` para serializar. |
 | `Runtime/Data/TournamentData.cs` | Modelo de torneo. `ToDictionary()` para serializar a `tournaments/{id}`. |
 
 ---
 
-## 11. INFRAESTRUCTURA DE SOPORTE (sin Firebase real)
+## 10. INFRAESTRUCTURA DE SOPORTE (sin Firebase real)
 
 | Archivo | Relación con Firebase |
 |---|---|
-| `Services/UnityMainThreadDispatcher.cs` | Marshaliza callbacks de Firebase/FCM (que llegan en background threads) al main thread. Mencionado en comentario únicamente — no usa SDK. |
-| `Payments/Core/PaymentConfig.cs` | Stores URLs de Cloud Functions. Solo strings. |
-| `Payments/Core/PaymentBridge.cs` | Delegates bridge para desacoplar el sistema de pagos del Firebase SDK. |
-| `Services/PaymentBridgeWiring.cs` | Conecta `PaymentBridge` delegates con AuthService, AnalyticsService, DatabaseService, CurrencyManager, DeepLinkService reales. Usa `using DigitPark.Services.Firebase`. |
-| `Payments/Core/PaymentManager.cs` | Usa `EntitlementService.Instance` + `PaymentBridge` delegates. Toca Firebase indirectamente vía la cadena: PaymentBridge → PaymentBridgeWiring → DatabaseService/AnalyticsService. |
-| `Payments/Stripe/StripeCheckoutController.cs` | Usa `PaymentBridge` delegates (LogCustomEvent, ProcessGemsPurchase). Firebase indirecto via wiring. |
-| `Payments/Abort/StripeAbortProtocol.cs` | Usa `PaymentBridge` delegates (LogCustomEvent). Firebase indirecto via wiring. |
-| `Services/DeepLinkService.cs` | Lee `AuthenticationService.Instance` para obtener uid en deep links. |
-| `Services/ATTService.cs` | Menciona "antes de inicializar Firebase Analytics" en comentario. No usa SDK. |
-| `Features/Social/Notifications/NotificationsManager.cs` | Tiene `using DigitPark.Services.Firebase;` como **import muerto** — nunca llama ningún servicio Firebase. Grep confirmado. |
+| `Services/UnityMainThreadDispatcher.cs` | Marshaliza callbacks de Firebase/FCM (background threads) al main thread |
+| `Payments/Core/PaymentConfig.cs` | Stores URLs de Cloud Functions |
+| `Payments/Core/PaymentBridge.cs` | Delegates bridge para desacoplar sistema de pagos del Firebase SDK |
+| `Services/PaymentBridgeWiring.cs` | Conecta PaymentBridge delegates con AuthService, AnalyticsService, DatabaseService |
+| `Services/DeepLinkService.cs` | Lee `AuthenticationService.Instance` para obtener uid en deep links |
+| `Services/ATTService.cs` | Menciona "antes de inicializar Firebase Analytics" en comentario |
 
 ---
 
-## 12. HERRAMIENTAS DE EDITOR (no van en APK/IPA)
+## 11. HERRAMIENTAS DE EDITOR (no van en APK/IPA)
 
 | Archivo | Uso Firebase |
 |---|---|
-| `Editor/Tools/DebugMenuEditor.cs` | Pestaña "Firebase" en el debug menu: muestra uid, FCM token, lanza test events de Analytics. Usa `Services.Firebase.*` en tiempo de Editor. |
-| `Editor/Tools/FolderReorgMigration.cs` | Herramienta de migración de carpetas. Solo menciona paths de Firebase para reorganizar. No usa SDK. |
-| `DevTools/DebugManager.cs` | Pestaña Firebase en runtime debug overlay. Usa `AuthService`, `AnalyticsService`, `DatabaseService`. |
+| `Editor/Tools/DebugMenuEditor.cs` | Pestaña "Firebase": muestra uid, FCM token, test events de Analytics |
+| `DevTools/DebugManager.cs` | Pestaña Firebase en runtime debug overlay |
 
 ---
 
-## 13. INVENTARIO COMPLETO — TODOS LOS ARCHIVOS
+## 12. NOTAS DE SEGURIDAD
 
-### Nivel A: Firebase SDK directo (13 archivos)
-```
-Services/Firebase/
-├── AuthenticationService.cs     → Auth + Crashlytics (opcional)
-├── DatabaseService.cs           → Realtime Database (servicio central)
-├── NotificationService.cs       → FCM (#if FIREBASE_MESSAGING)
-└── AnalyticsService.cs          → Analytics
-
-Services/
-├── MatchmakingService.cs        → Auth (read) + Realtime Database directa
-├── AvatarService.cs             → Firebase Storage
-└── RotatingContentService.cs    → Realtime Database directa
-
-Features/Cosmetics/BattleCards/
-└── BattleCardService.cs         → Realtime Database directa
-
-Features/Monetization/Shop/
-└── WelcomePackService.cs        → Realtime Database directa
-
-Core/Boot/
-└── BootManager.cs               → Init Firebase + usa Auth + DB + FCM + Analytics
-
-Features/Monetization/
-├── DailyMissions/DailyMissionsManager.cs  → DB directa (usando Firebase namespace)
-├── DailyRewards/DailyRewardsManager.cs    → DB directa
-└── Currency/CurrencyManager.cs            → DB directa
-
-Payments/FeatureFlags/
-└── RemoteConfigService.cs       → Remote Config (#if FIREBASE_REMOTE_CONFIG)
-```
-
-### Nivel B: Via service wrappers (42 archivos)
-```
-Auth consumers:          LoginManager, RegisterManager, ForgotPasswordPopup
-Game consumers:          MinigameBase, GameSessionManager, GameSelectorManager,
-                         MatchmakingManager, PlayModeSelectionManager, DigitRushController
-                         ⚠️ FlashTap/MemoryPairs/OddOneOut/QuickMath NO usan Firebase —
-                            delegan score/resultados a GameSessionManager/MinigameBase
-Results:                 OnlineResultManager
-                         ⚠️ SprintSummaryPanelController NO usa Firebase — confirmado por grep
-Monetization:            PlayerProgressionSystem, PremiumManager, DailyOfferService
-Social:                  ProfileManager, LeaderboardManager, FriendsManager,
-                         SearchPlayersManager, FriendRequestsSceneManager,
-                         FriendService
-                         ⚠️ NotificationsManager tiene import muerto (using DigitPark.Services.Firebase)
-                            pero NUNCA llama ningún servicio Firebase — no es consumer real
-Tournaments:             TournamentManager, TournamentLobbyManager
-                         ⚠️ TournamentsBrowserManager y TournamentCreateManager NO usan Firebase
-CashBattle:              CashProfileSceneController, WalletManager, CashMatchmakingManager
-Settings:                SettingsManager
-MainMenu:                MainMenuManager
-Cosmetics:               BackgroundPatternManager
-Themes:                  ThemeManager
-Services cosmetics:      EmoteService, VictoryEffectService, PlayerTitleService,
-                         PlayerFrameService, NotificationStorageService
-Payments (wiring):       PaymentBridgeWiring, EntitlementService
-UI:                      AvatarUI, LeaderboardEntryUI, TournamentMyItemUI
-Debug:                   DebugManager
-Deep links:              DeepLinkService
-```
-
-### Nivel C: HTTP a Cloud Functions (3 archivos)
-```
-Payments/AppleIAP/AppleReceiptValidator.cs
-Payments/Stripe/StripeSessionPoller.cs
-Payments/Entitlements/EntitlementService.cs
-```
-
-### Nivel D: Modelos de datos (2 archivos)
-```
-Data/PlayerData.cs
-Data/TournamentData.cs
-```
-
-### Nivel E: Solo infraestructura/comentarios (5 archivos)
-```
-Services/UnityMainThreadDispatcher.cs
-Services/ATTService.cs
-Payments/Core/PaymentConfig.cs
-Payments/Core/PaymentBridge.cs
-Editor/Tools/FolderReorgMigration.cs
-```
-
-### Backend
-```
-functions/src/index.ts   → Cloud Functions + Admin SDK + Firestore
-```
-
----
-
-## 14. NOTAS DE SEGURIDAD
-
-1. **`stripeSessionStatus`**: sin auth — session IDs opacos, riesgo bajo pero documentado.
-2. **Firebase Storage rules**: deben permitir solo `auth.uid == userId` para `avatars/{userId}/*`.
-3. **GDPR gap**: `deleteUserData` Cloud Function elimina DB pero NO avatares en Storage. Pendiente.
-4. **FCM**: desactivado en Editor (`#if !UNITY_EDITOR`).
-5. **Remote Config**: fallback a `LocalFlagCache` si SDK no instalado. Sin crash.
-6. **Anti-cheat doble**: MinigameBase (cliente) + Cloud Function `validateScore` (servidor, 1 submit/30s).
-7. **Crashlytics**: no activo por defecto — requiere `FIREBASE_CRASHLYTICS` en Player Settings.
-8. **MatchmakingService**: usa `ValueChanged` listener en tiempo real — limpiar con `UnsubscribeOpponentListener()` en `OnDestroy` y `OnApplicationQuit`. Ya implementado.
+1. **Firebase Storage rules**: deben permitir solo `auth.uid == userId` para `avatars/{userId}/*`.
+2. **GDPR gap**: `deleteUserData` Cloud Function elimina DB pero NO avatares de Storage. Pendiente.
+3. **FCM**: desactivado en Editor (`#if !UNITY_EDITOR`).
+4. **Anti-cheat doble**: MinigameBase (cliente) + Cloud Function `validateScore` (servidor, 1 submit/30s).
+5. **Crashlytics**: no activo por defecto — requiere `FIREBASE_CRASHLYTICS` en Player Settings.
+6. **MatchmakingService**: usa `ValueChanged` listener en tiempo real — limpiar con `UnsubscribeOpponentListener()` en `OnDestroy` y `OnApplicationQuit`. Ya implementado.

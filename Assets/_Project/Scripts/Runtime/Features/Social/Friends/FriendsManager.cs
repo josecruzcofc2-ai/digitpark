@@ -10,7 +10,6 @@ using DigitPark.Data;
 using DigitPark.UI;
 using DigitPark.UI.Components;
 using DigitPark.Localization;
-using DigitPark.Themes;
 using DG.Tweening;
 using DigitPark.Animations;
 
@@ -167,13 +166,9 @@ namespace DigitPark.Managers
             SetupFriendCard(card, friend);
 
             // Apply theme to card
-            card.AddComponent<ThemeApplier>().Configure(ThemeApplier.ElementType.CardBackground, true, false);
             var usernameGO = card.transform.Find("InfoSection/Username")?.gameObject;
-            if (usernameGO != null) usernameGO.AddComponent<ThemeApplier>().Configure(ThemeApplier.ElementType.TextPrimary, false, true);
             var statsGO = card.transform.Find("InfoSection/StatsText")?.gameObject;
-            if (statsGO != null) statsGO.AddComponent<ThemeApplier>().Configure(ThemeApplier.ElementType.TextSecondary, false, true);
             var statusGO = card.transform.Find("InfoSection/StatusText")?.gameObject;
-            if (statusGO != null) statusGO.AddComponent<ThemeApplier>().Configure(ThemeApplier.ElementType.TextSecondary, false, true);
 
             // Animacion de entrada staggered
             int index = currentCards.Count - 1;

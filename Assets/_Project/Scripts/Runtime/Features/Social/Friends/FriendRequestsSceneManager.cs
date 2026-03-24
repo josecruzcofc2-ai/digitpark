@@ -9,7 +9,6 @@ using DigitPark.Services.Firebase;
 using DigitPark.Data;
 using DigitPark.UI.Components;
 using DigitPark.Localization;
-using DigitPark.Themes;
 using DG.Tweening;
 
 namespace DigitPark.Managers
@@ -104,16 +103,17 @@ namespace DigitPark.Managers
             showingReceived = received;
 
             // Update tab visuals
-            var theme = ThemeManager.Instance?.CurrentTheme;
+            Color activeColor = Color.cyan;
+            Color inactiveColor = Color.gray;
             if (receivedTabBg != null)
-                receivedTabBg.color = received ? (theme?.tabActive ?? Color.cyan) : (theme?.tabInactive ?? Color.gray);
+                receivedTabBg.color = received ? activeColor : inactiveColor;
             if (receivedTabText != null)
-                receivedTabText.color = received ? (theme?.textOnPrimary ?? Color.black) : (theme?.textSecondary ?? Color.gray);
+                receivedTabText.color = received ? Color.black : Color.gray;
 
             if (sentTabBg != null)
-                sentTabBg.color = received ? (theme?.tabInactive ?? Color.gray) : (theme?.tabActive ?? Color.cyan);
+                sentTabBg.color = received ? inactiveColor : activeColor;
             if (sentTabText != null)
-                sentTabText.color = received ? (theme?.textSecondary ?? Color.gray) : (theme?.textOnPrimary ?? Color.black);
+                sentTabText.color = received ? Color.gray : Color.black;
 
             LoadRequests();
         }
@@ -182,17 +182,11 @@ namespace DigitPark.Managers
             SetupRequestItem(item, request);
 
             // Apply theme to request item
-            item.AddComponent<ThemeApplier>().Configure(ThemeApplier.ElementType.CardBackground, true, false);
             var usernameGO = item.transform.Find("InfoSection/Username")?.gameObject;
-            if (usernameGO != null) usernameGO.AddComponent<ThemeApplier>().Configure(ThemeApplier.ElementType.TextPrimary, false, true);
             var timestampGO = item.transform.Find("InfoSection/TimestampText")?.gameObject;
-            if (timestampGO != null) timestampGO.AddComponent<ThemeApplier>().Configure(ThemeApplier.ElementType.TextSecondary, false, true);
             var acceptGO = item.transform.Find("ButtonsRow/AcceptButton")?.gameObject;
-            if (acceptGO != null) acceptGO.AddComponent<ThemeApplier>().Configure(ThemeApplier.ElementType.ButtonSuccess, true, false);
             var rejectGO = item.transform.Find("ButtonsRow/RejectButton")?.gameObject;
-            if (rejectGO != null) rejectGO.AddComponent<ThemeApplier>().Configure(ThemeApplier.ElementType.ButtonDanger, true, false);
             var cancelGO = item.transform.Find("ButtonsRow/CancelButton")?.gameObject;
-            if (cancelGO != null) cancelGO.AddComponent<ThemeApplier>().Configure(ThemeApplier.ElementType.ButtonSecondary, true, false);
 
             // Animacion de entrada staggered
             int index = currentItems.Count - 1;

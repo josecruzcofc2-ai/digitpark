@@ -356,7 +356,7 @@ namespace DigitPark.Managers
             if (!string.IsNullOrEmpty(tournamentId))
                 PlayerPrefs.SetString("DP_OpenTournamentId", tournamentId);
 
-            UnityEngine.SceneManagement.SceneManager.LoadScene("CashBattleHub");
+            UnityEngine.SceneManagement.SceneManager.LoadScene("MainMenu");
         }
 
         private void ClaimDailyReward()

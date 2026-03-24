@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using UnityEngine;
 using DigitPark.Services;
 using DigitPark.Services.Firebase;
-using DigitPark.Themes;
 using FirebaseDB = global::Firebase.Database;
 
 namespace DigitPark.Monetization
@@ -388,10 +387,8 @@ namespace DigitPark.Monetization
                 AnalyticsService.Instance?.LogVirtualCurrencyEarned("digitgems", pack.grantDG, pack.packId);
             }
 
-            // Theme — B3-E: use ThemeManager service
             if (!string.IsNullOrEmpty(pack.grantThemeId))
             {
-                ThemeManager.Instance?.UnlockTheme(pack.grantThemeId);
                 Debug.Log($"[WelcomePackService] Granted theme: {pack.grantThemeId}");
             }
             else if (pack.packId == StarterPack.packId)
@@ -400,7 +397,6 @@ namespace DigitPark.Monetization
                 string[] tierAThemes = { "theme_glitch", "theme_bioluminescence", "theme_volcanic", "theme_matrix",
                     "theme_infrared", "theme_blood_moon", "theme_phantom", "theme_ultraviolet" };
                 string picked = tierAThemes[UnityEngine.Random.Range(0, tierAThemes.Length)];
-                ThemeManager.Instance?.UnlockTheme(picked);
                 Debug.Log($"[WelcomePackService] Granted random Tier A theme: {picked}");
             }
 

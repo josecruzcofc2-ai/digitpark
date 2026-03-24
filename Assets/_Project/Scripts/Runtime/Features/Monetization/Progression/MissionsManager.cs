@@ -101,12 +101,6 @@ namespace DigitPark.Progression
             new MissionTemplate("weekly_streak", "Weekly Streak", "Get a 3-win streak", MissionType.WinStreak, 3,
                 new MissionReward(350, 800, 15)),
 
-            // Cash Battle
-            new MissionTemplate("weekly_cash_1", "Weekly Bettor", "Complete 1 Cash Battle", MissionType.PlayCashBattle, 1,
-                new MissionReward(300, 500, 20)),
-            new MissionTemplate("weekly_cash_3", "High Stakes", "Complete 3 Cash Battles", MissionType.PlayCashBattle, 3,
-                new MissionReward(500, 1000, 40)),
-
             // Tournament
             new MissionTemplate("weekly_tournament", "Competitor", "Participate in a tournament", MissionType.PlayTournament, 1,
                 new MissionReward(400, 1000, 25)),
@@ -129,12 +123,6 @@ namespace DigitPark.Progression
                 new MissionReward(3000, 7500, 150)),
             new MissionTemplate("season_wins_250", "Season Legend", "Win 250 matches", MissionType.WinGames, 250,
                 new MissionReward(5000, 15000, 300)),
-
-            // Cash Battle
-            new MissionTemplate("season_cash_10", "Serious Bettor", "Win 10 Cash Battles", MissionType.WinCashBattle, 10,
-                new MissionReward(2000, 5000, 100)),
-            new MissionTemplate("season_cash_25", "Cash Pro", "Win 25 Cash Battles", MissionType.WinCashBattle, 25,
-                new MissionReward(4000, 10000, 200)),
 
             // Tournament
             new MissionTemplate("season_tournament_3", "Elite Competitor", "Participate in 3 tournaments", MissionType.PlayTournament, 3,
@@ -260,7 +248,7 @@ namespace DigitPark.Progression
         /// <summary>
         /// Report a game played
         /// </summary>
-        public void ReportGamePlayed(string gameId, bool isWin, int score, float precision, bool isCashBattle)
+        public void ReportGamePlayed(string gameId, bool isWin, int score, float precision)
         {
             UpdateMissions(MissionType.PlayGames, 1);
 
@@ -280,15 +268,6 @@ namespace DigitPark.Progression
             if (precision >= 0.8f)
             {
                 UpdateMissions(MissionType.PrecisionGame, 1);
-            }
-
-            if (isCashBattle)
-            {
-                UpdateMissions(MissionType.PlayCashBattle, 1);
-                if (isWin)
-                {
-                    UpdateMissions(MissionType.WinCashBattle, 1);
-                }
             }
 
             // Track which games have been played this week for "play all games"
@@ -573,8 +552,6 @@ namespace DigitPark.Progression
         ReachScore,         // Reach X score in single game
         TotalScore,         // Accumulate X total score
         PrecisionGame,      // Complete game with X% precision
-        PlayCashBattle,     // Play X cash battles
-        WinCashBattle,      // Win X cash battles
         PlayTournament,     // Participate in X tournaments
         WinTournament,      // Win X tournaments
         EarnXP,             // Earn X XP

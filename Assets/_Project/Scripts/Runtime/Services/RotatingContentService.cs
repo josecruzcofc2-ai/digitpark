@@ -334,11 +334,7 @@ namespace DigitPark.Services
                     break;
 
                 case RotatingContentType.LimitedThemeVariant:
-                    var themeManager = DigitPark.Themes.ThemeManager.Instance;
-                    if (themeManager != null)
-                        themeManager.UnlockTheme(item.itemId);
-                    else
-                        PlayerPrefs.SetInt($"OwnedTheme_{item.itemId}", 1);
+                    PlayerPrefs.SetInt($"OwnedTheme_{item.itemId}", 1);
                     break;
             }
             PlayerPrefs.Save();

@@ -55,17 +55,6 @@ namespace DigitPark.Editor
             "Assets/_Project/Scenes/Monetization/Achievements.unity",
 
             // ── 11 Real money scenes (gold tint applied at runtime) ─────────────
-            "Assets/_Project/Scenes/Auth/AgeVerification.unity",
-            "Assets/_Project/Scenes/CashBattle/CashBattleHub.unity",
-            "Assets/_Project/Scenes/CashBattle/CashBattle1v1.unity",
-            "Assets/_Project/Scenes/CashBattle/CashHistory.unity",
-            "Assets/_Project/Scenes/CashBattle/CashMatchmaking.unity",
-            "Assets/_Project/Scenes/CashBattle/CashProfile.unity",
-            "Assets/_Project/Scenes/CashBattle/CashTournaments/CashTournamentCreate.unity",
-            "Assets/_Project/Scenes/CashBattle/CashTournaments/CashTournamentLobby.unity",
-            "Assets/_Project/Scenes/CashBattle/CashTournaments/CashTournaments.unity",
-            "Assets/_Project/Scenes/CashBattle/CashWallet.unity",
-            "Assets/_Project/Scenes/Onboarding/CashBattleOnboarding.unity",
         };
 
         // ==================== Menu items ====================
@@ -86,16 +75,22 @@ namespace DigitPark.Editor
         [MenuItem("DigitPark/Backgrounds/Add Pattern Layer to All Scenes")]
         public static void AddPatternLayerToAllScenes()
         {
-            // Prompt to save current scene first
+            // Save current scene if dirty before iterating
             if (EditorSceneManager.GetActiveScene().isDirty)
             {
-                bool save = EditorUtility.DisplayDialog(
-                    "Unsaved Changes",
-                    "The active scene has unsaved changes. Save before proceeding?",
-                    "Save & Continue", "Cancel");
-
-                if (!save) return;
-                EditorSceneManager.SaveScene(EditorSceneManager.GetActiveScene());
+                if (AllScenesBatchBuilder.SilentMode)
+                {
+                    EditorSceneManager.SaveScene(EditorSceneManager.GetActiveScene());
+                }
+                else
+                {
+                    bool save = EditorUtility.DisplayDialog(
+                        "Unsaved Changes",
+                        "The active scene has unsaved changes. Save before proceeding?",
+                        "Save & Continue", "Cancel");
+                    if (!save) return;
+                    EditorSceneManager.SaveScene(EditorSceneManager.GetActiveScene());
+                }
             }
 
             int added    = 0;
@@ -125,13 +120,14 @@ namespace DigitPark.Editor
                 }
             }
 
-            EditorUtility.DisplayDialog(
-                "BackgroundPattern Setup Complete",
-                $"Finished!\n\n" +
-                $"  Added:    {added} scenes\n" +
-                $"  Skipped:  {skipped} (already existed)\n" +
-                $"  Missing:  {notFound} (path not found — check log)",
-                "OK");
+            if (!AllScenesBatchBuilder.SilentMode)
+                EditorUtility.DisplayDialog(
+                    "BackgroundPattern Setup Complete",
+                    $"Finished!\n\n" +
+                    $"  Added:    {added} scenes\n" +
+                    $"  Skipped:  {skipped} (already existed)\n" +
+                    $"  Missing:  {notFound} (path not found — check log)",
+                    "OK");
         }
 
         // ==================== Core logic ====================
