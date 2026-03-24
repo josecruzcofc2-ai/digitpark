@@ -114,23 +114,16 @@ Para cada escena, seleccionar Canvas > Canvas Scaler y verificar:
 
 ---
 
-## Decisiones pendientes (bloquean tareas de código C-S15 y C-S16)
+## ~~Decisiones pendientes~~ ✅ RESUELTAS (C-S15 y C-S16 ejecutados)
 
-### 16. Decidir qué hace `_hasStylesPro` sin themes
-`PremiumManager.cs` tiene un bool `_hasStylesPro` que antes desbloqueaba temas visuales. El sistema de temas fue eliminado. Opciones:
-- **Opción A** — Repropósito: `StylesPro` ahora = bundle de Frames + Titles + WinEffects (cosmetics pack). Actualizar descriptions de `PremiumBundle` y `CompleteBundle` en consecuencia.
-- **Opción B** — Eliminar: quitar `_hasStylesPro`, `HasStylesPro`, `StylesPro` del enum, y limpiar referencias.
-- Impacto en código: `PremiumManager.cs`, `ShopManager.cs`, `ShopPremiumUIBuilder.cs`
-- **Una vez decidido → Claude ejecuta C-S15**
+### ~~16.~~ ✅ `_hasStylesPro` repropósito decidido
+- **Decisión**: Opción A — `StylesPro` = bundle de Frames + Titles + WinEffects
+- **Ejecutado**: C-S15 en PremiumManager.cs — descriptions actualizadas
 
-### 17. Decidir qué pasa con `ShopItemType.Theme` y `ShopItemType.Avatar`
-`ShopItemData.cs` tiene dos tipos de item que ya no funcionan:
-- `Theme` → `GrantRewards()` es empty break (no hace nada)
-- `Avatar` → marcado DEPRECATED, no-op con warning
-Opciones:
-- **Opción A** — Eliminar ambos del enum + remover casos en switch
-- **Opción B** — Dejar con `[Obsolete]` attribute + comentario
-- **Una vez decidido → Claude ejecuta C-S16**
+### ~~17.~~ ✅ `ShopItemType.Theme` y `ShopItemType.Avatar` eliminados
+- **Decisión**: Opción A — eliminados del enum + casos en switch removidos
+- **Ejecutado**: C-S16 en ShopItemData.cs
 
 *Actualizado 2026-03-24 — eliminado todo lo relacionado con Stripe, Triumph y CashBattle. Tarea #16 Multi-Accounting Detection eliminada (era exclusiva de CashBattle real-money). Cloud Functions list actualizada.*
 *Actualizado 2026-03-24 — añadidas 2 decisiones pendientes (#16 y #17) que bloquean tareas de código C-S15/C-S16 en TAREAS_CODIGO.md*
+*Actualizado 2026-03-24 — decisiones #16 y #17 resueltas y ejecutadas (C-S15/C-S16 completados en V56)*

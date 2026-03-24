@@ -58,51 +58,16 @@ Estas tareas tienen implementacion directa en codigo C# o TypeScript.
 
 ---
 
-## BLOQUE 5 — Post-Simplificación Cleanup (PENDIENTE)
+## BLOQUE 5 — Post-Simplificación Cleanup ✅ COMPLETADO
 
-### C-S13. AppleReceiptValidator.cs — Fix compile error P0
-- **Archivo**: `Scripts/Runtime/Payments/AppleIAP/AppleReceiptValidator.cs` línea 76
-- **Issue**: `Compliance.VersionGuard.GetRequiredAppVersionHeader()` — VersionGuard.cs fue eliminado, esto rompe la compilación
-- **Fix**: Reemplazar por `Application.version`
-- **Prioridad**: P0 — bloquea build
-
-### C-S14. PaymentConfig.cs — Eliminar campos Stripe muertos
-- **Archivo**: `Scripts/Runtime/Payments/Core/PaymentConfig.cs`
-- **Issue**: 7 campos muertos: `stripePublishableKey`, `stripeCreateCheckoutUrl`, `stripeSessionStatusUrl`, `stripeWebhookUrl`, `stripeCheckoutTimeoutSeconds`, `stripePollingIntervalMs`, `maxStripeRetries` + header y comment de Stripe
-- **Fix**: Eliminar esos campos y sus headers `[Header("Stripe...")]`
-- **Prioridad**: P1
-
-### C-S15. PremiumManager.cs — Actualizar descripciones y limpiar `_hasStylesPro`
-- **Archivo**: `Scripts/Runtime/Payments/Core/PaymentConfig.cs`
-- **Issue**: `PremiumProduct.PremiumBundle` dice "15 premium themes", `CompleteBundle` dice "19 themes", `StylesPro` dice "Unlock all premium themes" — sistema de temas eliminado
-- **Fix**: Actualizar descriptions a lo que realmente desbloquean. `_hasStylesPro` se mantiene como "StylesPro = Frames + Titles + WinEffects bundle" (ver Tarea Manual #16)
-- **ESPERAR**: Tarea manual #16 (decisión sobre `_hasStylesPro`)
-- **Prioridad**: P1
-
-### C-S16. ShopItemData.cs — Cleanup `ShopItemType.Theme`
-- **Archivo**: `Scripts/Runtime/Features/Monetization/Shop/ShopItemData.cs`
-- **Issue**: `case ShopItemType.Theme:` en `GrantRewards()` es empty break — el tema no se otorga a nadie. `ShopItemType.Avatar` también es DEPRECATED no-op
-- **Fix**: Marcar `Theme` y `Avatar` como `[Obsolete]` o eliminarlos del enum tras confirmar que no hay items del catálogo activos de ese tipo
-- **ESPERAR**: Tarea manual #16 (decisión sobre cleanup de Theme enum)
-- **Prioridad**: P1
-
-### C-S17. AllScenesBatchBuilder.cs — Eliminar entradas stale
-- **Archivo**: `Scripts/Editor/Tools/AllScenesBatchBuilder.cs`
-- **Issue**: Línea 74 referencia `AgeVerification.unity` + `AgeVerificationUIBuilder` (ambos eliminados). Línea 133 referencia `CashTournamentResultsUIBuilder` (eliminado)
-- **Fix**: Eliminar ambas entradas `E(...)` de esas líneas
-- **Prioridad**: P2
-
-### C-S18. BuildScenesConfigurator.cs — Actualizar dialog string
-- **Archivo**: `Scripts/Editor/Core/BuildScenesConfigurator.cs` línea 284
-- **Issue**: String del dialog menciona `"[30-39] Cash Battle"` — esas escenas ya no existen
-- **Fix**: Eliminar esa línea del string del dialog
-- **Prioridad**: P2
-
-### C-S19. GameSessionManager.cs — Eliminar comentario stale
-- **Archivo**: `Scripts/Runtime/Features/Games/Core/GameSessionManager.cs` línea ~610
-- **Issue**: Comentario `"(Practice y Online, no CashBattle)"` — CashBattle ya no existe
-- **Fix**: Actualizar comentario
-- **Prioridad**: P2
+### ~~C-S13~~ ✅ AppleReceiptValidator.cs — Fix compile error (VersionGuard → Application.version)
+### ~~C-S14~~ ✅ PaymentConfig.cs — Campos Stripe muertos eliminados
+### ~~C-S15~~ ✅ PremiumManager.cs — Descripciones actualizadas (frames/titles/effects)
+### ~~C-S16~~ ✅ ShopItemData.cs — ShopItemType.Theme y Avatar eliminados del enum
+### ~~C-S17~~ ✅ AllScenesBatchBuilder.cs — Entradas AgeVerification y CashTournamentResults eliminadas
+### ~~C-S18~~ ✅ BuildScenesConfigurator.cs — Dialog string actualizado (Cash Battle eliminado)
+### ~~C-S19~~ ✅ GameSessionManager.cs — Comentario stale eliminado
 
 *Actualizado 2026-03-24 — Bloque 2 marcado completado (todos los archivos confirmados modificados en git)*
 *Actualizado 2026-03-24 — Bloque 5 añadido: 7 tareas de cleanup post-simplificación confirmadas contra código real*
+*Actualizado 2026-03-24 — Bloque 5 completado: C-S13→C-S19 ejecutados y commiteados en V56*
