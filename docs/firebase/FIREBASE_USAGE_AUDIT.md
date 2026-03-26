@@ -1,7 +1,7 @@
 # FIREBASE USAGE AUDIT — DigitPark
-> Generado: 2026-03-19 | **Actualizado post-simplificación V58: 2026-03-25**
-> CashBattle, Stripe, Triumph, Themes, RemoteConfig, DailyRewards, BattleCards eliminados.
-> Sistemas activos: Auth, Realtime Database, Storage, FCM, Analytics, Firestore (backend), Cloud Functions.
+> Generado: 2026-03-19 | **Actualizado V58: 2026-03-25**
+> Eliminados: CashBattle, Stripe, Triumph, Themes, RemoteConfig, DailyRewards, DailyMissions, BattleCards, Achievements, Tournaments, Friends, Notifications, Progression, VictoryEffects, PlayerTitles, BackgroundPatterns, DeepLink.
+> Sistemas activos: Auth, Realtime Database, Storage, Analytics, Firestore (backend), Cloud Functions.
 
 ---
 
@@ -10,34 +10,44 @@
 | Producto Firebase | Estado | Cómo se accede |
 |---|---|---|
 | Authentication | ✅ REAL | SDK directo (AuthenticationService) |
-| Realtime Database | ✅ REAL | SDK directo (DatabaseService) + accesos directos en 4 archivos |
-| Cloud Messaging (FCM) | ✅ REAL (#if guard) | SDK directo (NotificationService) |
+| Realtime Database | ✅ REAL | SDK directo (DatabaseService) + accesos directos en 2 archivos |
 | Analytics | ✅ REAL | SDK directo (AnalyticsService) |
 | Storage | ✅ REAL | SDK directo (AvatarService) |
 | Crashlytics | ⚙️ OPCIONAL (#if guard) | SDK directo en AuthenticationService |
 | Firestore | ✅ REAL (solo backend) | Firebase Admin SDK en index.ts |
 | Cloud Functions | ✅ REAL | Node.js backend + HTTP calls desde Unity |
+| Cloud Messaging (FCM) | ❌ ELIMINADO | NotificationService.cs eliminado en simplificación |
 | Remote Config | ❌ ELIMINADO | RemoteConfigService.cs eliminado en simplificación |
 
-**Total de archivos .cs con algún tipo de uso Firebase**: ~42 archivos
+**Total de archivos .cs con algún tipo de uso Firebase**: ~22 archivos
 **Simulación**: NO HAY. El fallback en Editor es PlayerPrefs local.
 
 ---
 
-## SISTEMAS ELIMINADOS EN SIMPLIFICACIÓN (2026-03-24)
+## SISTEMAS ELIMINADOS EN SIMPLIFICACIÓN
 
-Los siguientes sistemas y sus archivos Firebase fueron eliminados:
-- **CashBattle**: CashProfileSceneController, WalletManager, CashMatchmakingManager (Auth + DB + Analytics)
-- **Themes**: ThemeManager (DB sync de equippedTheme)
-- **Stripe**: StripePaymentProvider, StripeSessionPoller, StripeCheckoutController, StripeAbortProtocol (HTTP a Cloud Functions)
+### V56–V57 (2026-03-24)
+- **CashBattle**: CashProfileSceneController, WalletManager, CashMatchmakingManager
+- **Themes**: ThemeManager (DB sync equippedTheme)
+- **Stripe**: StripePaymentProvider, StripeSessionPoller, StripeCheckoutController, StripeAbortProtocol
 - **Triumph**: TriumphManager, TriumphServices
-- **Remote Config**: RemoteConfigService (Firebase Remote Config SDK)
+- **Remote Config**: RemoteConfigService
 - **Feature Flags**: LocalFlagCache, PaymentFeatureFlag
-- **ServiceLocator**: Eliminado (ya no hay interfaces CashBattle)
+- **Achievements**: AchievementService (DB: achievements/{userId})
+- **Tournaments**: TournamentManager, TournamentLobbyManager (DB: tournaments/, tournamentHistory/)
+- **Friends**: FriendsManager, SearchPlayersManager, FriendRequestsSceneManager, FriendService (DB: friends/)
+- **Notifications**: NotificationService (FCM), InAppNotificationManager, NotificationStorageService
+- **Progression**: PlayerProgressionSystem (DB: xp/level)
+- **VictoryEffects**: VictoryEffectService (DB: equippedVictoryEffect, ownedVictoryEffects)
+- **PlayerTitles**: PlayerTitleService (DB: equippedTitle, ownedTitles)
+- **BackgroundPatterns**: BackgroundPatternManager (DB: equippedBackground, ownedBackgrounds)
+- **DeepLink**: DeepLinkService
+- **UnityMainThreadDispatcher**: (ya no necesario, FCM eliminado)
 
-### V58 — 2026-03-25
-- **DailyRewards**: DailyRewardsManager, DailyRewardService (DB: dailyRewards, premium rewards)
+### V58 (2026-03-25)
+- **DailyRewards**: DailyRewardsManager, DailyRewardService (DB: dailyRewards)
 - **BattleCards**: BattleCardService (DB: equippedBattleCard, ownedBattleCards)
+- **DailyMissions**: DailyMissionsManager (DB: missions/)
 
 ---
 
@@ -78,32 +88,16 @@ Los siguientes sistemas y sus archivos Firebase fueron eliminados:
 | `Features/Games/Navigation/MatchmakingManager.cs` | Lee userId antes de buscar rival |
 | `Features/Games/Navigation/PlayModeSelectionManager.cs` | Lee perfil para mostrar datos |
 | `Features/Games/DigitRush/DigitRushController.cs` | Lee userId |
-| `Features/Monetization/DailyMissions/DailyMissionsManager.cs` | Lee userId |
-| `Features/Monetization/DailyRewards/DailyRewardsManager.cs` | Lee userId |
 | `Features/Monetization/Currency/CurrencyManager.cs` | Lee userId |
-| `Features/Monetization/Progression/PlayerProgressionSystem.cs` | Lee userId |
 | `Features/Monetization/Premium/PremiumManager.cs` | Lee userId + restaura estado premium |
 | `Features/Monetization/Shop/WelcomePackService.cs` | Lee userId |
 | `Features/MainMenu/MainMenuManager.cs` | Lee perfil para UI principal |
 | `Features/Settings/SettingsManager.cs` | Lee uid para logout/delete account |
 | `Features/Social/Profile/ProfileManager.cs` | Lee userId |
 | `Features/Social/Profile/LeaderboardManager.cs` | Lee userId para leaderboard |
-| `Features/Social/Friends/FriendsManager.cs` | Lee userId |
-| `Features/Social/Friends/SearchPlayersManager.cs` | Lee userId |
-| `Features/Social/Friends/FriendRequestsSceneManager.cs` | Lee userId |
-| `Features/Tournaments/TournamentManager.cs` | Lee userId |
-| `Features/Tournaments/TournamentLobbyManager.cs` | Lee userId |
-| `Features/Cosmetics/Backgrounds/BackgroundPatternManager.cs` | Lee uid para sync |
-| `Features/Cosmetics/BattleCards/BattleCardService.cs` | Lee uid para sync |
-| `Services/AchievementService.cs` | Lee userId |
-| `Services/DailyRewardService.cs` | Lee userId |
 | `Services/DailyOfferService.cs` | Lee userId |
-| `Services/FriendService.cs` | Lee userId |
 | `Services/EmoteService.cs` | Lee uid para sync |
-| `Services/VictoryEffectService.cs` | Lee uid para sync |
-| `Services/PlayerTitleService.cs` | Lee uid para sync |
 | `Services/PlayerFrameService.cs` | Lee uid para sync |
-| `Services/NotificationStorageService.cs` | Lee uid para sync |
 | `Services/RotatingContentService.cs` | Lee userId |
 | `Services/AvatarService.cs` | Lee playerData (incluye userId) |
 | `Services/PaymentBridgeWiring.cs` | Wirea `GetCurrentUserId` delegate |
@@ -126,44 +120,29 @@ Los siguientes sistemas y sus archivos Firebase fueron eliminados:
 |---|---|---|
 | `Services/MatchmakingService.cs` | `matchmaking_queue/{gameKey}` | Read/Write/Delete + `Push()` + `ServerValue.Timestamp` |
 | `Services/MatchmakingService.cs` | `active_matches/{matchId}` | Read/Write + `ValueChanged` listener en tiempo real |
-| `Features/Cosmetics/BattleCards/BattleCardService.cs` | `players/{uid}` | Read (equippedBattleCard, ownedBattleCards) |
 | `Services/RotatingContentService.cs` | `players/{uid}/rotatingContent` | Read (restaurar compras) |
 | `Features/Monetization/Shop/WelcomePackService.cs` | `players/{uid}/welcomePacks` | Read (restaurar firstLogin + flags de compra) |
 
 ### Paths activos en la base de datos
 ```
 players/{userId}                         → perfil completo
-players/{userId}/equippedBattleCard      → BattleCard activa
-players/{userId}/ownedBattleCards        → BattleCards desbloqueadas
 players/{userId}/rotatingContent         → contenido rotativo comprado
 players/{userId}/welcomePacks            → estado Welcome Packs
-players/{userId}/equippedBackground      → fondo de perfil activo
-players/{userId}/ownedBackgrounds        → fondos desbloqueados
 players/{userId}/equippedEmotes          → emotes equipados
 players/{userId}/ownedEmotePacks         → packs de emotes
-players/{userId}/equippedVictoryEffect   → efecto de victoria
-players/{userId}/ownedVictoryEffects     → efectos desbloqueados
-players/{userId}/equippedTitle           → título activo
-players/{userId}/ownedTitles             → títulos desbloqueados
 players/{userId}/equippedFrame           → marco de perfil
 players/{userId}/ownedFrames             → marcos desbloqueados
 players/{userId}/premium                 → estado premium
-players/{userId}/notifications/stored    → notificaciones persistidas
 leaderboards/global                      → ranking global
 leaderboards/country                     → ranking por país
-tournaments/{tournamentId}               → datos de torneos
 scores/{userId}                          → puntuaciones
 matchHistory/{userId}                    → historial de partidas
-achievements/{userId}                    → logros
-notifications/{userId}                   → notificaciones in-app
-friends/{userId}                         → lista de amigos
-tournamentHistory/{userId}               → historial de torneos
 ratelimits/{uid}/lastScoreSubmit         → rate-limiting anti-cheat
 matchmaking_queue/{gameKey}/{entryKey}   → cola de matchmaking (1v1 normal)
 active_matches/{matchId}                 → partidas en curso (1v1 normal)
 ```
 
-> **Eliminados**: `players/{userId}/equippedTheme`, `players/{userId}/premium/cashBattle`, `cash_scores/{uid}`
+> **Eliminados**: `players/{userId}/equippedTheme`, `players/{userId}/equippedBattleCard`, `players/{userId}/ownedBattleCards`, `players/{userId}/equippedVictoryEffect`, `players/{userId}/ownedVictoryEffects`, `players/{userId}/equippedTitle`, `players/{userId}/ownedTitles`, `players/{userId}/equippedBackground`, `players/{userId}/ownedBackgrounds`, `players/{userId}/notifications/stored`, `achievements/{userId}`, `notifications/{userId}`, `friends/{userId}`, `tournaments/{tournamentId}`, `tournamentHistory/{userId}`, `cash_scores/{uid}`
 
 ### B — Via DatabaseService.Instance
 | Archivo | Qué escribe / lee |
@@ -174,31 +153,15 @@ active_matches/{matchId}                 → partidas en curso (1v1 normal)
 | `Features/Games/Core/GameSessionManager.cs` | Guarda resultados de partida |
 | `Features/Games/Core/MinigameBase.cs` | Submit score |
 | `Features/Games/DigitRush/DigitRushController.cs` | Score específico |
-| `Features/Monetization/DailyMissions/DailyMissionsManager.cs` | Progreso misiones |
-| `Features/Monetization/DailyRewards/DailyRewardsManager.cs` | Estado recompensas diarias |
 | `Features/Monetization/Currency/CurrencyManager.cs` | Guarda monedas/gemas |
-| `Features/Monetization/Progression/PlayerProgressionSystem.cs` | XP + nivel |
 | `Features/Monetization/Premium/PremiumManager.cs` | Sync + restore estado premium |
 | `Features/Monetization/Shop/WelcomePackService.cs` | Escribe welcomePacks/* |
 | `Features/MainMenu/MainMenuManager.cs` | Lee perfil para UI |
 | `Features/Social/Profile/ProfileManager.cs` | Perfil público |
 | `Features/Social/Profile/LeaderboardManager.cs` | Carga leaderboard |
-| `Features/Social/Friends/FriendsManager.cs` | Lista de amigos |
-| `Features/Social/Friends/SearchPlayersManager.cs` | Búsqueda por username |
-| `Features/Social/Friends/FriendRequestsSceneManager.cs` | Solicitudes de amistad |
-| `Features/Tournaments/TournamentManager.cs` | CRUD torneos |
-| `Features/Tournaments/TournamentLobbyManager.cs` | Estado lobby |
-| `Features/Cosmetics/Backgrounds/BackgroundPatternManager.cs` | Sync/restore fondo equipado |
-| `Features/Cosmetics/BattleCards/BattleCardService.cs` | Sync BattleCard equipada |
-| `Services/AchievementService.cs` | Persiste logros |
-| `Services/DailyRewardService.cs` | Persiste recompensas |
 | `Services/DailyOfferService.cs` | Sync oferta diaria |
-| `Services/FriendService.cs` | Solicitudes de amistad |
 | `Services/EmoteService.cs` | Sync emotes equipados/poseídos |
-| `Services/VictoryEffectService.cs` | Sync efectos de victoria |
-| `Services/PlayerTitleService.cs` | Sync títulos equipados/poseídos |
 | `Services/PlayerFrameService.cs` | Sync marcos equipados/poseídos |
-| `Services/NotificationStorageService.cs` | Persiste notificaciones leídas |
 | `Services/RotatingContentService.cs` | Sync contenido rotativo |
 | `Services/AvatarService.cs` | Guarda avatarUrl tras upload |
 | `Services/PaymentBridgeWiring.cs` | Wirea `UpdatePlayerFields` delegate |
@@ -220,20 +183,8 @@ active_matches/{matchId}                 → partidas en curso (1v1 normal)
 
 ## 4. FIREBASE CLOUD MESSAGING (FCM)
 
-**`Services/Firebase/NotificationService.cs`** — `#if FIREBASE_MESSAGING`
-- `Firebase.Messaging` → `FirebaseMessaging.GetTokenAsync()`, eventos `TokenReceived` y `MessageReceived`
-- Token guardado en `PlayerPrefs["FCM_Token"]`
-- `#if !UNITY_EDITOR` — sin push en Editor
-
-**`Services/Firebase/DatabaseService.cs`** — `#if FIREBASE_MESSAGING` (bloque interno)
-- Envía FCM token al backend al registrarlo
-
-### B — Via NotificationService.Instance
-| Archivo | Uso |
-|---|---|
-| `Core/Boot/BootManager.cs` | Init al arrancar |
-| `Features/Settings/SettingsManager.cs` | Habilitar/deshabilitar notificaciones push |
-| `UI/Notifications/InAppNotificationManager.cs` | Muestra banners in-app |
+**ELIMINADO** — `NotificationService.cs` eliminado en simplificación V57.
+`DatabaseService.cs` ya no envía FCM token al backend.
 
 ---
 
@@ -249,14 +200,11 @@ active_matches/{matchId}                 → partidas en curso (1v1 normal)
 | `screen_view` | Cambios de pantalla |
 | `game_start`, `game_complete`, `game_abandoned`, `game_paused` | GameSessionManager |
 | `purchase_initiated`, `purchase_completed`, `purchase_failed` | ShopItemUI, PaymentBridgeWiring |
-| `level_up`, `achievement_unlocked` | PlayerProgressionSystem, AchievementService |
-| `friend_request_sent`, `friend_request_accepted`, `challenge_sent` | FriendsManager, FriendService |
-| `tournament_joined`, `tournament_completed` | TournamentManager |
 | `login`, `signup` | LoginManager, RegisterManager |
 | `rotating_content_purchased` | RotatingContentService |
 | `welcome_pack_purchased` | WelcomePackService |
 
-> **Eliminados**: `cash_matched`, `cash_won`, `cash_lost`, eventos de wallet/transacciones CashBattle
+> **Eliminados**: `level_up`, `achievement_unlocked`, `friend_request_sent/accepted`, `challenge_sent`, `tournament_joined/completed`, `cash_matched/won/lost`
 
 ### B — Via AnalyticsService.Instance
 | Archivo | Qué loguea |
@@ -268,16 +216,10 @@ active_matches/{matchId}                 → partidas en curso (1v1 normal)
 | `Features/Games/Core/GameSelectorManager.cs` | `screen_view` |
 | `Features/Games/Navigation/PlayModeSelectionManager.cs` | `screen_view` |
 | `Features/Games/Results/OnlineResultManager.cs` | `game_complete` |
-| `Features/Monetization/DailyMissions/DailyMissionsManager.cs` | misiones completadas |
-| `Features/Monetization/DailyRewards/DailyRewardsManager.cs` | recompensas reclamadas |
-| `Features/Monetization/Progression/PlayerProgressionSystem.cs` | `level_up` |
 | `Features/Monetization/Shop/WelcomePackService.cs` | `welcome_pack_purchased` |
 | `Features/Monetization/Premium/PremiumManager.cs` | purchases premium |
-| `Features/Social/Friends/FriendsManager.cs` | `friend_request_sent` |
-| `Services/AchievementService.cs` | `achievement_unlocked` |
 | `Services/DailyOfferService.cs` | oferta aceptada |
 | `Services/RotatingContentService.cs` | `rotating_content_purchased` |
-| `Services/FriendService.cs` | friend events |
 | `Services/PaymentBridgeWiring.cs` | wirea LogCustomEvent + LogPurchaseCompleted delegates |
 | `Editor/Tools/DebugMenuEditor.cs` | test event manual (solo Editor) |
 
@@ -332,7 +274,6 @@ NO se usa desde Unity. Solo en `functions/src/index.ts`:
 | Archivo | Qué define |
 |---|---|
 | `Runtime/Data/PlayerData.cs` | Modelo completo del jugador. `ToFirebaseDictionary()` para serializar. |
-| `Runtime/Data/TournamentData.cs` | Modelo de torneo. `ToDictionary()` para serializar a `tournaments/{id}`. |
 
 ---
 
@@ -340,29 +281,7 @@ NO se usa desde Unity. Solo en `functions/src/index.ts`:
 
 | Archivo | Relación con Firebase |
 |---|---|
-| `Services/UnityMainThreadDispatcher.cs` | Marshaliza callbacks de Firebase/FCM (background threads) al main thread |
 | `Payments/Core/PaymentConfig.cs` | Stores URLs de Cloud Functions |
 | `Payments/Core/PaymentBridge.cs` | Delegates bridge para desacoplar sistema de pagos del Firebase SDK |
 | `Services/PaymentBridgeWiring.cs` | Conecta PaymentBridge delegates con AuthService, AnalyticsService, DatabaseService |
-| `Services/DeepLinkService.cs` | Lee `AuthenticationService.Instance` para obtener uid en deep links |
 | `Services/ATTService.cs` | Menciona "antes de inicializar Firebase Analytics" en comentario |
-
----
-
-## 11. HERRAMIENTAS DE EDITOR (no van en APK/IPA)
-
-| Archivo | Uso Firebase |
-|---|---|
-| `Editor/Tools/DebugMenuEditor.cs` | Pestaña "Firebase": muestra uid, FCM token, test events de Analytics |
-| `DevTools/DebugManager.cs` | Pestaña Firebase en runtime debug overlay |
-
----
-
-## 12. NOTAS DE SEGURIDAD
-
-1. **Firebase Storage rules**: deben permitir solo `auth.uid == userId` para `avatars/{userId}/*`.
-2. **GDPR gap**: `deleteUserData` Cloud Function elimina DB pero NO avatares de Storage. Pendiente.
-3. **FCM**: desactivado en Editor (`#if !UNITY_EDITOR`).
-4. **Anti-cheat doble**: MinigameBase (cliente) + Cloud Function `validateScore` (servidor, 1 submit/30s).
-5. **Crashlytics**: no activo por defecto — requiere `FIREBASE_CRASHLYTICS` en Player Settings.
-6. **MatchmakingService**: usa `ValueChanged` listener en tiempo real — limpiar con `UnsubscribeOpponentListener()` en `OnDestroy` y `OnApplicationQuit`. Ya implementado.

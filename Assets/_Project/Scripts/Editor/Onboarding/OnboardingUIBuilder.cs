@@ -9,7 +9,7 @@ namespace DigitPark.Editor
     /// <summary>
     /// Main Onboarding UI Builder - Slide-Based Architecture
     /// Each step is an independent slide inside SlidesContainer.
-    /// 6 slides: Welcome, Name, Games, Tournaments, Rewards, Completion
+    /// 4 slides: Welcome, Name, Games, Completion
     /// Portrait 9:16 (1080x1920), matchWidthOrHeight=0
     ///
     /// Menu: DigitPark/UI Builders/Onboarding/Main Onboarding
@@ -71,8 +71,6 @@ namespace DigitPark.Editor
             "Assets/_Project/Art/Icons/Onboarding/WelcomeIcon.png",
             "Assets/_Project/Art/Icons/Social/ProfileIcon.png",
             "Assets/_Project/Art/Icons/Onboarding/GamesIcon.png",
-            "Assets/_Project/Art/Icons/Onboarding/TournamentsIcon.png",
-            "Assets/_Project/Art/Icons/Onboarding/RewardsIcon.png",
             "Assets/_Project/Art/Icons/Onboarding/CompleteIcon.png"
         };
 
@@ -322,11 +320,9 @@ namespace DigitPark.Editor
             CreateSlide1_Welcome(container.transform);
             CreateSlide2_Name(container.transform);
             CreateSlide3_Games(container.transform);
-            CreateSlide4_Tournaments(container.transform);
-            CreateSlide5_Rewards(container.transform);
-            CreateSlide6_Completion(container.transform);
+            CreateSlide4_Completion(container.transform);
 
-            Debug.Log("[OnboardingUI] SlidesContainer creado (6 slides)");
+            Debug.Log("[OnboardingUI] SlidesContainer creado (4 slides)");
         }
 
         // --- Slide Base: Icon + Title (shared by info slides) ---
@@ -658,53 +654,11 @@ namespace DigitPark.Editor
 
         #endregion
 
-        #region Slide 4 - Tournaments
+        #region Slide 4 - Completion
 
-        private static void CreateSlide4_Tournaments(Transform parent)
+        private static void CreateSlide4_Completion(Transform parent)
         {
-            var slide = CreateSlideBase(parent, "Slide4", 3, false);
-            CreateSlideTitle(slide, "Tournaments", CYAN_NEON);
-
-            var content = CreateContentCard(slide);
-            AddContentText(content, "Join tournaments with dozens of players.",
-                (int)FontSizes.Body, TEXT_WHITE, TextAlignmentOptions.Center);
-            AddContentSpacer(content, 10);
-            AddContentText(content, "WIN BIG PRIZES",
-                (int)FontSizes.Subtitle, CYAN_NEON, TextAlignmentOptions.Center, true);
-            AddContentSpacer(content, 14);
-            AddBulletText(content, "Up to 256 players per tournament");
-            AddBulletText(content, "Guaranteed prizes");
-            AddBulletText(content, "Professional bracket system");
-        }
-
-        #endregion
-
-        #region Slide 5 - Rewards
-
-        private static void CreateSlide5_Rewards(Transform parent)
-        {
-            var slide = CreateSlideBase(parent, "Slide5", 4, false);
-            CreateSlideTitle(slide, "Daily Rewards", CYAN_NEON);
-
-            var content = CreateContentCard(slide);
-            AddContentText(content, "Come back every day for coins, gems, and more rewards.",
-                (int)FontSizes.Body, TEXT_WHITE, TextAlignmentOptions.Center);
-            AddContentSpacer(content, 10);
-            AddContentText(content, "REWARDS EVERY DAY",
-                (int)FontSizes.Subtitle, CYAN_NEON, TextAlignmentOptions.Center, true);
-            AddContentSpacer(content, 14);
-            AddBulletText(content, "Free coins every day");
-            AddBulletText(content, "Weekly gem bonuses");
-            AddBulletText(content, "Daily missions with prizes");
-        }
-
-        #endregion
-
-        #region Slide 6 - Completion
-
-        private static void CreateSlide6_Completion(Transform parent)
-        {
-            var slide = FindOrCreate(parent, "Slide6");
+            var slide = FindOrCreate(parent, "Slide4");
             var sRT = GetOrAdd<RectTransform>(slide);
             sRT.anchorMin = Vector2.zero;
             sRT.anchorMax = Vector2.one;
