@@ -30,14 +30,7 @@ namespace DigitPark.Navigation
         public const string BetSelection   = "BetSelection";
         public const string PlayModeSelection = "PlayModeSelection";
 
-        // Tournaments
-        public const string Tournaments     = "Tournaments";
-        public const string TournamentLobby = "TournamentLobby";
-
         // Social
-        public const string Profile         = "Profile";
-        public const string Friends         = "Friends";
-        public const string SearchPlayers   = "SearchPlayers";
         public const string Leaderboard     = "Leaderboard";
         public const string Notifications   = "Notifications";
 

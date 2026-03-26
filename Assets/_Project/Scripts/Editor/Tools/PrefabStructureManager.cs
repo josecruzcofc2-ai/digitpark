@@ -22,23 +22,16 @@ namespace DigitPark.Editor
             { "Common", new[] { "ConfirmPanel", "ErrorPanel", "BackButton", "PlayerCard" } },
 
             // Animation - Efectos y animaciones
-            { "Animation", new[] { "TransitionCanvas", "UIAnimationManager", "ParticleEffectSpawner", "RewardClaimAnimator", "Button3D" } },
+            { "Animation", new[] { "TransitionCanvas", "UIAnimationManager", "RewardClaimAnimator", "Button3D" } },
 
             // Games - Paneles de victoria/derrota
             { "Games/WinPanels", new[] { "WinPanel_Normal", "LosePanel_Normal", "WinPanel_RealMoney", "LosePanel_RealMoney" } },
 
-// Monetization - Sistema de monetización
+            // Monetization - Sistema de monetización
             { "Monetization", new[] { "TrophyCard" } },
-            { "Monetization/Achievements", new[] { "AchievementItem", "CategoryHeader" } },
-            { "Monetization/DailyMissions", new[] { "MissionItem" } },
-            { "Monetization/DailyRewards", new[] { "RewardDayItem" } },
 
             // Social - Sistema social
             { "Social", new[] { "PlayerSearchItem", "LeaderboardEntry" } },
-
-            // Tournaments - Torneos normales
-            { "Tournaments/Browser", new[] { "TournamentItem", "TournamentSearchItem", "TournamentMyItem" } },
-            { "Tournaments/Lobby", new[] { "PrizeRowItem", "ParticipantItem" } },
 
             // Onboarding
             { "Onboarding", new[] { "StepDotItem", "AvatarOptionItem" } }
@@ -220,11 +213,6 @@ namespace DigitPark.Editor
             // Mover prefabs a sus ubicaciones correctas
 // UI/Scores -> Social
             moved += TryMovePrefab("UI/Scores/LeaderboardEntry.prefab", "Social/LeaderboardEntry.prefab");
-
-            // UI/Tournaments -> Tournaments/Browser
-            moved += TryMovePrefab("UI/Tournaments/TournamentItem.prefab", "Tournaments/Browser/TournamentItem.prefab");
-            moved += TryMovePrefab("UI/Tournaments/TournamentSearchItem.prefab", "Tournaments/Browser/TournamentSearchItem.prefab");
-            moved += TryMovePrefab("UI/Tournaments/TournamentMyItem.prefab", "Tournaments/Browser/TournamentMyItem.prefab");
 
             // UI/WinPanels -> Games/WinPanels
             string[] winPanels = { "WinPanel_Normal", "LosePanel_Normal", "WinPanel_RealMoney", "LosePanel_RealMoney" };

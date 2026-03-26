@@ -13,7 +13,7 @@ namespace DigitPark.Managers
 {
     /// <summary>
     /// Manager para la escena de selección de modo de juego
-    /// Opciones: Solo (Practice), 1v1, Tournaments
+    /// Opciones: Solo (Practice), 1v1
     /// </summary>
     public class PlayModeSelectionManager : MonoBehaviour
     {
@@ -26,21 +26,14 @@ namespace DigitPark.Managers
         [Header("UI - Mode Cards")]
         [SerializeField] private Button soloCard;
         [SerializeField] private Button oneVsOneCard;
-        [SerializeField] private Button tournamentsCard;
-
         [Header("UI - Card Texts")]
         [SerializeField] private TextMeshProUGUI soloTitleText;
         [SerializeField] private TextMeshProUGUI soloDescText;
         [SerializeField] private TextMeshProUGUI oneVsOneTitleText;
         [SerializeField] private TextMeshProUGUI oneVsOneDescText;
-        [SerializeField] private TextMeshProUGUI tournamentsTitleText;
-        [SerializeField] private TextMeshProUGUI tournamentsDescText;
-
         [Header("UI - Card Icons (optional)")]
         [SerializeField] private Image soloIcon;
         [SerializeField] private Image oneVsOneIcon;
-        [SerializeField] private Image tournamentsIcon;
-
         private void Start()
         {
             Debug.Log("[PlayModeSelection] Manager iniciado");
@@ -65,7 +58,6 @@ namespace DigitPark.Managers
             backButton?.onClick.RemoveAllListeners();
             soloCard?.onClick.RemoveAllListeners();
             oneVsOneCard?.onClick.RemoveAllListeners();
-            tournamentsCard?.onClick.RemoveAllListeners();
         }
 
         private void SetupListeners()
@@ -76,7 +68,6 @@ namespace DigitPark.Managers
             backButton?.onClick.AddListener(OnBackClicked);
             soloCard?.onClick.AddListener(OnSoloClicked);
             oneVsOneCard?.onClick.AddListener(OnOneVsOneClicked);
-            tournamentsCard?.onClick.AddListener(OnTournamentsClicked);
         }
 
         private void UpdateTexts()
@@ -97,11 +88,6 @@ namespace DigitPark.Managers
             if (oneVsOneDescText != null)
                 oneVsOneDescText.text = AutoLocalizer.Get("1v1_description");
 
-            // Tournaments card
-            if (tournamentsTitleText != null)
-                tournamentsTitleText.text = AutoLocalizer.Get("tournaments_title");
-            if (tournamentsDescText != null)
-                tournamentsDescText.text = AutoLocalizer.Get("tournaments_description");
         }
 
         #region Navigation Callbacks
@@ -146,27 +132,6 @@ namespace DigitPark.Managers
             GameSelectorManager.SetPracticeMode(false);
             GameSelectorManager.SetOnlineMatchMode(true);
             SceneManager.LoadScene("GameSelector");
-        }
-
-        private void OnTournamentsClicked()
-        {
-            if (_isNavigating) return;
-
-            // B3-I: Require network for online modes
-            if (DigitPark.Services.NetworkService.Instance != null &&
-                !DigitPark.Services.NetworkService.Instance.IsOnline)
-            {
-                Debug.LogWarning("[PlayModeSelection] Sin conexión — Torneos no disponible");
-                return;
-            }
-
-            _isNavigating = true;
-
-            Debug.Log("[PlayModeSelection] Modo Torneos seleccionado");
-
-            AnalyticsService.Instance?.LogCustomEvent("mode_selected", new Dictionary<string, object> { { "mode", "tournaments" } });
-
-            SceneManager.LoadScene("TournamentsBrowser");
         }
 
         #endregion

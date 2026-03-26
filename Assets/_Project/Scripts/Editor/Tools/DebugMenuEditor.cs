@@ -12,34 +12,6 @@ namespace DigitPark.Editor
     {
         #region Premium
 
-        [MenuItem("Tools/DigitPark Debug/Premium/Unlock Create Tournaments")]
-        private static void UnlockCreateTournaments()
-        {
-            if (PremiumManager.Instance != null)
-            {
-                PremiumManager.Instance.UnlockProduct(PremiumProduct.CreateTournaments);
-                Debug.Log("[Debug] Create Tournaments desbloqueado");
-            }
-            else
-            {
-                SetPremiumPlayerPref("Premium_CreateTournaments", true);
-            }
-        }
-
-        [MenuItem("Tools/DigitPark Debug/Premium/Unlock Tournament Bundle")]
-        private static void UnlockTournamentBundle()
-        {
-            if (PremiumManager.Instance != null)
-            {
-                PremiumManager.Instance.UnlockProduct(PremiumProduct.TournamentBundle);
-                Debug.Log("[Debug] Tournament Bundle desbloqueado");
-            }
-            else
-            {
-                SetPremiumPlayerPref("Premium_CreateTournaments", true);
-            }
-        }
-
         [MenuItem("Tools/DigitPark Debug/Premium/Unlock Styles PRO")]
         private static void UnlockStylesPro()
         {
@@ -57,7 +29,6 @@ namespace DigitPark.Editor
         [MenuItem("Tools/DigitPark Debug/Premium/Unlock ALL Premium")]
         private static void UnlockAllPremium()
         {
-            UnlockTournamentBundle();
             UnlockStylesPro();
             Debug.Log("[Debug] Todos los productos premium desbloqueados");
         }
@@ -65,7 +36,6 @@ namespace DigitPark.Editor
         [MenuItem("Tools/DigitPark Debug/Premium/Reset All Premium")]
         private static void ResetAllPremium()
         {
-            PlayerPrefs.DeleteKey("Premium_CreateTournaments");
             PlayerPrefs.DeleteKey("Premium_StylesPro");
             PlayerPrefs.Save();
             Debug.Log("[Debug] Estado premium reseteado");
@@ -168,29 +138,6 @@ namespace DigitPark.Editor
             Debug.Log("[Debug] Evento de prueba enviado a Analytics");
         }
 
-        [MenuItem("Tools/DigitPark Debug/Firebase/Show FCM Token")]
-        private static void ShowFCMToken()
-        {
-            if (Services.Firebase.NotificationService.Instance != null)
-            {
-                string token = Services.Firebase.NotificationService.Instance.GetToken();
-                if (!string.IsNullOrEmpty(token))
-                {
-                    Debug.Log($"[Debug] FCM Token: {token}");
-                    EditorGUIUtility.systemCopyBuffer = token;
-                    Debug.Log("[Debug] Token copiado al clipboard");
-                }
-                else
-                {
-                    Debug.Log("[Debug] FCM Token no disponible");
-                }
-            }
-            else
-            {
-                Debug.LogWarning("[Debug] NotificationService no disponible");
-            }
-        }
-
         #endregion
 
         #region Quick Actions
@@ -199,7 +146,6 @@ namespace DigitPark.Editor
         private static void QuickSetupTesting()
         {
             // Desbloquear premium
-            SetPremiumPlayerPref("Premium_CreateTournaments", true);
             SetPremiumPlayerPref("Premium_StylesPro", true);
 
             Debug.Log("[Debug] Configuracion rapida aplicada: Premium completo desbloqueado");

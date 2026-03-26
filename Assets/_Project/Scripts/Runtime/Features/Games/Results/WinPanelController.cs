@@ -95,22 +95,9 @@ namespace DigitPark.UI
         /// </summary>
         public void ShowNormalResult(MinigameResult result)
         {
-            var session = GameSessionManager.Instance;
-            bool isSprint = session?.HasActiveSession == true &&
-                            session.CurrentContext?.Mode == GameMode.CognitiveSprint;
-
             if (titleText != null)
             {
-                if (isSprint)
-                {
-                    int current = session.CurrentContext.CurrentGameIndex + 1;
-                    int total = session.CurrentContext.Games.Count;
-                    titleText.text = AutoLocalizer.Get("sprint_game_progress", current.ToString(), total.ToString());
-                }
-                else
-                {
-                    titleText.text = AutoLocalizer.Get("completed");
-                }
+                titleText.text = AutoLocalizer.Get("completed");
                 titleText.color = normalColor;
             }
 
@@ -119,22 +106,7 @@ namespace DigitPark.UI
             if (wagerText != null) wagerText.gameObject.SetActive(false);
             if (vsContainer != null) vsContainer.SetActive(false);
 
-            // En CognitiveSprint, ocultar Play Again y cambiar texto del botón Accept
-            if (isSprint && session?.CurrentContext?.HasMoreGames == true)
-            {
-                if (playAgainButton != null) playAgainButton.gameObject.SetActive(false);
-                // El texto del botón Accept se actualiza si tiene un TextMeshProUGUI hijo
-                if (acceptButton != null)
-                {
-                    var btnText = acceptButton.GetComponentInChildren<TextMeshProUGUI>();
-                    if (btnText != null)
-                        btnText.text = AutoLocalizer.Get("sprint_next_game");
-                }
-            }
-            else
-            {
-                if (playAgainButton != null) playAgainButton.gameObject.SetActive(true);
-            }
+            if (playAgainButton != null) playAgainButton.gameObject.SetActive(true);
 
             Show();
 
@@ -383,16 +355,7 @@ namespace DigitPark.UI
             Transform iconTransform = resultIcon != null ? resultIcon.transform : null;
             WinCelebrationAnimator.PlayWin(canvas, iconTransform);
 
-            // Custom victory effect (from VictoryEffectService)
-            bool customEffectPlayed = false;
-            if (DigitPark.Services.VictoryEffectService.Instance != null)
-            {
-                customEffectPlayed = DigitPark.Services.VictoryEffectService.Instance
-                    .PlayEquippedEffect(transform.position);
-            }
-
-            // Fallback to default sparkle effect if no custom effect
-            if (!customEffectPlayed && sparkleEffect != null)
+            if (sparkleEffect != null)
             {
                 sparkleEffect.PlayVictoryConfetti();
                 sparkleEffect.PlayCoinExplosion(Vector2.zero);

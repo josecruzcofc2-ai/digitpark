@@ -8,7 +8,7 @@ namespace DigitPark.Services
 {
     /// <summary>
     /// Servicio singleton que gestiona marcos de perfil.
-    /// 34 marcos con diferentes metodos de obtencion (8 coin, 6 gem, 12 real money, 5 achievement, 3 secret).
+    /// 34 marcos con diferentes metodos de obtencion (8 coin, 6 gem, 12 real money).
     /// Persistencia via PlayerPrefs.
     /// </summary>
     public class PlayerFrameService : MonoBehaviour
@@ -725,16 +725,8 @@ namespace DigitPark.Services
                     return false;
                 case FramePriceType.Achievement:
                 case FramePriceType.Secret:
-                    // Check if achievement is completed
-                    if (!string.IsNullOrEmpty(frame.achievementId))
-                    {
-                        if (AchievementService.Instance == null || !AchievementService.Instance.IsUnlocked(frame.achievementId))
-                        {
-                            Debug.Log($"[PlayerFrameService] Achievement not unlocked: {frame.achievementId}");
-                            return false;
-                        }
-                    }
-                    break;
+                    // Achievements removed — achievement-gated frames are permanently locked
+                    return false;
             }
 
             UnlockFrame(frameId);

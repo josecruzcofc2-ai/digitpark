@@ -26,7 +26,7 @@ namespace DigitPark.Editor
 
             Debug.Log("<color=cyan>[DigitPark]</color> Animation System setup complete!");
             if (!AllScenesBatchBuilder.SilentMode)
-                EditorUtility.DisplayDialog("Animation System", "Animation system has been set up successfully!\n\nCreated:\n- UIAnimationManager\n- SceneTransitionManager\n- ParticleEffectSpawner\n- UI Materials", "OK");
+                EditorUtility.DisplayDialog("Animation System", "Animation system has been set up successfully!\n\nCreated:\n- UIAnimationManager\n- SceneTransitionManager\n- UI Materials", "OK");
         }
 
         [MenuItem("DigitPark/Polish/Animation/Create Button3D Prefab", false, 401)]
@@ -250,30 +250,11 @@ namespace DigitPark.Editor
             CreateButton3DPrefab();
             CreateTransitionCanvasPrefab();
             CreateUIAnimationManagerPrefab();
-            CreateParticleSpawnerPrefab();
             CreateRewardClaimAnimatorPrefab();
 
             Debug.Log("<color=cyan>[DigitPark]</color> All animation prefabs created!");
             if (!AllScenesBatchBuilder.SilentMode)
                 EditorUtility.DisplayDialog("Animation System", "All animation prefabs have been created!", "OK");
-        }
-
-        private static void CreateParticleSpawnerPrefab()
-        {
-            EnsureDirectoriesExist();
-
-            GameObject spawnerObj = new GameObject("ParticleEffectSpawner");
-            spawnerObj.AddComponent<DigitPark.Animations.ParticleEffectSpawner>();
-
-            // Create particles container
-            GameObject particlesContainer = new GameObject("Particles");
-            particlesContainer.transform.SetParent(spawnerObj.transform);
-
-            string prefabPath = $"{PREFAB_PATH}/ParticleEffectSpawner.prefab";
-            PrefabUtility.SaveAsPrefabAsset(spawnerObj, prefabPath);
-            DestroyImmediate(spawnerObj);
-
-            Debug.Log($"<color=cyan>[DigitPark]</color> Particle Effect Spawner prefab created at {prefabPath}");
         }
 
         private static void CreateRewardClaimAnimatorPrefab()
@@ -349,11 +330,9 @@ namespace DigitPark.Editor
             // Load and instantiate prefabs
             string managerPath = $"{PREFAB_PATH}/UIAnimationManager.prefab";
             string transitionPath = $"{PREFAB_PATH}/TransitionCanvas.prefab";
-            string particlePath = $"{PREFAB_PATH}/ParticleEffectSpawner.prefab";
 
             GameObject managerPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(managerPath);
             GameObject transitionPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(transitionPath);
-            GameObject particlePrefab = AssetDatabase.LoadAssetAtPath<GameObject>(particlePath);
 
             if (managerPrefab != null)
                 PrefabUtility.InstantiatePrefab(managerPrefab);
@@ -364,11 +343,6 @@ namespace DigitPark.Editor
                 PrefabUtility.InstantiatePrefab(transitionPrefab);
             else
                 Debug.LogWarning("TransitionCanvas prefab not found.");
-
-            if (particlePrefab != null)
-                PrefabUtility.InstantiatePrefab(particlePrefab);
-            else
-                Debug.LogWarning("ParticleEffectSpawner prefab not found.");
 
             Debug.Log("<color=cyan>[DigitPark]</color> Animation system added to scene!");
         }

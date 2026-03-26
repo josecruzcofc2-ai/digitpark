@@ -32,7 +32,7 @@ namespace DigitPark.Editor
 
         private const string BACK_BUTTON_PREFAB = "Assets/_Project/Prefabs/Common/BackButton.prefab";
 
-        // 5 juegos (sin CognitiveSprint)
+        // 5 juegos
         private static readonly string[] GAME_IDS = { "DigitRush", "FlashTap", "MemoryPairs", "OddOneOut", "QuickMath" };
         private static readonly string[] GAME_LABELS = { "Digit\nRush", "Flash\nTap", "Memory\nPairs", "Odd One\nOut", "Quick\nMath" };
 
@@ -328,7 +328,7 @@ namespace DigitPark.Editor
                 DestroyImmediate(selectorPanel.transform.GetChild(i).gameObject);
             }
 
-            // Crear 5 botones de juego (sin CognitiveSprint)
+            // Crear 5 botones de juego
             for (int i = 0; i < GAME_IDS.Length; i++)
             {
                 CreateGameButton(selectorPanel.transform, i);

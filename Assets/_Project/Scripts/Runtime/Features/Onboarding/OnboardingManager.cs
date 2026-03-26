@@ -129,14 +129,6 @@ namespace DigitPark.Managers
                     },
                     new OnboardingStep
                     {
-                        id = "tournaments",
-                        title = L("tournament_button"),
-                        description = L("tournaments_description"),
-                        stepType = OnboardingStepType.Info,
-                        requiresInteraction = false
-                    },
-                    new OnboardingStep
-                    {
                         id = "rewards",
                         title = L("dr_title"),
                         description = L("onboarding_rewards_desc"),
@@ -164,8 +156,7 @@ namespace DigitPark.Managers
             LocalizeSlideTitle(0, "onboarding_welcome_title");
             LocalizeSlideTitle(1, "onboarding_name_title");
             LocalizeSlideTitle(2, "onboarding_games_title");
-            LocalizeSlideTitle(3, "tournament_button");
-            LocalizeSlideTitle(5, "dr_title");
+            LocalizeSlideTitle(4, "dr_title");
 
             // Slide 1 - Welcome content
             LocalizeContentTexts(0, new[]
@@ -189,17 +180,7 @@ namespace DigitPark.Managers
                 ("onboarding_games_b5", false)
             });
 
-            // Slide 5 - Tournaments content
-            LocalizeContentTexts(4, new[]
-            {
-                ("onboarding_tournaments_desc", false),
-                ("onboarding_tournaments_highlight", true),
-                ("onboarding_tournaments_b1", false),
-                ("onboarding_tournaments_b2", false),
-                ("onboarding_tournaments_b3", false)
-            });
-
-            // Slide 7 - Rewards content
+            // Slide 5 - Rewards content
             LocalizeContentTexts(6, new[]
             {
                 ("onboarding_rewards_desc", false),
@@ -709,8 +690,6 @@ namespace DigitPark.Managers
                     PlayerPrefs.Save();
                 }
 
-                // Mark tutorial_complete achievement (triggers GiveReward: +75 DC +2 DG)
-                DigitPark.Services.AchievementService.Instance?.AddProgress("tutorial_complete", 1);
             }
 
             Debug.Log($"[Onboarding] Completed. Rewards given: {giveRewards} ({completionRewardCoins} DC + {completionRewardGems} DG)");

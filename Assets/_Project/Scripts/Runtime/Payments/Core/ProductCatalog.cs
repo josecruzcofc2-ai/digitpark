@@ -367,7 +367,7 @@ namespace DigitPark.Payments
 
         public static bool ValidateCatalogCompliance()
         {
-            // DISC-02: Sincronizado con StripeComplianceGuard.ProhibitedTerms (incluye "triumph")
+            // DISC-02: Validacion de compliance (incluye "triumph")
             string[] prohibitedTerms = {
                 "tournament", "prize", "cash_game", "skill_game",
                 "real_money", "entry_fee", "wager", "bet", "gambling", "triumph"

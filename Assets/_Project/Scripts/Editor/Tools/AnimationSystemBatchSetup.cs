@@ -28,7 +28,6 @@ namespace DigitPark.Editor
         // Options (public for direct menu access)
         public bool addUIAnimationManager = true;
         public bool addSceneTransitionManager = true;
-        public bool addParticleSpawner = true;
         public bool convertButtonsTo3D = true; // ON - All buttons become 3D
         public bool addPulseToImportantButtons = true; // ON - CTA buttons pulse
         public bool addGlowToHeaders = true; // ON - Headers glow
@@ -67,7 +66,6 @@ namespace DigitPark.Editor
             var setup = CreateInstance<AnimationSystemBatchSetup>();
             setup.addUIAnimationManager = true;
             setup.addSceneTransitionManager = true;
-            setup.addParticleSpawner = true;
             setup.convertButtonsTo3D = true;
             setup.addPulseToImportantButtons = true;
             setup.addGlowToHeaders = true;
@@ -113,7 +111,6 @@ namespace DigitPark.Editor
             EditorGUI.indentLevel++;
             addUIAnimationManager = EditorGUILayout.Toggle("UI Animation Manager", addUIAnimationManager);
             addSceneTransitionManager = EditorGUILayout.Toggle("Scene Transition Manager", addSceneTransitionManager);
-            addParticleSpawner = EditorGUILayout.Toggle("Particle Effect Spawner", addParticleSpawner);
             EditorGUI.indentLevel--;
 
             EditorGUILayout.Space(5);
@@ -362,22 +359,6 @@ namespace DigitPark.Editor
                 {
                     GameObject transitionObj = CreateTransitionCanvas();
                     transitionObj.transform.SetParent(managersRoot.transform);
-                    madeChanges = true;
-                }
-            }
-
-            // Add Particle Spawner
-            if (addParticleSpawner)
-            {
-                var existing = Object.FindFirstObjectByType<DigitPark.Animations.ParticleEffectSpawner>();
-                if (existing == null)
-                {
-                    GameObject spawnerObj = new GameObject("ParticleEffectSpawner");
-                    spawnerObj.transform.SetParent(managersRoot.transform);
-                    spawnerObj.AddComponent<DigitPark.Animations.ParticleEffectSpawner>();
-
-                    GameObject particlesContainer = new GameObject("Particles");
-                    particlesContainer.transform.SetParent(spawnerObj.transform);
                     madeChanges = true;
                 }
             }
@@ -673,7 +654,6 @@ namespace DigitPark.Editor
             var window = CreateInstance<AnimationSystemBatchSetup>();
             window.addUIAnimationManager = true;
             window.addSceneTransitionManager = true;
-            window.addParticleSpawner = true;
             window.convertButtonsTo3D = false;
             window.addPulseToImportantButtons = false;
 
@@ -838,7 +818,6 @@ namespace DigitPark.Editor
             var window = CreateInstance<AnimationSystemBatchSetup>();
             window.addUIAnimationManager = false;
             window.addSceneTransitionManager = false;
-            window.addParticleSpawner = false;
             window.convertButtonsTo3D = true;
             window.addPulseToImportantButtons = true;
 

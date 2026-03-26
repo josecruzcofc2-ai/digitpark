@@ -8,7 +8,7 @@ namespace DigitPark.Editor
     /// <summary>
     /// Editor UIBuilder for the Boot/Splash scene.
     /// Creates UI elements ONLY inside the Canvas. Never touches root-level GameObjects
-    /// (AuthenticationService, DailyRewardService, AchievementService, etc.)
+    /// (AuthenticationService, etc.)
     ///
     /// Scene hierarchy after build:
     ///   Boot (scene root)
@@ -16,9 +16,6 @@ namespace DigitPark.Editor
     ///   ├── UIBuilder                  ← PRESERVED (BootManager + runtime BootUIBuilder live here)
     ///   ├── AuthenticationService      ← PRESERVED
     ///   ├── PremiumDebugController     ← PRESERVED
-    ///   ├── DailyRewardService         ← PRESERVED
-    ///   ├── AchievementService         ← PRESERVED
-    ///   ├── AchievementDebugPanel      ← PRESERVED
     ///   ├── EditorBootConfig           ← PRESERVED
     ///   ├── BootAnimator               ← Created/reused (wired automatically)
     ///   └── Canvas                     ← UI lives here (rebuilt by this builder)

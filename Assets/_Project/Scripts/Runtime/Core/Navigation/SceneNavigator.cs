@@ -36,16 +36,8 @@ namespace DigitPark.Navigation
             public const string MAIN_MENU = "MainMenu";
             public const string PROFILE = "Profile";
 
-            // Tournaments
-            public const string TOURNAMENTS_BROWSER = "TournamentsBrowser";
-            public const string TOURNAMENT_CREATE = "TournamentCreate";
-            public const string TOURNAMENT_LOBBY = "TournamentLobby";
-
             // Monetization
             public const string SHOP = "Shop";
-            public const string DAILY_MISSIONS = "DailyMissions";
-            public const string DAILY_REWARDS = "DailyRewards";
-            public const string ACHIEVEMENTS = "Achievements";
             public const string ONBOARDING = "Onboarding";
 
         }
@@ -264,9 +256,6 @@ namespace DigitPark.Navigation
     {
         Featured,
         Currency,
-        Styles,
-        Effects,
-        BattleCards,
-        Backgrounds
+        Styles
     }
 }

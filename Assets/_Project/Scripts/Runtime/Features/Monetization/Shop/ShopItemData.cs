@@ -14,15 +14,9 @@ namespace DigitPark.Monetization
         DigitGemsPack,  // Paquete de DigitGems (compra con dinero real)
         DigitCoinsPack, // Paquete de DigitCoins (compra con DigitGems)
         Frame,          // Marco de perfil (DC, DG o USD)
-        Title,          // Título de jugador (DC, DG o USD)
         SpecialOffer,   // Oferta especial (bundle)
         PremiumBundle,  // Bundle premium
         StarterPack,    // Paquete de inicio
-        WinEffect,      // Efecto de victoria
-        WinEffectBundle, // Bundle de efectos de victoria
-        BattleCard,         // BattleCard cosmético de matchmaking
-        BackgroundPattern,  // Patrón de fondo cosmético
-        TemporaryDecoration // Decoración temporal (expira después de N días)
     }
 
     /// <summary>
@@ -87,10 +81,6 @@ namespace DigitPark.Monetization
         [Tooltip("Porcentaje de bonus (ej: 20 = +20%)")]
         [Range(0, 100)]
         public int bonusPercent;
-
-        [Header("Cosmetic IDs")]
-        [Tooltip("ID del patrón de fondo que desbloquea (si aplica)")]
-        public string backgroundPatternId;
 
         [Header("Temporary Decoration Settings")]
         [Tooltip("Duración en días tras la compra (solo para TemporaryDecoration)")]
@@ -250,16 +240,6 @@ namespace DigitPark.Monetization
                     currency.AddCoins(GetTotalCoins());
                     break;
 
-                case ShopItemType.WinEffect:
-                case ShopItemType.WinEffectBundle:
-                    if (!string.IsNullOrEmpty(itemId))
-                    {
-                        var effectService = DigitPark.Services.VictoryEffectService.Instance;
-                        if (effectService != null)
-                            effectService.UnlockEffect(itemId);
-                    }
-                    break;
-
                 case ShopItemType.Frame:
                     if (!string.IsNullOrEmpty(itemId))
                     {
@@ -269,42 +249,6 @@ namespace DigitPark.Monetization
                     }
                     break;
 
-                case ShopItemType.Title:
-                    if (!string.IsNullOrEmpty(itemId))
-                    {
-                        var titleService = DigitPark.Services.PlayerTitleService.Instance;
-                        if (titleService != null)
-                            titleService.UnlockTitle(itemId);
-                    }
-                    break;
-
-                case ShopItemType.BattleCard:
-                    if (!string.IsNullOrEmpty(itemId))
-                    {
-                        var bcService = DigitPark.Cosmetics.BattleCardService.Instance;
-                        if (bcService != null)
-                            bcService.UnlockCard(itemId);
-                    }
-                    break;
-
-                case ShopItemType.BackgroundPattern:
-                    if (!string.IsNullOrEmpty(backgroundPatternId))
-                    {
-                        var bgManager = DigitPark.Cosmetics.BackgroundPatternManager.Instance;
-                        if (bgManager != null)
-                            bgManager.UnlockBackground(backgroundPatternId);
-                    }
-                    break;
-
-                case ShopItemType.TemporaryDecoration:
-                    if (!string.IsNullOrEmpty(itemId))
-                    {
-                        long expiryBinary = DateTime.UtcNow.AddDays(itemDurationDays).ToBinary();
-                        PlayerPrefs.SetString($"TempDeco_Expiry_{itemId}", expiryBinary.ToString());
-                        PlayerPrefs.SetInt($"TempDeco_Active_{itemId}", 1);
-                        PlayerPrefs.Save();
-                    }
-                    break;
 
                 case ShopItemType.SpecialOffer:
                     // Bundle - grant multiple rewards
@@ -359,26 +303,12 @@ namespace DigitPark.Monetization
                         priceType = PriceType.DigitGems;
                     break;
                 case ShopItemType.Frame:
-                case ShopItemType.Title:
                     shopTab = ShopTab.Styles;
                     break;
                 case ShopItemType.SpecialOffer:
                 case ShopItemType.PremiumBundle:
                 case ShopItemType.StarterPack:
                     shopTab = ShopTab.Featured;
-                    break;
-                case ShopItemType.WinEffect:
-                case ShopItemType.WinEffectBundle:
-                    shopTab = ShopTab.Effects;
-                    break;
-                case ShopItemType.BattleCard:
-                    shopTab = ShopTab.BattleCards;
-                    break;
-                case ShopItemType.BackgroundPattern:
-                    shopTab = ShopTab.Backgrounds;
-                    break;
-                case ShopItemType.TemporaryDecoration:
-                    shopTab = ShopTab.Styles;
                     break;
             }
         }

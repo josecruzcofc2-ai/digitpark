@@ -26,9 +26,9 @@ namespace DigitPark.Editor.AutoAssigners
             // Header
             "titleText", "gameIconImage", "gameTypeText",
             // Player Card
-            "playerNameText", "playerLevelText", "playerCard",
+            "playerNameText", "playerCard",
             // Opponent Card
-            "opponentNameText", "opponentLevelText",
+            "opponentNameText",
             "opponentCard",
             // VS Section
             "vsContainer", "vsText",
@@ -174,12 +174,10 @@ namespace DigitPark.Editor.AutoAssigners
 
             // Player Card
             AssignReference(so, "playerNameText", FindTextByName("playername"));
-            AssignReference(so, "playerLevelText", FindTextByName("playerlevel", "leveltext"));
             AssignReference(so, "playerCard", FindByNameContains<Transform>("playercard"));
 
             // Opponent Card
             AssignReference(so, "opponentNameText", FindTextByName("opponentname"));
-            AssignReference(so, "opponentLevelText", FindTextByName("opponentlevel"));
             AssignReference(so, "opponentCard", FindByNameContains<Transform>("opponentcard"));
             // VS Section
             AssignReference(so, "vsContainer", FindByNameContains<Transform>("vscontainer"));

@@ -18,7 +18,7 @@ namespace DigitPark.Managers
     /// <summary>
     /// Manager de la escena de Scores/Rankings
     /// Muestra tablas de clasificación por juego: Nacional (país) y Mundial (global)
-    /// Con selector de juego (5 juegos, sin CognitiveSprint)
+    /// Con selector de juego (5 juegos)
     /// </summary>
     public class LeaderboardManager : MonoBehaviour
     {
@@ -52,7 +52,7 @@ namespace DigitPark.Managers
         [SerializeField] private TextMeshProUGUI positionNumberText;
         [SerializeField] private TextMeshProUGUI positionTimeText;
 
-        // Juegos disponibles para ranking (sin CognitiveSprint)
+        // Juegos disponibles para ranking
         private static readonly string[] GAME_IDS = {
             "DigitRush", "FlashTap", "MemoryPairs", "OddOneOut", "QuickMath"
         };

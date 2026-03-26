@@ -27,13 +27,13 @@ namespace DigitPark.Data
 
     /// <summary>
     /// Entrada individual de historial de partidas generales.
-    /// Diferente de HistoryEntry (CashBattle) - aqui no hay dinero.
+    /// Entrada individual de historial de partidas generales (sin dinero real).
     /// </summary>
     [Serializable]
     public class MatchHistoryEntry
     {
         public string entryId;
-        public string gameType;             // "DigitRush", "MemoryPairs", "CognitiveSprint", etc.
+        public string gameType;             // "DigitRush", "MemoryPairs", "QuickMath", "FlashTap", "OddOneOut"
         public MatchMode mode;
         public GeneralMatchResult result;
 
@@ -45,9 +45,6 @@ namespace DigitPark.Data
         public string opponentName;         // null si es practica
         public string opponentId;           // null si es practica
         public float opponentScore;         // Score del oponente (0 si practica)
-
-        // Cognitive Sprint: juegos incluidos en la sesion
-        public string[] gamesPlayed;        // ej: ["DigitRush", "MemoryPairs", "QuickMath"]
 
         public string timestamp;            // ISO 8601
 
@@ -106,87 +103,6 @@ namespace DigitPark.Data
                 opponentId = opponentId,
                 opponentScore = opponentScore
             };
-        }
-
-        /// <summary>
-        /// Crea entrada de Cognitive Sprint (practica)
-        /// </summary>
-        public static MatchHistoryEntry CreateCognitiveSprintPractice(
-            string[] gamesPlayed, float time, int errors, float penaltyTime)
-        {
-            return new MatchHistoryEntry
-            {
-                gameType = "CognitiveSprint",
-                mode = MatchMode.Practice,
-                result = GeneralMatchResult.None,
-                time = time,
-                errors = errors,
-                penaltyTime = penaltyTime,
-                finalScore = time + penaltyTime,
-                gamesPlayed = gamesPlayed
-            };
-        }
-
-        /// <summary>
-        /// Crea entrada de Cognitive Sprint (online)
-        /// </summary>
-        public static MatchHistoryEntry CreateCognitiveSprintOnline(
-            string[] gamesPlayed, float time, int errors, float penaltyTime,
-            string opponentName, string opponentId, float opponentScore)
-        {
-            float myFinal = time + penaltyTime;
-            GeneralMatchResult matchResult;
-
-            if (Mathf.Approximately(myFinal, opponentScore))
-                matchResult = GeneralMatchResult.Draw;
-            else if (myFinal < opponentScore)
-                matchResult = GeneralMatchResult.Win;
-            else
-                matchResult = GeneralMatchResult.Loss;
-
-            return new MatchHistoryEntry
-            {
-                gameType = "CognitiveSprint",
-                mode = MatchMode.Online,
-                result = matchResult,
-                time = time,
-                errors = errors,
-                penaltyTime = penaltyTime,
-                finalScore = myFinal,
-                opponentName = opponentName,
-                opponentId = opponentId,
-                opponentScore = opponentScore,
-                gamesPlayed = gamesPlayed
-            };
-        }
-
-        /// <summary>
-        /// Es una entrada de Cognitive Sprint?
-        /// </summary>
-        public bool IsCognitiveSprint => gameType == "CognitiveSprint";
-
-        /// <summary>
-        /// Texto compacto de juegos del sprint (ej: "DR + MP + QM")
-        /// </summary>
-        public string GetSprintGamesText()
-        {
-            if (gamesPlayed == null || gamesPlayed.Length == 0) return "";
-
-            var abbreviations = new Dictionary<string, string>
-            {
-                { "DigitRush", "DR" },
-                { "MemoryPairs", "MP" },
-                { "QuickMath", "QM" },
-                { "FlashTap", "FT" },
-                { "OddOneOut", "OO" }
-            };
-
-            var parts = new List<string>();
-            foreach (var g in gamesPlayed)
-            {
-                parts.Add(abbreviations.ContainsKey(g) ? abbreviations[g] : g);
-            }
-            return string.Join(" + ", parts);
         }
 
         public DateTime GetTimestamp()
@@ -253,27 +169,17 @@ namespace DigitPark.Data
         /// </summary>
         public string GetSubtitle()
         {
-            if (IsCognitiveSprint)
-            {
-                string gamesText = GetSprintGamesText();
-                if (mode == MatchMode.Practice)
-                    return $"{AutoLocalizer.Get("result_practice")} \u00B7 {gamesText}";
-                return $"vs. {opponentName} \u00B7 {gamesText}";
-            }
-
             if (mode == MatchMode.Practice)
                 return AutoLocalizer.Get("result_practice");
             return $"vs. {opponentName}";
         }
 
         /// <summary>
-        /// Detalle compacto: tiempo + errores (+ num juegos si sprint)
+        /// Detalle compacto: tiempo + errores
         /// </summary>
         public string GetDetailText()
         {
             string errText = AutoLocalizer.Get("errors_count", errors);
-            if (IsCognitiveSprint && gamesPlayed != null)
-                return $"{GetFormattedTime()} \u00B7 {errText} \u00B7 {AutoLocalizer.Get("games_count", gamesPlayed.Length)}";
             return $"{GetFormattedTime()} \u00B7 {errText}";
         }
     }

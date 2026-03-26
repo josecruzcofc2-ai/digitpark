@@ -27,8 +27,6 @@ namespace DigitPark.Managers
         [SerializeField] private Button filterQuickMathButton;
         [SerializeField] private Button filterFlashTapButton;
         [SerializeField] private Button filterOddOneOutButton;
-        [SerializeField] private Button filterCognitiveSprintButton;
-
         [Header("UI - Content")]
         [SerializeField] private Transform scrollContent;
         [SerializeField] private GameObject matchEntryPrefab;
@@ -45,7 +43,7 @@ namespace DigitPark.Managers
         private string currentFilter = null; // null = todos
         private int currentOffset = 0;
         private const int PAGE_SIZE = 20;
-        private string returnScene = "Profile";
+        private string returnScene = "MainMenu";
 
         // Colores por juego
         private static readonly Dictionary<string, Color> GAME_COLORS = new Dictionary<string, Color>
@@ -55,7 +53,6 @@ namespace DigitPark.Managers
             { "QuickMath", new Color(1f, 0.5f, 0f, 1f) },        // Orange
             { "FlashTap", new Color(0.2f, 0.9f, 0.4f, 1f) },     // Green
             { "OddOneOut", new Color(1f, 0.3f, 0.3f, 1f) },       // Red
-            { "CognitiveSprint", new Color(1f, 0.84f, 0f, 1f) }   // Gold
         };
 
         // Filter buttons y sus game types
@@ -68,7 +65,7 @@ namespace DigitPark.Managers
         {
             Debug.Log("[MatchHistory] MatchHistorySceneManager iniciado");
 
-            returnScene = PlayerPrefs.GetString("DP_MatchHistoryReturnScene", "Profile");
+            returnScene = PlayerPrefs.GetString("DP_MatchHistoryReturnScene", "MainMenu");
             PlayerPrefs.DeleteKey("DP_MatchHistoryReturnScene");
 
             SetupFilterButtons();
@@ -86,7 +83,6 @@ namespace DigitPark.Managers
             if (filterQuickMathButton != null) filterButtons[filterQuickMathButton] = "QuickMath";
             if (filterFlashTapButton != null) filterButtons[filterFlashTapButton] = "FlashTap";
             if (filterOddOneOutButton != null) filterButtons[filterOddOneOutButton] = "OddOneOut";
-            if (filterCognitiveSprintButton != null) filterButtons[filterCognitiveSprintButton] = "CognitiveSprint";
         }
 
         private void SetupListeners()
@@ -104,7 +100,6 @@ namespace DigitPark.Managers
             filterQuickMathButton?.onClick.AddListener(() => ApplyFilter("QuickMath"));
             filterFlashTapButton?.onClick.AddListener(() => ApplyFilter("FlashTap"));
             filterOddOneOutButton?.onClick.AddListener(() => ApplyFilter("OddOneOut"));
-            filterCognitiveSprintButton?.onClick.AddListener(() => ApplyFilter("CognitiveSprint"));
         }
 
         #endregion
@@ -384,7 +379,6 @@ namespace DigitPark.Managers
                 "QuickMath" => AutoLocalizer.Get("game_display_quick_math"),
                 "FlashTap" => AutoLocalizer.Get("game_display_flash_tap"),
                 "OddOneOut" => AutoLocalizer.Get("game_display_odd_one_out"),
-                "CognitiveSprint" => AutoLocalizer.Get("game_display_cognitive_sprint"),
                 _ => gameType ?? AutoLocalizer.Get("game_type_unknown")
             };
         }

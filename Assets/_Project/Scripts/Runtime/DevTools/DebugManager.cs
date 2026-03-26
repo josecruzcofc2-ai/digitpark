@@ -155,7 +155,6 @@ namespace DigitPark.DevTools
             DrawServiceStatus("AuthenticationService", AuthenticationService.Instance != null);
             DrawServiceStatus("DatabaseService", DatabaseService.Instance != null);
             DrawServiceStatus("AnalyticsService", AnalyticsService.Instance != null);
-            DrawServiceStatus("NotificationService", NotificationService.Instance != null);
             DrawServiceStatus("PremiumManager", PremiumManager.Instance != null);
             DrawServiceStatus("GameSessionManager", GameSessionManager.Instance != null);
 
@@ -206,22 +205,11 @@ namespace DigitPark.DevTools
 
             if (PremiumManager.Instance != null)
             {
-                GUILayout.Label($"Create Tournaments: {PremiumManager.Instance.CanCreateTournaments}");
                 GUILayout.Label($"Styles PRO: {PremiumManager.Instance.HasStylesPro}");
                 GUILayout.Label($"Is Premium: {PremiumManager.Instance.IsPremium}");
 
                 GUILayout.Space(10);
                 GUILayout.Label("=== Desbloquear (Test) ===", GUI.skin.box);
-
-                if (GUILayout.Button("Desbloquear: Create Tournaments"))
-                {
-                    PremiumManager.Instance.UnlockProduct(PremiumProduct.CreateTournaments);
-                }
-
-                if (GUILayout.Button("Desbloquear: Tournament Bundle"))
-                {
-                    PremiumManager.Instance.UnlockProduct(PremiumProduct.TournamentBundle);
-                }
 
                 if (GUILayout.Button("Desbloquear: Styles PRO"))
                 {
@@ -232,7 +220,6 @@ namespace DigitPark.DevTools
 
                 if (GUILayout.Button("Resetear Todo Premium"))
                 {
-                    PlayerPrefs.DeleteKey("DP_Premium_CreateTournaments");
                     PlayerPrefs.DeleteKey("DP_Premium_StylesPro");
                     PlayerPrefs.Save();
                     UnityEngine.Debug.Log("[Debug] Estado premium reseteado - reinicia la app");
@@ -369,17 +356,6 @@ namespace DigitPark.DevTools
                 GUILayout.Label($"Database: {(DatabaseService.Instance != null ? "OK" : "NO")}");
             }
 
-            // Notifications
-            if (NotificationService.Instance != null)
-            {
-                GUILayout.Label($"FCM Initialized: {NotificationService.Instance.IsInitialized}");
-                string token = NotificationService.Instance.GetToken();
-                if (!string.IsNullOrEmpty(token))
-                {
-                    GUILayout.Label($"FCM Token: {token.Substring(0, Mathf.Min(20, token.Length))}...");
-                }
-            }
-
             GUILayout.Space(10);
             GUILayout.Label("=== Test Database ===", GUI.skin.box);
 
@@ -461,29 +437,11 @@ namespace DigitPark.DevTools
         {
             if (PremiumManager.Instance != null)
             {
-                PremiumManager.Instance.UnlockProduct(PremiumProduct.TournamentBundle);
                 PremiumManager.Instance.UnlockProduct(PremiumProduct.StylesPro);
                 UnityEngine.Debug.Log("[Debug] Todos los productos premium desbloqueados");
             }
         }
 #endif
-
-        /// <summary>
-        /// Simula recibir una notificacion push
-        /// </summary>
-        public void SimulateNotification(string type, string title, string body)
-        {
-            var notification = new NotificationData
-            {
-                Type = type,
-                Title = title,
-                Body = body,
-                ReceivedAt = DateTime.Now
-            };
-
-            UnityEngine.Debug.Log($"[Debug] Notificacion simulada: {type} - {title}");
-            // TODO: Invocar evento de NotificationService si es necesario
-        }
 
         /// <summary>
         /// Simula ganar juegos de prueba

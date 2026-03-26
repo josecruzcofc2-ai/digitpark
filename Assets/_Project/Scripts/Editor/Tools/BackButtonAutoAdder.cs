@@ -18,7 +18,6 @@ namespace DigitPark.Editor
         private const string BACK_BUTTON_GOLD_PATH = "Assets/_Project/Prefabs/Common/BackButtonGold.prefab";
         private const string SCENES_PATH = "Assets/_Project/Scenes";
 
-        // No gold-button scenes remain after CashBattle removal
         private static readonly HashSet<string> GOLD_SCENES = new HashSet<string>();
 
         // Scenes that should NOT have ANY back button
@@ -37,7 +36,6 @@ namespace DigitPark.Editor
             "MemoryPairs",
             "QuickMath",
             "OddOneOut",
-            "CognitiveSprint",
 
             // Matchmaking scenes (have cancel button instead)
             "Matchmaking",
@@ -166,7 +164,7 @@ namespace DigitPark.Editor
                 // Determine parent: gold buttons go inside the Header GO for perfect alignment
                 // with TitleText and currency pill. Header may live at different depths:
                 //   SafeArea > Header
-                //   WalletUI > Header  (CashWallet — no SafeArea)
+                //   WalletUI > Header
                 Transform parent;
 
                 if (buttonType == "GOLD")
@@ -242,7 +240,7 @@ namespace DigitPark.Editor
             Transform direct = canvas.Find("Header");
             if (direct != null) return direct;
 
-            // 2. SafeArea > Header  (CashBattleHub, CashHistory, CashTournaments…)
+            // 2. SafeArea > Header
             Transform safeArea = canvas.Find("SafeArea");
             if (safeArea != null)
             {
@@ -325,7 +323,6 @@ namespace DigitPark.Editor
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
 
-            // Also remove any leftover BackButtonGold from now-excluded scenes (e.g. CashMatchmaking)
             RemoveBackButtonFromExcludedGoldScenes();
 
             if (!AllScenesBatchBuilder.SilentMode)
@@ -337,11 +334,7 @@ namespace DigitPark.Editor
                     "OK");
         }
 
-        // Scenes that were previously gold but now excluded — remove any leftover BackButtonGold
-        private static readonly HashSet<string> FORMERLY_GOLD_EXCLUDED = new HashSet<string>
-        {
-            "CashMatchmaking"
-        };
+        private static readonly HashSet<string> FORMERLY_GOLD_EXCLUDED = new HashSet<string>();
 
         private static void RemoveBackButtonFromExcludedGoldScenes()
         {

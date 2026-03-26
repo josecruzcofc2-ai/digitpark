@@ -54,7 +54,6 @@ namespace DigitPark.Monetization
             grantDG = 200,
             grantThemeId = "", // Random Tier A — resolved at purchase time
             grantFrameId = "frame_ruby",
-            grantTitleId = "mastermind",
             grantEffectId = "",
         };
 
@@ -75,8 +74,7 @@ namespace DigitPark.Monetization
             grantDG = 500,
             grantThemeId = "theme_aurora_borealis",
             grantFrameId = "frame_holographic",
-            grantTitleId = "",
-            grantEffectId = "gold_rain",
+            grantEffectId = "",
         };
 
         // ==================== STATE ====================
@@ -407,20 +405,6 @@ namespace DigitPark.Monetization
                 Debug.Log($"[WelcomePackService] Granted frame: {pack.grantFrameId}");
             }
 
-            // Title — B3-E: use PlayerTitleService
-            if (!string.IsNullOrEmpty(pack.grantTitleId))
-            {
-                PlayerTitleService.Instance?.UnlockTitle(pack.grantTitleId);
-                Debug.Log($"[WelcomePackService] Granted title: {pack.grantTitleId}");
-            }
-
-            // Effect
-            if (!string.IsNullOrEmpty(pack.grantEffectId))
-            {
-                VictoryEffectService.Instance?.UnlockEffect(pack.grantEffectId);
-                Debug.Log($"[WelcomePackService] Granted effect: {pack.grantEffectId}");
-            }
-
             PlayerPrefs.Save();
         }
 
@@ -458,7 +442,6 @@ namespace DigitPark.Monetization
         public int grantDG;
         public string grantThemeId;
         public string grantFrameId;
-        public string grantTitleId;
         public string grantEffectId;
     }
 }

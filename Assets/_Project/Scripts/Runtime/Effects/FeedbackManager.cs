@@ -31,7 +31,6 @@ namespace DigitPark.Effects
 
         // Referencias a otros managers
         private ParticleSystemManager particleManager;
-        private CelebrationManager celebrationManager;
 
         // Camera shake
         private Vector3 originalCameraPosition;
@@ -73,14 +72,6 @@ namespace DigitPark.Effects
                 GameObject pmObj = new GameObject("ParticleSystemManager");
                 pmObj.transform.SetParent(transform);
                 particleManager = pmObj.AddComponent<ParticleSystemManager>();
-            }
-
-            celebrationManager = GetComponentInChildren<CelebrationManager>();
-            if (celebrationManager == null)
-            {
-                GameObject cmObj = new GameObject("CelebrationManager");
-                cmObj.transform.SetParent(transform);
-                celebrationManager = cmObj.AddComponent<CelebrationManager>();
             }
 
             Debug.Log("[FeedbackManager] Sistema de feedback inicializado");
@@ -137,48 +128,6 @@ namespace DigitPark.Effects
         #endregion
 
         #region Celebrations
-
-        /// <summary>
-        /// Celebracion pequeña (completar nivel)
-        /// </summary>
-        public void PlaySmallCelebration()
-        {
-            if (!effectsEnabled) return;
-
-            PlayHaptic(HapticType.Heavy);
-            celebrationManager?.PlayConfetti(CelebrationType.Small);
-            StartCoroutine(ScreenFlash(new Color(1f, 0.84f, 0f, 0.2f), 0.3f));
-        }
-
-        /// <summary>
-        /// Celebracion grande (nuevo record)
-        /// </summary>
-        public void PlayBigCelebration()
-        {
-            if (!effectsEnabled) return;
-
-            PlayHaptic(HapticType.Heavy);
-            celebrationManager?.PlayConfetti(CelebrationType.Big);
-            celebrationManager?.PlayFireworks();
-            ShakeScreen(shakeIntensity * 0.3f, 0.5f);
-            StartCoroutine(ScreenFlash(new Color(1f, 0.84f, 0f, 0.4f), 0.5f));
-            StartCoroutine(PulseEffect());
-        }
-
-        /// <summary>
-        /// Celebracion epica (logro especial)
-        /// </summary>
-        public void PlayEpicCelebration()
-        {
-            if (!effectsEnabled) return;
-
-            PlayHaptic(HapticType.Heavy);
-            celebrationManager?.PlayConfetti(CelebrationType.Epic);
-            celebrationManager?.PlayFireworks();
-            celebrationManager?.PlayStarBurst();
-            ShakeScreen(shakeIntensity * 0.5f, 0.8f);
-            StartCoroutine(EpicScreenEffect());
-        }
 
         #endregion
 

@@ -84,8 +84,6 @@ namespace DigitPark.Editor
         private const string ICON_SEARCH = ICONS_BASE + "/Navigation/SearchIcon.png";
         private const string ICON_MISSIONS = ICONS_BASE + "/Missions/MissionsIcon.png";
         private const string ICON_PLAY = ICONS_BASE + "/UI/PlayIcon.png";
-private const string ICON_DAILY_REWARD = ICONS_BASE + "/DailyRewards/DailyRewardIcon.png";
-        private const string ICON_ACHIEVEMENTS = ICONS_BASE + "/UI/AchievementsIcon.png";
         private const string ICON_SHOP = ICONS_BASE + "/UI/ShopIcon.png";
         private const string ICON_PREMIUM = ICONS_BASE + "/UI/PremiumIcon.png";
 
@@ -266,12 +264,6 @@ if (GUILayout.Button("7. Extra Row", GUILayout.Height(25))) CreateExtraRow();
             // Use a circle sprite for round badge appearance
             badgeImg.type = Image.Type.Sliced;
             badgeImg.pixelsPerUnitMultiplier = 2f;
-
-            // BadgeAnimator: pop-in entrance + continuous pulse
-            var badgeAnim = GetOrAdd<BadgeAnimator>(badge);
-            var badgeSO = new SerializedObject(badgeAnim);
-            var autoPulseProp = badgeSO.FindProperty("autoPulse");
-            if (autoPulseProp != null) { autoPulseProp.boolValue = true; badgeSO.ApplyModifiedProperties(); }
 
             var badgeText = FindOrCreate(badge.transform, "BadgeText");
             var btRT = GetOrAdd<RectTransform>(badgeText);
@@ -775,7 +767,6 @@ if (GUILayout.Button("7. Extra Row", GUILayout.Height(25))) CreateExtraRow();
             for (int i = panel.transform.childCount - 1; i >= 0; i--)
                 DestroyImmediate(panel.transform.GetChild(i).gameObject);
 
-            CreateExtraCard(panel.transform, "AchievementsCard", "Achievements", ORANGE_ACCENT);
             CreateExtraCard(panel.transform, "ShopCard", "Shop", GOLD);
             CreateExtraCard(panel.transform, "PremiumCard", "Premium", GOLD);
 
@@ -925,9 +916,7 @@ SetRef(so, "settingsButton", FindInPath<Button>(r, "Header/SettingsButton"));
 
             // Monetization buttons
             SetRef(so, "shopButton", FindInPath<Button>(r, "ExtraRow/ShopCard"));
-            SetRef(so, "achievementsButton", FindInPath<Button>(r, "ExtraRow/AchievementsCard"));
             SetRef(so, "dailyRewardsButton", FindInPath<Button>(r, "DailyRewardCard"));
-            SetRef(so, "missionsCardButton", FindInPath<Button>(r, "QuickActionsPanel/MissionsCard"));
 
             so.ApplyModifiedProperties();
             EditorUtility.SetDirty(manager);
@@ -987,8 +976,7 @@ SetRef(so, "settingsButton", FindInPath<Button>(r, "Header/SettingsButton"));
             a += TryAssignIcon(canvas.transform, "QuickActionsPanel/MissionsCard/Icon", ICON_MISSIONS);
             a += TryAssignIcon(canvas.transform, "PlayCard/Icon", ICON_PLAY);
 a += TryAssignIcon(canvas.transform, "DailyRewardCard/DailyRewardIcon", ICON_DAILY_REWARD);
-            a += TryAssignIcon(canvas.transform, "ExtraRow/AchievementsCard/Icon", ICON_ACHIEVEMENTS);
-            a += TryAssignIcon(canvas.transform, "ExtraRow/ShopCard/Icon", ICON_SHOP);
+                        a += TryAssignIcon(canvas.transform, "ExtraRow/ShopCard/Icon", ICON_SHOP);
             a += TryAssignIcon(canvas.transform, "ExtraRow/PremiumCard/Icon", ICON_PREMIUM);
 
             AssignNotificationSprites();

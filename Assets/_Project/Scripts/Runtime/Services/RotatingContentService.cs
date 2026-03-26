@@ -319,16 +319,6 @@ namespace DigitPark.Services
         {
             switch (item.contentType)
             {
-                case RotatingContentType.SeasonalBattleCard:
-                    // Unlock card in BattleCardService
-                    var cardService = DigitPark.Cosmetics.BattleCardService.Instance;
-                    if (cardService != null)
-                    {
-                        // BattleCardService.UnlockCard(item.itemId) — wire when method exists
-                        PlayerPrefs.SetInt($"Card_Owned_{item.itemId}", 1);
-                    }
-                    break;
-
                 case RotatingContentType.MonthlyExclusiveFrame:
                     PlayerPrefs.SetInt($"Frame_Owned_{item.itemId}", 1);
                     break;
@@ -453,7 +443,6 @@ namespace DigitPark.Services
 
     public enum RotatingContentType
     {
-        SeasonalBattleCard,      // Quarterly, 800-1,500 DG
         MonthlyExclusiveFrame,   // Monthly, $4.99-$9.99 IAP
         LimitedThemeVariant      // 2-week window, 600 DG
     }

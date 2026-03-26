@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using DG.Tweening;
 using TMPro;
@@ -6,7 +6,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using DigitPark.Localization;
-using DigitPark.UI;
 
 namespace DigitPark.Animations
 {
@@ -118,7 +117,7 @@ namespace DigitPark.Animations
         {
             // Phase 1: White flash
             flashImage.color = FLASH_WIN;
-            var fadeOut = flashImage.DOFade(0f, AccessibilityHelper.AnimDuration(0.4f)).SetEase(AccessibilityHelper.AnimEase(AnimConstants.SMOOTH));
+            var fadeOut = flashImage.DOFade(0f, 0.4f).SetEase(AnimConstants.SMOOTH);
             TrackTween(fadeOut);
 
             // Screen shake
@@ -132,8 +131,8 @@ namespace DigitPark.Animations
             {
                 resultIconTransform.localScale = Vector3.zero;
                 var popIn = DOTween.Sequence();
-                popIn.Append(resultIconTransform.DOScale(AnimConstants.SCALE_GO_POP, AccessibilityHelper.AnimDuration(0.3f)).SetEase(AccessibilityHelper.AnimEase(AnimConstants.ENTER), 3f));
-                popIn.Append(resultIconTransform.DOScale(1f, AccessibilityHelper.AnimDuration(AnimConstants.DURATION_QUICK)).SetEase(AccessibilityHelper.AnimEase(AnimConstants.SMOOTH)));
+                popIn.Append(resultIconTransform.DOScale(AnimConstants.SCALE_GO_POP, 0.3f).SetEase(AnimConstants.ENTER, 3f));
+                popIn.Append(resultIconTransform.DOScale(1f, AnimConstants.DURATION_QUICK).SetEase(AnimConstants.SMOOTH));
                 TrackTween(popIn);
             }
 
@@ -153,7 +152,7 @@ namespace DigitPark.Animations
         {
             // Subtle red flash
             flashImage.color = FLASH_LOSE;
-            var loseFade = flashImage.DOFade(0f, AccessibilityHelper.AnimDuration(0.5f)).SetEase(AccessibilityHelper.AnimEase(AnimConstants.SMOOTH));
+            var loseFade = flashImage.DOFade(0f, 0.5f).SetEase(AnimConstants.SMOOTH);
             TrackTween(loseFade);
 
             yield return new WaitForSeconds(0.5f);
@@ -297,7 +296,7 @@ namespace DigitPark.Animations
             // Pop in
             var seq = DOTween.Sequence();
             seq.Append(text.DOFade(1f, 0.1f));
-            seq.Join(textRT.DOScale(AnimConstants.SCALE_GO_POP, AccessibilityHelper.AnimDuration(AnimConstants.DURATION_MEDIUM)).SetEase(AccessibilityHelper.AnimEase(AnimConstants.ENTER), 3f));
+            seq.Join(textRT.DOScale(AnimConstants.SCALE_GO_POP, AnimConstants.DURATION_MEDIUM).SetEase(AnimConstants.ENTER, 3f));
             seq.Append(textRT.DOScale(1f, 0.1f));
 
             // Screen shake
@@ -321,7 +320,7 @@ namespace DigitPark.Animations
             ringImg.raycastTarget = false;
 
             var ringSeq = DOTween.Sequence();
-            ringSeq.Append(ringRT.DOScale(12f, AccessibilityHelper.AnimDuration(0.5f)).SetEase(AccessibilityHelper.AnimEase(AnimConstants.SMOOTH)));
+            ringSeq.Append(ringRT.DOScale(12f, 0.5f).SetEase(AnimConstants.SMOOTH));
             ringSeq.Join(ringImg.DOFade(0f, 0.5f));
             ringSeq.OnComplete(() => Destroy(ringGO));
             TrackTween(ringSeq);

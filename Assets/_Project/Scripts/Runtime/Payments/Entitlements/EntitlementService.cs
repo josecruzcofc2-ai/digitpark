@@ -95,7 +95,7 @@ namespace DigitPark.Payments.Entitlements
 
         /// <summary>
         /// Otorga un entitlement tras compra exitosa.
-        /// provider debe ser "stripe" o "apple_iap" — NUNCA "triumph".
+        /// provider MUST be "apple_iap" — NUNCA "triumph".
         /// </summary>
         public async Task Grant(string productId, string provider, string transactionId)
         {

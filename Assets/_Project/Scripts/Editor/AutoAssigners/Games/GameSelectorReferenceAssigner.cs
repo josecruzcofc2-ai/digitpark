@@ -26,7 +26,6 @@ namespace DigitPark.Editor.AutoAssigners
         private static readonly string[] REQUIRED_REFS = {
             "digitRushButton", "memoryPairsButton", "quickMathButton",
             "flashTapButton", "oddOneOutButton",
-            "cognitiveSprintButton", "cognitiveSprintPanel",
             "backButton"
         };
 
@@ -260,10 +259,6 @@ namespace DigitPark.Editor.AutoAssigners
             AssignReference(so, "quickMathButton", FindButtonByName("quickmath", "math"));
             AssignReference(so, "flashTapButton", FindButtonByName("flashtap", "flash", "tap"));
             AssignReference(so, "oddOneOutButton", FindButtonByName("oddoneout", "odd", "one"));
-
-            // Cognitive Sprint
-            AssignReference(so, "cognitiveSprintButton", FindButtonByName("cognitivesprint", "sprint", "cognitive"));
-            AssignReference(so, "cognitiveSprintPanel", FindByNameContains<Transform>("cognitivesprintpanel", "sprintpanel"));
 
             // Navigation
             AssignReference(so, "backButton", FindButtonByName("back", "return", "close"));

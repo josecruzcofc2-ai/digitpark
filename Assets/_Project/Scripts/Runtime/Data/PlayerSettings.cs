@@ -15,7 +15,6 @@ namespace DigitPark.Data
 
         // Notificaciones
         public bool pushNotificationsEnabled;
-        public bool tournamentNotifications;
         public bool dailyRewardNotifications;
 
         // Visual
@@ -39,7 +38,6 @@ namespace DigitPark.Data
             vibrationEnabled = true;
 
             pushNotificationsEnabled = true;
-            tournamentNotifications = true;
             dailyRewardNotifications = true;
 
             theme = ThemeType.Auto;

@@ -48,74 +48,8 @@
       }
     },
 
-    "tournaments": {
-      // Cualquier usuario autenticado puede leer torneos
-      ".read": "auth != null",
-
-      "$tournamentId": {
-        // Solo el creador puede modificar su torneo (creación o actualización)
-        // AUDIT-FIXED [2026-03-10] P1: era auth != null (cualquier usuario podía sobreescribir torneos ajenos)
-        ".write": "auth != null && (!data.exists() && newData.child('creatorId').val() === auth.uid || data.child('creatorId').val() === auth.uid)",
-        ".validate": "newData.hasChildren(['tournamentId', 'name', 'status', 'creatorId'])",
-
-        "participants": {
-          // B0-B [2026-03-20]: Cada participante puede escribir SOLO su propia entrada
-          // El creador ya tiene acceso por la regla padre
-          "$participantId": {
-            ".write": "auth != null && auth.uid === $participantId"
-          }
-        }
-      }
-    },
-
-    "notifications": {
-      "$uid": {
-        // Solo el usuario puede leer/escribir sus notificaciones
-        ".read": "auth != null && auth.uid === $uid",
-        ".write": "auth != null && auth.uid === $uid"
-      }
-    },
-
-    "friend_requests": {
-      "$uid": {
-        ".read": "auth != null && auth.uid === $uid",
-        "$requestId": {
-          // Allow write if: user owns this node OR is the sender of the request
-          ".write": "auth != null && (auth.uid === $uid || newData.child('senderId').val() === auth.uid)",
-          ".validate": "newData.hasChildren(['requestId', 'senderId', 'receiverId', 'status']) && (newData.child('senderId').val() === auth.uid || newData.child('receiverId').val() === auth.uid)"
-        }
-      }
-    },
-
     // Paths para borrado GDPR (DeleteAccount): solo el propio usuario puede borrar sus datos
     "matchHistory": {
-      "$uid": {
-        ".read": "auth != null && auth.uid === $uid",
-        ".write": "auth != null && auth.uid === $uid"
-      }
-    },
-
-    "achievements": {
-      "$uid": {
-        ".read": "auth != null && auth.uid === $uid",
-        ".write": "auth != null && auth.uid === $uid"
-      }
-    },
-
-    "friends": {
-      "$uid": {
-        ".read": "auth != null && auth.uid === $uid",
-        // B0-B [2026-03-20]: Solo el dueño puede leer su lista de amigos
-        // Para escritura: el dueño puede escribir cualquier entrada,
-        // Y otro usuario autenticado puede escribir SOLO su propia entrada ($friendId === auth.uid)
-        // Esto permite accept/reject bilateral sin Cloud Function
-        "$friendId": {
-          ".write": "auth != null && (auth.uid === $uid || auth.uid === $friendId)"
-        }
-      }
-    },
-
-    "tournamentHistory": {
       "$uid": {
         ".read": "auth != null && auth.uid === $uid",
         ".write": "auth != null && auth.uid === $uid"

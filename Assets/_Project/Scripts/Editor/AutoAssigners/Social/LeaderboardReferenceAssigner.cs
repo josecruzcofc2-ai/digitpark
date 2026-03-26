@@ -11,7 +11,7 @@ namespace DigitPark.Editor.AutoAssigners
     /// <summary>
     /// Reference Assigner for Scores/Leaderboard scene.
     /// Automatically finds and assigns UI references to LeaderboardManager.
-    /// Includes Game Selector buttons (5 juegos, sin CognitiveSprint).
+    /// Includes Game Selector buttons (5 juegos).
     ///
     /// Menu: DigitPark/Auto Assigners/References/Social/Leaderboard References
     /// </summary>
@@ -24,7 +24,7 @@ namespace DigitPark.Editor.AutoAssigners
         private static int alreadySetCount = 0;
         private static List<ReferenceResult> results = new List<ReferenceResult>();
 
-        // 5 juegos con ranking (sin CognitiveSprint)
+        // 5 juegos con ranking
         private static readonly string[] GAME_IDS = {
             "DigitRush", "FlashTap", "MemoryPairs", "OddOneOut", "QuickMath"
         };

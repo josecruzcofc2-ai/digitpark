@@ -42,9 +42,6 @@ namespace DigitPark.Editor
             }
 
             SetStringField(configProp, "paymentsHealthUrl",        $"{BASE_URL}/paymentsHealth");
-            SetStringField(configProp, "stripeCreateCheckoutUrl",  $"{BASE_URL}/stripeCreateCheckout");
-            SetStringField(configProp, "stripeSessionStatusUrl",   $"{BASE_URL}/stripeSessionStatus");
-            SetStringField(configProp, "stripeWebhookUrl",         $"{BASE_URL}/stripeWebhook");
             SetStringField(configProp, "iapValidateReceiptUrl",    $"{BASE_URL}/iapValidateReceipt");
             SetStringField(configProp, "getEntitlementsUrl",       $"{BASE_URL}/getEntitlements");
             SetStringField(configProp, "syncEntitlementsUrl",      $"{BASE_URL}/syncEntitlements");
@@ -139,20 +136,6 @@ namespace DigitPark.Editor
                 { "platinum", 100000 },
             };
 
-            var titleRebalance = new Dictionary<string, int>
-            {
-                { "strategist", 8000  },
-                { "analyst",    8000  },
-                { "champion",   20000 },
-                { "gladiator",  20000 },
-            };
-
-            var effectRebalance = new Dictionary<string, int>
-            {
-                { "confetti", 12000 },
-                { "fireworks", 20000 },
-            };
-
             var allItems = Resources.LoadAll<ShopItemData>("Shop");
             int changed = 0;
             var log = new System.Text.StringBuilder();
@@ -167,16 +150,6 @@ namespace DigitPark.Editor
                 if (item.itemType == ShopItemType.Frame)
                 {
                     foreach (var kv in frameRebalance)
-                        if (nameLower.Contains(kv.Key)) { newPrice = kv.Value; break; }
-                }
-                else if (item.itemType == ShopItemType.Title)
-                {
-                    foreach (var kv in titleRebalance)
-                        if (nameLower.Contains(kv.Key)) { newPrice = kv.Value; break; }
-                }
-                else if (item.itemType == ShopItemType.WinEffect)
-                {
-                    foreach (var kv in effectRebalance)
                         if (nameLower.Contains(kv.Key)) { newPrice = kv.Value; break; }
                 }
 

@@ -5,9 +5,11 @@ using UnityEngine;
 using DigitPark.Services;
 using DigitPark.Services.Firebase;
 using DigitPark.Data;
-using DigitPark.Progression;
 using DigitPark.Navigation;
 using DigitPark.Economy;
+#if UNITY_ANDROID
+using Google.Play.Review;
+#endif
 
 namespace DigitPark.Games
 {
@@ -100,31 +102,6 @@ namespace DigitPark.Games
         }
 
         /// <summary>
-        /// Inicia un Cognitive Sprint con multiples juegos
-        /// </summary>
-        public void StartCognitiveSprintSession(List<GameType> games, string opponentId, string opponentName, decimal entryFee, string matchId)
-        {
-            if (games == null || games.Count < 2 || games.Count > 5)
-            {
-                Debug.LogError("Cognitive Sprint requiere entre 2 y 5 juegos");
-                return;
-            }
-
-            CurrentContext = new GameContext
-            {
-                Mode = GameMode.CognitiveSprint,
-                Games = games,
-                OpponentId = opponentId,
-                OpponentName = opponentName,
-                EntryFee = entryFee,
-                MatchId = matchId
-            };
-
-            OnSessionStarted?.Invoke(CurrentContext);
-            LoadCurrentGame();
-        }
-
-        /// <summary>
         /// Inicia una sesion de partida online 1v1
         /// </summary>
         public void StartOnlineMatch(string matchId, string opponentName)
@@ -139,29 +116,6 @@ namespace DigitPark.Games
             }
 
             Debug.Log($"[GameSessionManager] Online match started: {matchId} vs {opponentName}");
-        }
-
-        /// <summary>
-        /// Inicia una sesion de torneo
-        /// </summary>
-        public void StartTournamentSession(GameType gameType, string tournamentId, string matchId, string opponentId, string opponentName)
-        {
-            CurrentContext = new GameContext
-            {
-                Mode = GameMode.Tournament,
-                Games = new List<GameType> { gameType },
-                TournamentId = tournamentId,
-                MatchId = matchId,
-                OpponentId = opponentId,
-                OpponentName = opponentName
-            };
-
-            // Analytics
-            AnalyticsService.Instance?.LogGameStart(gameType.ToString());
-            AnalyticsService.Instance?.LogTournamentJoined(tournamentId, gameType.ToString(), 0);
-
-            OnSessionStarted?.Invoke(CurrentContext);
-            LoadCurrentGame();
         }
 
         /// <summary>
@@ -254,16 +208,6 @@ namespace DigitPark.Games
                                 gameId
                             );
 
-                            // Si es torneo normal, actualizar score en el torneo
-                            if (CurrentContext.Mode == GameMode.Tournament && !string.IsNullOrEmpty(CurrentContext.TournamentId))
-                            {
-                                await DatabaseService.Instance.UpdateTournamentScore(
-                                    CurrentContext.TournamentId,
-                                    playerData.userId,
-                                    result.TotalTime
-                                );
-                            }
-
                         }
                         else
                         {
@@ -329,22 +273,8 @@ namespace DigitPark.Games
 
                 OnGameCompleted?.Invoke(result);
 
-                // === Achievement tracking ===
+                // Win streak tracking — only count actual victories in competitive modes
                 {
-                    string gameType = CurrentContext.CurrentGame?.ToString();
-                    int score = (int)result.FinalScore;
-                    int accuracy = result.Errors == 0 ? 100 : Mathf.Max(0, 100 - (result.Errors * 10));
-
-                    AchievementService.Instance?.OnGameCompleted(
-                        result.Completed,
-                        result.TotalTime,
-                        gameType,
-                        score,
-                        accuracy,
-                        wasBehind: false
-                    );
-
-                    // Win streak tracking — only count actual victories in competitive modes
                     bool isWin;
                     if (CurrentContext.Mode == GameMode.Practice)
                     {
@@ -366,7 +296,6 @@ namespace DigitPark.Games
                         int currentStreak = PlayerPrefs.GetInt("DP_CurrentWinStreak", 0) + 1;
                         PlayerPrefs.SetInt("DP_CurrentWinStreak", currentStreak);
                         PlayerPrefs.Save();
-                        AchievementService.Instance?.OnWinStreakChanged(currentStreak);
 
                         // Sync win streak to Firebase
                         SyncWinStreakToFirebase(currentStreak);
@@ -384,37 +313,23 @@ namespace DigitPark.Games
                     // Se mantiene en 0 hasta tener esos datos — sin bonus especulativo.
                     const float scorePercentile = 0f;
 
-                    var xpResult = new GameResult
+                }
+
+                if (result.Completed)
+                {
+                    int gamesPlayed = PlayerPrefs.GetInt("DP_TotalGamesPlayed", 0) + 1;
+                    PlayerPrefs.SetInt("DP_TotalGamesPlayed", gamesPlayed);
+                    PlayerPrefs.Save();
+                    if (gamesPlayed == 10)
                     {
-                        gameId     = CurrentContext.CurrentGame?.ToString() ?? "",
-                        isWin      = isWin,
-                        isPerfect  = result.Errors == 0 && result.Completed,
-                        score      = (int)result.FinalScore,
-                        scorePercentile = scorePercentile
-                    };
-                    if (PlayerProgressionSystem.Instance != null)
-                    {
-                        int xpGained = PlayerProgressionSystem.Instance.AddGameXP(xpResult);
-                        if (xpGained > 0)
-                            MissionsManager.Instance?.ReportXPEarned(xpGained);
+#if UNITY_IOS && !UNITY_EDITOR
+                        UnityEngine.iOS.Device.RequestStoreReview();
+#elif UNITY_ANDROID && !UNITY_EDITOR
+                        RequestAndroidReviewFlow();
+#endif
                     }
                 }
 
-                // Incrementar contador de partidas en ReviewService
-                ReviewService.Instance?.IncrementGamesPlayed();
-
-                // Intentar mostrar review prompt si gano (no despues de perder)
-                if (result.Completed)
-                {
-                    ReviewService.Instance?.TryRequestReview(justLost: false);
-                }
-
-                // Si hay mas juegos en Cognitive Sprint, avanzar
-                if (CurrentContext.Mode == GameMode.CognitiveSprint && CurrentContext.HasMoreGames)
-                {
-                    // Mostrar pantalla de transicion o cargar siguiente juego
-                    Debug.Log($"Juego {CurrentContext.CurrentGameIndex + 1} completado. Siguiente juego...");
-                }
             }
             catch (Exception ex)
             {
@@ -545,12 +460,6 @@ namespace DigitPark.Games
                 case GameMode.Online:
                     return 0; // Handled by OnlineResultManager.GrantRankedRewards (FWOTD + perfect bonus)
 
-                case GameMode.Tournament:
-                    return result.Completed ? EconomyConstants.COINS_TOURNAMENT_WIN : EconomyConstants.COINS_TOURNAMENT_LOSS;
-
-                case GameMode.CognitiveSprint:
-                    return result.Completed ? EconomyConstants.COINS_SPRINT_WIN : EconomyConstants.COINS_SPRINT_LOSS;
-
                 default:
                     return 0;
             }
@@ -580,24 +489,6 @@ namespace DigitPark.Games
                     if (DatabaseService.Instance != null)
                     {
                         await DatabaseService.Instance.SavePlayerData(playerData);
-
-                        // Si es torneo, reportar que terminó
-                        if (ctx.Mode == GameMode.Tournament && !string.IsNullOrEmpty(ctx.TournamentId))
-                        {
-                            // Calcular mejor tiempo de la sesión
-                            float bestSessionTime = float.MaxValue;
-                            foreach (var result in ctx.Results)
-                            {
-                                if (result.TotalTime < bestSessionTime)
-                                    bestSessionTime = result.TotalTime;
-                            }
-
-                            await DatabaseService.Instance.UpdateTournamentScore(
-                                ctx.TournamentId,
-                                playerData.userId,
-                                bestSessionTime
-                            );
-                        }
                     }
 
                     Debug.Log("[GameSession] Resultados guardados exitosamente");
@@ -628,49 +519,7 @@ namespace DigitPark.Games
                 return;
 
             bool isPractice = ctx.Mode == GameMode.Practice;
-            bool isSprint = ctx.Games != null && ctx.Games.Count > 1;
 
-            if (isSprint)
-            {
-                // Cognitive Sprint: una sola entrada con todos los juegos
-                float totalTime = 0f;
-                int totalErrors = 0;
-                float totalPenalty = 0f;
-
-                foreach (var r in ctx.Results)
-                {
-                    totalTime += r.TotalTime;
-                    totalErrors += r.Errors;
-                    totalPenalty += r.PenaltyTime;
-                }
-
-                string[] gameNames = new string[ctx.Games.Count];
-                for (int i = 0; i < ctx.Games.Count; i++)
-                    gameNames[i] = ctx.Games[i].ToString();
-
-                MatchHistoryEntry entry;
-                if (isPractice)
-                {
-                    entry = MatchHistoryEntry.CreateCognitiveSprintPractice(
-                        gameNames, totalTime, totalErrors, totalPenalty);
-                }
-                else
-                {
-                    float opponentTotal = 0f;
-                    if (ctx.OpponentResults != null)
-                    {
-                        foreach (var r in ctx.OpponentResults)
-                            opponentTotal += r.FinalScore;
-                    }
-
-                    entry = MatchHistoryEntry.CreateCognitiveSprintOnline(
-                        gameNames, totalTime, totalErrors, totalPenalty,
-                        ctx.OpponentName, ctx.OpponentId, opponentTotal);
-                }
-
-                MatchHistoryStorage.Instance.AddEntry(entry);
-            }
-            else
             {
                 // Juego individual: una entrada por resultado
                 foreach (var r in ctx.Results)
@@ -702,5 +551,24 @@ namespace DigitPark.Games
 
             Debug.Log($"[GameSession] Partida registrada en historial general");
         }
+
+#if UNITY_ANDROID
+        private async void RequestAndroidReviewFlow()
+        {
+            try
+            {
+                var reviewManager = new ReviewManager();
+                var requestTask = reviewManager.RequestReviewFlow();
+                await requestTask;
+                if (requestTask.Error != ReviewErrorCode.NoError) return;
+                var launchTask = reviewManager.LaunchReviewFlow(requestTask.Result);
+                await launchTask;
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"[GameSession] Android review flow failed: {e.Message}");
+            }
+        }
+#endif
     }
 }

@@ -7,7 +7,7 @@ namespace DigitPark.Payments
     /// <summary>
     /// Static delegates injected from Assembly-CSharp (PaymentBridgeWiring)
     /// to avoid direct dependency on AnalyticsService, AuthenticationService,
-    /// DatabaseService, CurrencyManager, and DeepLinkService from this named assembly.
+    /// DatabaseService, and CurrencyManager from this named assembly.
     /// All delegates default to safe no-ops until wired.
     /// </summary>
     public static class PaymentBridge
@@ -26,10 +26,6 @@ namespace DigitPark.Payments
         // Firebase Database
         public static Func<Dictionary<string, object>, Task> UpdatePlayerFields = _ =>
             Task.CompletedTask;
-
-        // DeepLink
-        public static Action<string, Action<string>> RegisterDeepLinkHandler = (_, __) => { };
-        public static Action<string> UnregisterDeepLinkHandler = _ => { };
 
         // Auth — Firebase ID token para Authorization header en Cloud Functions
         // BUG-06: necesario para que SyncWithServer() pueda llamar a getEntitlements autenticado

@@ -33,20 +33,8 @@ namespace DigitPark.Managers
         [SerializeField] public TextMeshProUGUI userText;
         [SerializeField] public Button searchButton;
 
-        [Header("UI - Notifications")]
-        [SerializeField] public Button notificationsButton;
-        [SerializeField] public Image notificationIconImage;
-        [SerializeField] public Sprite notificationIconNormal;
-        [SerializeField] public Sprite notificationIconActive;
-        [SerializeField] public GameObject notificationBadge;
-        [SerializeField] public TextMeshProUGUI notificationBadgeText;
-
         [Header("UI - Monetization")]
         [SerializeField] public Button shopButton;
-        [SerializeField] public Button achievementsButton;
-        [SerializeField] public Button dailyMissionsButton;
-        [SerializeField] public Button dailyRewardsButton;
-        [SerializeField] public Button missionsCardButton;
 
         [Header("UI - Premium")]
         [SerializeField] public Button premiumButton;
@@ -57,8 +45,6 @@ namespace DigitPark.Managers
         [SerializeField] public Animator titleAnimator;
 
         private PlayerData currentPlayer;
-        private int pendingNotificationsCount = 0;
-
         private void Start()
         {
             Debug.Log("[MainMenu] MainMenuManager iniciado");
@@ -102,54 +88,18 @@ namespace DigitPark.Managers
             settingsButton?.onClick.AddListener(OnSettingsButtonClicked);
             premiumButton?.onClick.AddListener(OnPremiumButtonClicked);
             shopButton?.onClick.AddListener(OnShopButtonClicked);
-            achievementsButton?.onClick.AddListener(OnAchievementsButtonClicked);
-            dailyMissionsButton?.onClick.AddListener(OnDailyMissionsButtonClicked);
-            dailyRewardsButton?.onClick.AddListener(OnDailyRewardsButtonClicked);
-            missionsCardButton?.onClick.AddListener(OnDailyMissionsButtonClicked);
 
             // User info buttons
             userButton?.onClick.AddListener(OnUserButtonClicked);
             searchButton?.onClick.AddListener(OnSearchButtonClicked);
-            notificationsButton?.onClick.AddListener(OnNotificationsButtonClicked);
-
             // Suscribirse a cambios de premium
             PremiumManager.OnPremiumStatusChanged += UpdatePremiumUI;
-
-            // Suscribirse a eventos de notificaciones
-            if (NotificationService.Instance != null)
-            {
-                NotificationService.Instance.OnNotificationReceived += OnNotificationReceived;
-            }
-
-            // Suscribirse a cambios en el almacenamiento de notificaciones
-            if (NotificationStorageService.Instance != null)
-            {
-                NotificationStorageService.Instance.OnUnreadCountChanged += OnUnreadCountChanged;
-                // Sincronizar badge con el conteo real persistido
-                SetNotificationCount(NotificationStorageService.Instance.GetUnreadCount());
-            }
         }
 
         private void OnDestroy()
         {
             DOTween.Kill(transform);
             PremiumManager.OnPremiumStatusChanged -= UpdatePremiumUI;
-
-            // Desuscribirse de eventos de notificaciones
-            if (NotificationService.Instance != null)
-            {
-                NotificationService.Instance.OnNotificationReceived -= OnNotificationReceived;
-            }
-
-            if (NotificationStorageService.Instance != null)
-            {
-                NotificationStorageService.Instance.OnUnreadCountChanged -= OnUnreadCountChanged;
-            }
-        }
-
-        private void OnUnreadCountChanged(int count)
-        {
-            SetNotificationCount(count);
         }
 
         /// <summary>
@@ -255,77 +205,6 @@ namespace DigitPark.Managers
             }
         }
 
-        /// <summary>
-        /// Callback cuando se recibe una notificación
-        /// </summary>
-        private void OnNotificationReceived(NotificationData notification)
-        {
-            pendingNotificationsCount++;
-            UpdateNotificationIcon();
-            Debug.Log($"[MainMenu] Notificación recibida: {notification.Title}");
-        }
-
-        /// <summary>
-        /// Actualiza el icono de notificaciones según el contador
-        /// </summary>
-        public void UpdateNotificationIcon()
-        {
-            bool hasNotifications = pendingNotificationsCount > 0;
-
-            // Cambiar sprite del icono
-            if (notificationIconImage != null)
-            {
-                notificationIconImage.sprite = hasNotifications
-                    ? notificationIconActive
-                    : notificationIconNormal;
-            }
-
-            // Mostrar/ocultar badge rojo con BadgeAnimator
-            if (notificationBadge != null)
-            {
-                var badgeAnim = notificationBadge.GetComponent<DigitPark.Animations.BadgeAnimator>();
-                if (badgeAnim != null)
-                {
-                    if (hasNotifications && !notificationBadge.activeSelf)
-                        badgeAnim.Show();
-                    else if (!hasNotifications && notificationBadge.activeSelf)
-                        badgeAnim.Hide();
-                    else if (hasNotifications && notificationBadge.activeSelf)
-                        badgeAnim.PlayUpdate();
-                }
-                else
-                {
-                    notificationBadge.SetActive(hasNotifications);
-                }
-            }
-
-            // Actualizar texto del badge
-            if (notificationBadgeText != null && hasNotifications)
-            {
-                notificationBadgeText.text = pendingNotificationsCount > 99
-                    ? "99+"
-                    : pendingNotificationsCount.ToString();
-            }
-        }
-
-        /// <summary>
-        /// Establece el contador de notificaciones pendientes
-        /// </summary>
-        public void SetNotificationCount(int count)
-        {
-            pendingNotificationsCount = Mathf.Max(0, count);
-            UpdateNotificationIcon();
-        }
-
-        /// <summary>
-        /// Limpia todas las notificaciones pendientes
-        /// </summary>
-        public void ClearNotifications()
-        {
-            pendingNotificationsCount = 0;
-            UpdateNotificationIcon();
-        }
-
         #region Button Callbacks
 
         /// <summary>
@@ -375,7 +254,7 @@ namespace DigitPark.Managers
 
             // AudioManager.Instance?.PlaySFX("ButtonClick");
 
-            SceneNavigator.Instance?.NavigateTo("Profile");
+            Debug.Log("[MainMenu] Profile no disponible");
         }
 
         /// <summary>
@@ -387,24 +266,10 @@ namespace DigitPark.Managers
 
             // AudioManager.Instance?.PlaySFX("ButtonClick");
 
-            SceneNavigator.Instance?.NavigateTo("SearchPlayers");
+            Debug.Log("[MainMenu] SearchPlayers no disponible");
         }
 
         /// <summary>
-        /// Abre el panel/escena de notificaciones
-        /// </summary>
-        private void OnNotificationsButtonClicked()
-        {
-            Debug.Log("[MainMenu] Abriendo notificaciones");
-
-            // Limpiar contador visual al ver notificaciones
-            ClearNotifications();
-
-            // Navegar a la escena de Notificaciones
-            PlayerPrefs.SetString("DP_NotificationsReturnScene", "MainMenu");
-            SceneNavigator.Instance?.NavigateTo("Notifications");
-        }
-
         /// <summary>
         /// Muestra el panel de premium
         /// </summary>
@@ -414,23 +279,8 @@ namespace DigitPark.Managers
             SceneNavigator.Instance?.NavigateTo("Shop");
         }
 
-        private void OnAchievementsButtonClicked()
-        {
-            Debug.Log("[MainMenu] Navegando a Achievements");
-            SceneNavigator.Instance?.NavigateTo("Achievements");
-        }
 
-        private void OnDailyMissionsButtonClicked()
-        {
-            Debug.Log("[MainMenu] Navegando a DailyMissions");
-            SceneNavigator.Instance?.NavigateTo("DailyMissions");
-        }
 
-        private void OnDailyRewardsButtonClicked()
-        {
-            Debug.Log("[MainMenu] Navegando a DailyRewards");
-            SceneNavigator.Instance?.NavigateTo("DailyRewards");
-        }
 
         private void OnPremiumButtonClicked()
         {

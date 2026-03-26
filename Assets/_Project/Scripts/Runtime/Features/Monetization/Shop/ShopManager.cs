@@ -245,8 +245,6 @@ namespace DigitPark.Monetization
                 case ShopTab.Featured: pos = 1f; break;
                 case ShopTab.Currency: pos = 0.75f; break;
                 case ShopTab.Styles: pos = 0.45f; break;
-                case ShopTab.Effects: pos = 0.15f; break;
-                case ShopTab.BattleCards: pos = 0f; break;
             }
 
             _scrollRect.verticalNormalizedPosition = pos;
@@ -645,12 +643,6 @@ namespace DigitPark.Monetization
             if (item == null) return;
 
             item.transform.DOPunchScale(Vector3.one * 0.2f, 0.4f, 5, 0.5f);
-
-            var particleSpawner = DigitPark.Animations.ParticleEffectSpawner.Instance;
-            if (particleSpawner != null)
-            {
-                particleSpawner.SpawnCenterBurst();
-            }
 
             var uiAnimManager = DigitPark.Animations.UIAnimationManager.Instance;
             if (uiAnimManager != null)

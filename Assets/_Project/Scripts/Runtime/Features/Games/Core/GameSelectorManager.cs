@@ -15,7 +15,7 @@ namespace DigitPark.Games
 {
     /// <summary>
     /// Manager para la pantalla de seleccion de juegos
-    /// Muestra los 5 juegos disponibles + opcion de Cognitive Sprint
+    /// Muestra los 5 juegos disponibles
     /// </summary>
     public class GameSelectorManager : MonoBehaviour
     {
@@ -25,14 +25,6 @@ namespace DigitPark.Games
         [SerializeField] private Button quickMathButton;
         [SerializeField] private Button flashTapButton;
         [SerializeField] private Button oddOneOutButton;
-
-        [Header("Cognitive Sprint")]
-        [SerializeField] private Button cognitiveSprintButton;
-        [SerializeField] private GameObject cognitiveSprintPanel;
-        [SerializeField] private Toggle[] gameToggles; // 5 toggles para seleccionar juegos
-        [SerializeField] private Button startSprintButton;
-        [SerializeField] private Button cancelSprintButton;
-        [SerializeField] private TextMeshProUGUI selectedCountText;
 
         [Header("Navigation")]
         [SerializeField] private Button backButton;
@@ -58,31 +50,17 @@ namespace DigitPark.Games
             LoadPracticeModeFromPrefs();
 
             SetupButtons();
-            SetupCognitiveSprintPanel();
-
-            // Suscribirse a cambios de seleccion
-            if (CognitiveSprintManager.Instance != null)
-                CognitiveSprintManager.Instance.OnSelectionChanged += UpdateSprintUI;
         }
 
         private void OnDestroy()
         {
             DOTween.Kill(transform);
-            if (CognitiveSprintManager.Instance != null)
-            {
-                CognitiveSprintManager.Instance.OnSelectionChanged -= UpdateSprintUI;
-            }
             digitRushButton?.onClick.RemoveAllListeners();
             memoryPairsButton?.onClick.RemoveAllListeners();
             quickMathButton?.onClick.RemoveAllListeners();
             flashTapButton?.onClick.RemoveAllListeners();
             oddOneOutButton?.onClick.RemoveAllListeners();
-            cognitiveSprintButton?.onClick.RemoveAllListeners();
             backButton?.onClick.RemoveAllListeners();
-            startSprintButton?.onClick.RemoveAllListeners();
-            cancelSprintButton?.onClick.RemoveAllListeners();
-            if (gameToggles != null)
-                foreach (var toggle in gameToggles) toggle?.onValueChanged.RemoveAllListeners();
         }
 
         private void SetupButtons()
@@ -103,46 +81,11 @@ namespace DigitPark.Games
             if (oddOneOutButton != null)
                 oddOneOutButton.onClick.AddListener(() => StartSingleGame(GameType.OddOneOut));
 
-            // Cognitive Sprint
-            if (cognitiveSprintButton != null)
-                cognitiveSprintButton.onClick.AddListener(OpenCognitiveSprintPanel);
-
             // Back - disable auto-navigation from BackButton prefab to prevent double listener
             var autoNav = backButton?.GetComponent<DigitPark.UI.BackButton>();
             if (autoNav != null) autoNav.DisableAutoNavigation();
             if (backButton != null)
                 backButton.onClick.AddListener(GoBack);
-        }
-
-        private void SetupCognitiveSprintPanel()
-        {
-            if (cognitiveSprintPanel != null)
-                cognitiveSprintPanel.SetActive(false);
-
-            // Setup toggles
-            if (gameToggles != null)
-            {
-                GameType[] types = { GameType.DigitRush, GameType.MemoryPairs, GameType.QuickMath,
-                                    GameType.FlashTap, GameType.OddOneOut };
-
-                for (int i = 0; i < gameToggles.Length && i < types.Length; i++)
-                {
-                    int index = i;
-                    GameType gameType = types[i];
-
-                    if (gameToggles[i] != null)
-                    {
-                        gameToggles[i].onValueChanged.AddListener((isOn) => OnToggleChanged(gameType, isOn));
-                    }
-                }
-            }
-
-            // Botones del panel
-            if (startSprintButton != null)
-                startSprintButton.onClick.AddListener(StartCognitiveSprint);
-
-            if (cancelSprintButton != null)
-                cancelSprintButton.onClick.AddListener(CloseCognitiveSprintPanel);
         }
 
         /// <summary>
@@ -163,127 +106,13 @@ namespace DigitPark.Games
             else if (isOnlineMatchMode)
             {
                 Debug.Log($"[GameSelector] Iniciando seleccion de apuesta para {gameType}");
-                MatchmakingManager.SetMatchGameType(gameType, false);
+                MatchmakingManager.SetMatchGameType(gameType);
                 SceneManager.LoadScene("BetSelection");
             }
             else
             {
                 Debug.Log($"Modo competitivo para {gameType}");
                 GameSessionManager.Instance.StartPracticeSession(gameType);
-            }
-        }
-
-        /// <summary>
-        /// Abre el panel de Cognitive Sprint
-        /// </summary>
-        private void OpenCognitiveSprintPanel()
-        {
-            if (cognitiveSprintPanel != null)
-            {
-                cognitiveSprintPanel.SetActive(true);
-                AnimatePanelIn(cognitiveSprintPanel.transform);
-                CognitiveSprintManager.Instance.ClearSelection();
-                ResetToggles();
-                UpdateSprintUI(new List<GameType>());
-            }
-        }
-
-        /// <summary>
-        /// Cierra el panel de Cognitive Sprint
-        /// </summary>
-        private void CloseCognitiveSprintPanel()
-        {
-            if (cognitiveSprintPanel != null)
-            {
-                AnimatePanelOut(cognitiveSprintPanel.transform, () => cognitiveSprintPanel.SetActive(false));
-                CognitiveSprintManager.Instance.ClearSelection();
-            }
-        }
-
-        /// <summary>
-        /// Cuando un toggle cambia
-        /// </summary>
-        private void OnToggleChanged(GameType gameType, bool isOn)
-        {
-            if (isOn)
-            {
-                CognitiveSprintManager.Instance.AddGame(gameType);
-            }
-            else
-            {
-                CognitiveSprintManager.Instance.RemoveGame(gameType);
-            }
-        }
-
-        /// <summary>
-        /// Actualiza la UI del sprint segun la seleccion
-        /// </summary>
-        private void UpdateSprintUI(List<GameType> selectedGames)
-        {
-            if (selectedCountText != null)
-            {
-                int count = selectedGames?.Count ?? 0;
-                selectedCountText.text = AutoLocalizer.Get("game_selector_count", count, CognitiveSprintManager.MAX_GAMES);
-
-                // Cambiar color segun validez
-                if (count >= CognitiveSprintManager.MIN_GAMES)
-                {
-                    selectedCountText.color = Color.green;
-                }
-                else
-                {
-                    selectedCountText.color = Color.white;
-                }
-            }
-
-            // Habilitar/deshabilitar boton de inicio
-            if (startSprintButton != null)
-            {
-                startSprintButton.interactable = CognitiveSprintManager.Instance.IsValidSelection();
-            }
-        }
-
-        /// <summary>
-        /// Resetea todos los toggles
-        /// </summary>
-        private void ResetToggles()
-        {
-            if (gameToggles != null)
-            {
-                foreach (var toggle in gameToggles)
-                {
-                    if (toggle != null)
-                        toggle.isOn = false;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Inicia el Cognitive Sprint
-        /// </summary>
-        private void StartCognitiveSprint()
-        {
-            if (!CognitiveSprintManager.Instance.IsValidSelection())
-            {
-                Debug.LogWarning("Seleccion invalida para Cognitive Sprint");
-                return;
-            }
-
-            if (isPracticeMode)
-            {
-                CognitiveSprintManager.Instance.StartPracticeSprint();
-            }
-            else if (isOnlineMatchMode)
-            {
-                // Modo 1v1 online con Cognitive Sprint - seleccion de apuesta primero
-                Debug.Log("[GameSelector] Iniciando seleccion de apuesta para Cognitive Sprint");
-                MatchmakingManager.SetMatchGameType(GameType.DigitRush, true); // true = isCognitiveSprint
-                SceneManager.LoadScene("BetSelection");
-            }
-            else
-            {
-                // Modo competitivo sin matchmaking
-                CognitiveSprintManager.Instance.StartPracticeSprint();
             }
         }
 

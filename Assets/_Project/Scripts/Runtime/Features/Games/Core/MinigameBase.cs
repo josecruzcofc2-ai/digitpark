@@ -194,59 +194,18 @@ namespace DigitPark.Games
         /// Muestra el panel de resultado apropiado según el modo de juego
         /// Routing:
         ///   E1 (Practice single) → Normal panel
-        ///   E2 mid-sprint → Normal panel (transición), E2 final → SprintSummary practice
-        ///   E3 (Online 1v1) → OnlineResult (existente)
-        ///   E4 mid-sprint → Normal panel, E4 final → SprintSummary online
-        ///   E5/E6 (Tournament) → TournamentResult
-        ///   E7 (Cash 1v1 single) → CashBattleResult
-        ///   E8 mid-sprint → Normal panel, E8 final → SprintSummary cash
+        ///   E3 (Online 1v1) → OnlineResult
         /// </summary>
         protected virtual void ShowResultPanel(MinigameResult result)
         {
-            var ctx = GameSessionManager.Instance?.CurrentContext;
-
-            // 1. Online free 1v1 (no sprint)
-            if (OnlineResultManager.IsOnlineMatch() && ctx?.Mode != GameMode.CognitiveSprint)
+            // 1. Online free 1v1
+            if (OnlineResultManager.IsOnlineMatch())
             {
                 HandleOnlineResult(result);
                 return;
             }
 
-            // 2. Online 1v1 in sprint - submit and let OnlineResultManager handle
-            if (OnlineResultManager.IsOnlineMatch() && ctx?.Mode == GameMode.CognitiveSprint)
-            {
-                if (!ctx.HasMoreGames)
-                {
-                    // Último juego del sprint online → esperar oponente, luego SprintSummary
-                    OnlineResultManager.Instance.SubmitSprintAndWaitForResult(ctx);
-                    return;
-                }
-                // Mid-sprint online: enviar resultado pero mostrar panel normal de transición
-                HandleOnlineResult(result);
-                return;
-            }
-
-            // 3. Tournament (free)
-            if (ctx?.Mode == GameMode.Tournament)
-            {
-                HandleTournamentResult(result, ctx);
-                return;
-            }
-
-            // 4. CognitiveSprint - último juego (practice o cash)
-            if (ctx?.Mode == GameMode.CognitiveSprint && !ctx.HasMoreGames)
-            {
-                if (ResultPanelManager.Instance == null)
-                {
-                    Debug.LogWarning("[MinigameBase] ResultPanelManager not found for sprint summary");
-                    return;
-                }
-                ResultPanelManager.Instance.ShowSprintSummary(ctx);
-                return;
-            }
-
-            // 6. CognitiveSprint - más juegos (cualquier modo) → panel normal de transición
-            // 7. Practice single → panel normal
+            // Practice single → panel normal
             ShowNormalResultPanel(result);
         }
 
@@ -271,26 +230,6 @@ namespace DigitPark.Games
                     SetupPanelCallbacks(losePanelNormal);
                 }
             }
-        }
-
-        /// <summary>
-        /// Maneja resultado de torneo usando datos del contexto local
-        /// </summary>
-        private void HandleTournamentResult(MinigameResult result, GameContext ctx)
-        {
-            int attemptsUsed = PlayerPrefs.GetInt($"tournament_{ctx.TournamentId}_attempts", 1);
-            float bestTime = PlayerPrefs.GetFloat($"tournament_{ctx.TournamentId}_best", result.FinalScore);
-
-            if (result.FinalScore < bestTime)
-            {
-                bestTime = result.FinalScore;
-                PlayerPrefs.SetFloat($"tournament_{ctx.TournamentId}_best", bestTime);
-            }
-            PlayerPrefs.SetInt($"tournament_{ctx.TournamentId}_attempts", attemptsUsed + 1);
-            PlayerPrefs.Save();
-
-            if (ResultPanelManager.Instance == null) { Debug.LogWarning("[MinigameBase] ResultPanelManager not found"); return; }
-            ResultPanelManager.Instance.ShowTournamentResult(result, 1, attemptsUsed, 3, bestTime, 0m);
         }
 
         /// <summary>
@@ -334,20 +273,10 @@ namespace DigitPark.Games
         }
 
         /// <summary>
-        /// Callback cuando se acepta el resultado (vuelve al selector o avanza en CognitiveSprint)
+        /// Callback cuando se acepta el resultado (vuelve al selector)
         /// </summary>
         private void OnPanelAcceptClicked()
         {
-            var session = GameSessionManager.Instance;
-            if (session?.HasActiveSession == true &&
-                session.CurrentContext?.Mode == GameMode.CognitiveSprint &&
-                session.CurrentContext.HasMoreGames)
-            {
-                Debug.Log($"[{GameType}] Accept clicked - advancing to next game in Cognitive Sprint");
-                session.ProceedToNextGame();
-                return;
-            }
-
             Debug.Log($"[{GameType}] Accept clicked - returning to selector");
             SceneNavigator.Instance?.NavigateTo("GameSelector");
         }

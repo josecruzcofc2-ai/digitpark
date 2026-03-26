@@ -20,8 +20,6 @@ namespace DigitPark.Managers
         [SerializeField] private AudioClip mainMenuMusic;
         [SerializeField] private AudioClip gameplayMusic;
         [SerializeField] private AudioClip leaderboardMusic;
-        [SerializeField] private AudioClip tournamentMusic;
-
         [Header("SFX Clips")]
         [SerializeField] private AudioClip buttonClickSFX;
         [SerializeField] private AudioClip correctTouchSFX;
@@ -30,7 +28,6 @@ namespace DigitPark.Managers
         [SerializeField] private AudioClip newRecordSFX;
         [SerializeField] private AudioClip coinsSFX;
         [SerializeField] private AudioClip levelUpSFX;
-        [SerializeField] private AudioClip tournamentJoinSFX;
 
         [Header("Settings")]
         [SerializeField] private float musicVolume = 0.7f;
@@ -125,8 +122,7 @@ namespace DigitPark.Managers
                 { "GameComplete", gameCompleteSFX },
                 { "NewRecord", newRecordSFX },
                 { "Coins", coinsSFX },
-                { "LevelUp", levelUpSFX },
-                { "TournamentJoin", tournamentJoinSFX }
+                { "LevelUp", levelUpSFX }
             };
 
             Debug.Log($"[Audio] {sfxDictionary.Count} efectos de sonido registrados");
@@ -233,7 +229,6 @@ namespace DigitPark.Managers
                 case "mainmenu": return mainMenuMusic;
                 case "gameplay": return gameplayMusic;
                 case "leaderboard": return leaderboardMusic;
-                case "tournament": return tournamentMusic;
                 default: return null;
             }
         }

@@ -113,10 +113,6 @@ namespace DigitPark.Services
                 PlayerPrefs.SetString(NOTIF_DATE_KEY, today);
                 PlayerPrefs.Save();
 
-                // In-app toast (visible if player has the game open)
-                string message = AutoLocalizer.Get("wishlist_item_available", offer.displayName);
-                InAppNotificationManager.Instance?.Show(message, "", "info");
-
                 // Local notification for players who don't have the app open
                 ScheduleLocalNotification(offer.displayName);
 

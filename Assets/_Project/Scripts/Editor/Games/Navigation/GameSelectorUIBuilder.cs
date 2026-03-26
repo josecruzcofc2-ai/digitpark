@@ -90,23 +90,6 @@ namespace DigitPark.Editor
                 Debug.Log("Encontrado GamesPanel existente, se reconstruirá");
             }
 
-            // Limpiar CognitiveSprintButton duplicados fuera del GamesPanel
-            // Primero recolectar, luego destruir para evitar MissingReferenceException
-            List<GameObject> toDestroy = new List<GameObject>();
-            for (int i = 0; i < canvasTransform.childCount; i++)
-            {
-                Transform child = canvasTransform.GetChild(i);
-                if (child != null && child.name == "CognitiveSprintButton")
-                {
-                    toDestroy.Add(child.gameObject);
-                }
-            }
-            foreach (GameObject obj in toDestroy)
-            {
-                Debug.Log("Eliminando CognitiveSprintButton duplicado fuera de GamesPanel");
-                DestroyImmediate(obj);
-            }
-
             // Crear nueva estructura
             CreateNewGameSelectorLayout(canvasTransform);
 
@@ -173,10 +156,6 @@ namespace DigitPark.Editor
             CreateGameCard(gamesPanel.transform, "QuickMathButton", "Quick Math", "IconPlaceholder_QuickMath", false);
             CreateGameCard(gamesPanel.transform, "FlashTapButton", "Flash Tap", "IconPlaceholder_FlashTap", false);
             CreateGameCard(gamesPanel.transform, "OddOneOutButton", "Odd One Out", "IconPlaceholder_OddOneOut", false);
-            CreateGameCard(gamesPanel.transform, "CognitiveSprintButton", "Cognitive Sprint", "IconPlaceholder_Sprint", true);
-
-            // ========== COGNITIVE SPRINT PANEL (oculto por defecto) ==========
-            CreateCognitiveSprintPanel(canvasTransform);
         }
 
         private static void CreateGameCard(Transform parent, string buttonName, string gameName, string iconName, bool isGold)
@@ -187,7 +166,7 @@ namespace DigitPark.Editor
             // Limpiar children antiguos que ya no necesitamos
             string[] oldChildren = { "IconContainer", "GameNameText", "IconText", "Border", "InnerBackground", "SpecialBadge",
                                      "DigitRushBtnText", "MemoryPairsBtnText", "QuickMathBtnText", "FlashTapBtnText",
-                                     "OddOneOutBtnText", "CognitiveSprintBtnText", "ArrowText" };
+                                     "OddOneOutBtnText", "ArrowText" };
             foreach (string childName in oldChildren)
             {
                 Transform oldChild = card.transform.Find(childName);
@@ -258,202 +237,6 @@ namespace DigitPark.Editor
             {
                 effect.SetColors(CYAN_NEON, new Color(0.4f, 1f, 1f, 1f), CYAN_DARK);
             }
-        }
-
-        private static void CreateCognitiveSprintPanel(Transform canvasTransform)
-        {
-            GameObject panel = CreateOrFind(canvasTransform, "CognitiveSprintPanel");
-            RectTransform panelRect = SetupRectTransform(panel,
-                Vector2.zero, Vector2.one,
-                Vector2.zero, Vector2.zero);
-
-            // Fondo oscuro semi-transparente
-            Image panelBg = panel.GetComponent<Image>();
-            if (panelBg == null) panelBg = panel.AddComponent<Image>();
-            panelBg.color = new Color(0, 0, 0, 0.9f);
-
-            // Panel interior
-            GameObject innerPanel = CreateOrFind(panel.transform, "InnerPanel");
-            RectTransform innerPanelRect = SetupRectTransform(innerPanel,
-                new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
-                Vector2.zero, new Vector2(800, 900));
-
-            Image innerPanelBg = innerPanel.GetComponent<Image>();
-            if (innerPanelBg == null) innerPanelBg = innerPanel.AddComponent<Image>();
-            innerPanelBg.color = CARD_BG;
-
-            // Borde neón cyan para el panel
-            Outline panelOutline = innerPanel.GetComponent<Outline>();
-            if (panelOutline == null) panelOutline = innerPanel.AddComponent<Outline>();
-            panelOutline.effectColor = CYAN_NEON;
-            panelOutline.effectDistance = new Vector2(3, 3);
-
-            // Título del panel
-            GameObject panelTitle = CreateOrFind(innerPanel.transform, "PanelTitle");
-            SetupRectTransform(panelTitle,
-                new Vector2(0, 1), new Vector2(1, 1),
-                new Vector2(0, -50), new Vector2(0, 80));
-
-            TextMeshProUGUI titleTmp = panelTitle.GetComponent<TextMeshProUGUI>();
-            if (titleTmp == null) titleTmp = panelTitle.AddComponent<TextMeshProUGUI>();
-            titleTmp.text = "Cognitive Sprint";
-            titleTmp.fontSize = FontSizes.H4;
-            titleTmp.enableAutoSizing = true;
-            titleTmp.fontSizeMin = FontSizes.AutoMinTitle;
-            titleTmp.fontSizeMax = titleTmp.fontSize;
-            titleTmp.fontStyle = FontStyles.Bold;
-            titleTmp.color = CYAN_NEON;
-            titleTmp.alignment = TextAlignmentOptions.Center;
-
-            // Subtítulo
-            GameObject subtitle = CreateOrFind(innerPanel.transform, "CognitiveSprintDescText");
-            SetupRectTransform(subtitle,
-                new Vector2(0, 1), new Vector2(1, 1),
-                new Vector2(0, -120), new Vector2(-40, 40));
-
-            TextMeshProUGUI subtitleTmp = subtitle.GetComponent<TextMeshProUGUI>();
-            if (subtitleTmp == null) subtitleTmp = subtitle.AddComponent<TextMeshProUGUI>();
-            subtitleTmp.text = "Select 3-5 games for the sprint";
-            subtitleTmp.fontSize = FontSizes.Body;
-            subtitleTmp.enableAutoSizing = true;
-            subtitleTmp.fontSizeMin = FontSizes.AutoMinBody;
-            subtitleTmp.fontSizeMax = subtitleTmp.fontSize;
-            subtitleTmp.fontStyle = FontStyles.Bold;
-            subtitleTmp.color = Color.white;
-            subtitleTmp.alignment = TextAlignmentOptions.Center;
-
-            // Contenedor de toggles
-            GameObject togglesContainer = CreateOrFind(innerPanel.transform, "TogglesContainer");
-            RectTransform togglesRect = SetupRectTransform(togglesContainer,
-                new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
-                new Vector2(0, 80), new Vector2(600, 400)); // Subido a 80
-
-            VerticalLayoutGroup vLayout = togglesContainer.GetComponent<VerticalLayoutGroup>();
-            if (vLayout == null) vLayout = togglesContainer.AddComponent<VerticalLayoutGroup>();
-            vLayout.spacing = 20;
-            vLayout.childAlignment = TextAnchor.UpperCenter;
-            vLayout.childForceExpandWidth = true;
-            vLayout.childForceExpandHeight = false;
-            vLayout.childControlWidth = true;
-            vLayout.childControlHeight = false;
-
-            // Crear toggles para cada juego
-            string[] gameNames = { "Digit Rush", "Memory Pairs", "Quick Math", "Flash Tap", "Odd One Out" };
-            string[] toggleNames = { "Toggle_DigitRush", "Toggle_MemoryPairs", "Toggle_QuickMath", "Toggle_FlashTap", "Toggle_OddOneOut" };
-
-            for (int i = 0; i < gameNames.Length; i++)
-            {
-                CreateSprintToggle(togglesContainer.transform, toggleNames[i], gameNames[i]);
-            }
-
-            // Texto de seleccion - entre los toggles y los botones
-            GameObject selectedText = CreateOrFind(innerPanel.transform, "SelectedCountText");
-            SetupRectTransform(selectedText,
-                new Vector2(0.5f, 0), new Vector2(0.5f, 0),
-                new Vector2(0, 120), new Vector2(400, 35)); // Valor ajustado por el usuario
-
-            TextMeshProUGUI selectedTmp = selectedText.GetComponent<TextMeshProUGUI>();
-            if (selectedTmp == null) selectedTmp = selectedText.AddComponent<TextMeshProUGUI>();
-            selectedTmp.text = "0/5 games selected";
-            selectedTmp.fontSize = FontSizes.Body;
-            selectedTmp.enableAutoSizing = true;
-            selectedTmp.fontSizeMin = FontSizes.AutoMinBody;
-            selectedTmp.fontSizeMax = selectedTmp.fontSize;
-            selectedTmp.fontStyle = FontStyles.Bold;
-            selectedTmp.color = Color.white;
-            selectedTmp.alignment = TextAlignmentOptions.Center;
-
-            // Botones de acción - dentro del panel con espacio
-            GameObject buttonsContainer = CreateOrFind(innerPanel.transform, "ButtonsContainer");
-            SetupRectTransform(buttonsContainer,
-                new Vector2(0, 0), new Vector2(1, 0),
-                new Vector2(0, 50), new Vector2(-60, 90)); // Subido y centrado
-
-            HorizontalLayoutGroup hLayout = buttonsContainer.GetComponent<HorizontalLayoutGroup>();
-            if (hLayout == null) hLayout = buttonsContainer.AddComponent<HorizontalLayoutGroup>();
-            hLayout.spacing = 30;
-            hLayout.childAlignment = TextAnchor.MiddleCenter;
-            hLayout.childForceExpandWidth = false;
-            hLayout.childForceExpandHeight = false;
-            hLayout.childControlWidth = false;
-            hLayout.childControlHeight = false;
-
-            // Botón Cancelar
-            CreateActionButton(buttonsContainer.transform, "CancelSprintButton", "Cancel", false);
-
-            // Start button
-            CreateActionButton(buttonsContainer.transform, "StartSprintButton", "Start Sprint", true);
-
-            // Desactivar panel por defecto
-            panel.SetActive(false);
-        }
-
-        private static void CreateSprintToggle(Transform parent, string toggleName, string labelText)
-        {
-            GameObject toggleObj = CreateOrFind(parent, toggleName);
-
-            // Layout element para el tamaño
-            LayoutElement layout = toggleObj.GetComponent<LayoutElement>();
-            if (layout == null) layout = toggleObj.AddComponent<LayoutElement>();
-            layout.preferredHeight = 60;
-            layout.preferredWidth = 500;
-
-            // Background del toggle
-            Image toggleBg = toggleObj.GetComponent<Image>();
-            if (toggleBg == null) toggleBg = toggleObj.AddComponent<Image>();
-            toggleBg.color = new Color(0.08f, 0.12f, 0.18f, 1f);
-
-            // Borde neón para el toggle
-            Outline toggleOutline = toggleObj.GetComponent<Outline>();
-            if (toggleOutline == null) toggleOutline = toggleObj.AddComponent<Outline>();
-            toggleOutline.effectColor = CYAN_DARK;
-            toggleOutline.effectDistance = new Vector2(1.5f, 1.5f);
-
-            // Toggle component
-            Toggle toggle = toggleObj.GetComponent<Toggle>();
-            if (toggle == null) toggle = toggleObj.AddComponent<Toggle>();
-
-            // Checkmark container
-            GameObject checkBg = CreateOrFind(toggleObj.transform, "Background");
-            SetupRectTransform(checkBg,
-                new Vector2(0, 0.5f), new Vector2(0, 0.5f),
-                new Vector2(40, 0), new Vector2(40, 40));
-
-            Image checkBgImg = checkBg.GetComponent<Image>();
-            if (checkBgImg == null) checkBgImg = checkBg.AddComponent<Image>();
-            checkBgImg.color = DARK_BG;
-
-            // Checkmark
-            GameObject checkmark = CreateOrFind(checkBg.transform, "Checkmark");
-            SetupRectTransform(checkmark,
-                new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
-                Vector2.zero, new Vector2(30, 30));
-
-            Image checkImg = checkmark.GetComponent<Image>();
-            if (checkImg == null) checkImg = checkmark.AddComponent<Image>();
-            checkImg.color = CYAN_NEON;
-
-            // Label
-            GameObject label = CreateOrFind(toggleObj.transform, "Label");
-            SetupRectTransform(label,
-                new Vector2(0, 0), new Vector2(1, 1),
-                new Vector2(40, 0), new Vector2(-80, 0));
-
-            TextMeshProUGUI labelTmp = label.GetComponent<TextMeshProUGUI>();
-            if (labelTmp == null) labelTmp = label.AddComponent<TextMeshProUGUI>();
-            labelTmp.text = labelText;
-            labelTmp.fontSize = FontSizes.Body;
-            labelTmp.enableAutoSizing = true;
-            labelTmp.fontSizeMin = FontSizes.AutoMinBody;
-            labelTmp.fontSizeMax = labelTmp.fontSize;
-            labelTmp.fontStyle = FontStyles.Bold;
-            labelTmp.color = Color.white;
-            labelTmp.alignment = TextAlignmentOptions.MidlineLeft;
-
-            // Configurar toggle
-            toggle.targetGraphic = checkBgImg;
-            toggle.graphic = checkImg;
-            toggle.isOn = false;
         }
 
         private static void CreateActionButton(Transform parent, string buttonName, string text, bool isPrimary)
@@ -535,7 +318,6 @@ namespace DigitPark.Editor
             CreateGameCard(gamesPanel, "QuickMathButton", "Quick Math", "IconPlaceholder_QuickMath", false);
             CreateGameCard(gamesPanel, "FlashTapButton", "Flash Tap", "IconPlaceholder_FlashTap", false);
             CreateGameCard(gamesPanel, "OddOneOutButton", "Odd One Out", "IconPlaceholder_OddOneOut", false);
-            CreateGameCard(gamesPanel, "CognitiveSprintButton", "Cognitive Sprint", "IconPlaceholder_Sprint", true);
 
             Debug.Log("Game Cards creadas exitosamente!");
             EditorUtility.SetDirty(canvas.gameObject);

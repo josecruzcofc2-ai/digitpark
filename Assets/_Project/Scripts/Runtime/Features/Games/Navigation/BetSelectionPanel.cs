@@ -74,7 +74,6 @@ namespace DigitPark.Monetization.Betting
 
         // PlayerPrefs keys (game type only — not money/bet values)
         private const string GAME_TYPE_KEY = "MatchGameType";
-        private const string IS_SPRINT_KEY = "MatchIsCognitiveSprint";
 
         // In-memory session state — not persisted to disk (not editable on rooted devices)
         private static int _storedBetAmount = 0;
@@ -195,11 +194,8 @@ namespace DigitPark.Monetization.Betting
             if (_gameNameText != null)
             {
                 string gameTypeName = PlayerPrefs.GetString(GAME_TYPE_KEY, "");
-                bool isSprint = PlayerPrefs.GetInt(IS_SPRINT_KEY, 0) == 1;
 
-                if (isSprint)
-                    _gameNameText.text = AutoLocalizer.Get("game_cognitive_sprint");
-                else if (!string.IsNullOrEmpty(gameTypeName))
+                if (!string.IsNullOrEmpty(gameTypeName))
                     _gameNameText.text = gameTypeName;
                 else
                     _gameNameText.text = "";

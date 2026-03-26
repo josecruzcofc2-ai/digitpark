@@ -79,23 +79,6 @@ namespace DigitPark.Services
             new OfferItem("frame_neon",       "Neon Frame",       OfferCurrency.DC, 7500, OfferTier.A),
             new OfferItem("frame_diamond",    "Diamond Frame",    OfferCurrency.DC, 10000, OfferTier.S),
             new OfferItem("frame_crystal",    "Crystal Frame",    OfferCurrency.DC, 12000, OfferTier.S),
-            // Effects DG
-            new OfferItem("effect_gold_rain",      "Gold Rain",      OfferCurrency.DG, 250, OfferTier.A),
-            new OfferItem("effect_neon_explosion",  "Neon Explosion", OfferCurrency.DG, 400, OfferTier.A),
-            // Effects DC
-            new OfferItem("effect_fireworks",  "Fireworks",  OfferCurrency.DC, 2000, OfferTier.B),
-            new OfferItem("effect_lightning",  "Lightning",  OfferCurrency.DC, 5000, OfferTier.A),
-            // Titles DG
-            new OfferItem("mastermind",  "Mastermind",  OfferCurrency.DG, 150, OfferTier.B),
-            new OfferItem("prodigy",     "Prodigy",     OfferCurrency.DG, 150, OfferTier.B),
-            new OfferItem("titan",       "Titan",       OfferCurrency.DG, 300, OfferTier.A),
-            new OfferItem("oracle",      "Oracle",      OfferCurrency.DG, 300, OfferTier.A),
-            new OfferItem("phoenix",     "Phoenix",     OfferCurrency.DG, 500, OfferTier.S),
-            // Titles DC
-            new OfferItem("strategist",  "Strategist",  OfferCurrency.DC, 8000, OfferTier.B),
-            new OfferItem("analyst",     "Analyst",     OfferCurrency.DC, 8000, OfferTier.B),
-            new OfferItem("champion",    "Champion",    OfferCurrency.DC, 20000, OfferTier.A),
-            new OfferItem("gladiator",   "Gladiator",   OfferCurrency.DC, 20000, OfferTier.A),
             // BattleCards DG
             new OfferItem("card_frost",   "Frost Card",   OfferCurrency.DG, 75, OfferTier.B),
             new OfferItem("card_shadow",  "Shadow Card",  OfferCurrency.DG, 150, OfferTier.B),
@@ -454,15 +437,6 @@ namespace DigitPark.Services
             {
                 PlayerPrefs.SetInt($"Frame_Owned_{id}", 1);
                 PlayerPrefs.Save();
-            }
-            else if (id.StartsWith("effect_"))
-            {
-                VictoryEffectService.Instance?.UnlockEffect(id);
-            }
-            else if (PlayerTitleService.Instance?.GetTitleData(id) != null)
-            {
-                // B3-D: Use service instead of broken "title_" prefix check (titles have no prefix)
-                PlayerTitleService.Instance.UnlockTitle(id);
             }
             else if (id.StartsWith("card_"))
             {

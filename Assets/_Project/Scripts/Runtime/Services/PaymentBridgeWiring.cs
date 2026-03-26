@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 using DigitPark.Payments;
@@ -11,16 +10,12 @@ namespace DigitPark.Services
 {
     /// <summary>
     /// Wires Assembly-CSharp services (AnalyticsService, AuthenticationService,
-    /// DatabaseService, CurrencyManager, DeepLinkService) into PaymentBridge delegates.
+    /// DatabaseService, CurrencyManager) into PaymentBridge delegates.
     /// This file is in Assembly-CSharp so it can reference both sides freely.
     /// BootManager calls Wire() before InitializePaymentSystem().
     /// </summary>
     public static class PaymentBridgeWiring
     {
-        // Registered deep link handlers: path → callback
-        private static readonly Dictionary<string, System.Action<string>> _deepLinkHandlers
-            = new Dictionary<string, System.Action<string>>();
-
         public static void Wire()
         {
             PaymentBridge.GetCurrentUserId = () =>
@@ -55,21 +50,6 @@ namespace DigitPark.Services
                 return System.Threading.Tasks.Task.CompletedTask;
             };
 
-            // Deep link handler registration: stores callback and dispatches via Application.deepLinkActivated
-            PaymentBridge.RegisterDeepLinkHandler = (path, callback) =>
-            {
-                _deepLinkHandlers[path] = callback;
-                // Ensure Application.deepLinkActivated is hooked (idempotent)
-                Application.deepLinkActivated -= OnDeepLinkActivated;
-                Application.deepLinkActivated += OnDeepLinkActivated;
-            };
-
-            // WARN-01: unregister para evitar acumulación de handlers entre compras
-            PaymentBridge.UnregisterDeepLinkHandler = (path) =>
-            {
-                _deepLinkHandlers.Remove(path);
-            };
-
             // BUG-06: Firebase ID token para Authorization en Cloud Functions (getEntitlements, syncEntitlements)
             PaymentBridge.GetFirebaseIdToken = async () =>
             {
@@ -98,25 +78,6 @@ namespace DigitPark.Services
             };
 
             Debug.Log("[PaymentBridgeWiring] All delegates wired to game services");
-        }
-
-        private static void OnDeepLinkActivated(string url)
-        {
-            if (string.IsNullOrEmpty(url)) return;
-
-            // S9-NEW-01: Strict URI parsing — prevent handler hijacking via crafted URLs
-            System.Uri uri;
-            try { uri = new System.Uri(url); }
-            catch { return; } // URL malformada — ignorar
-
-            // Verificar scheme exacto
-            if (uri.Scheme != "digitpark") return;
-
-            // Match host exacto, no substring Contains
-            if (_deepLinkHandlers.TryGetValue(uri.Host, out var handler))
-            {
-                handler?.Invoke(url);
-            }
         }
     }
 }

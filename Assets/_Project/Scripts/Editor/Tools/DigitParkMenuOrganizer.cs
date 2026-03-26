@@ -37,28 +37,10 @@ namespace DigitPark.Editor
     /// │   │
     /// │   ├── Monetization/                      [180-219]
     /// │   │   ├── Shop
-    /// │   │   ├── DailyRewards
-    /// │   │   ├── DailyMissions
-    /// │   │   ├── Achievements
     /// │   │   └── Onboarding
     /// │   │
-    /// │   ├── Social/                            [220-229]
-    /// │   │   ├── Scores
-    /// │   │   └── SearchPlayers
-    /// │   │
-    /// │   ├── Tournaments/                       [230-249]
-    /// │   │   ├── Rebuild Complete UI
-    /// │   │   ├── Open Builder Window
-    /// │   │   ├── Quick Fix - Colors Only
-    /// │   │   ├── TournamentCreate
-    /// │   │   ├── TournamentLobby
-    /// │   │   └── TournamentsBrowser
-    /// │   │
-    /// │   └── CashBattle/                        [250-299]
-    /// │       ├── CashBattle Hub
-    /// │       ├── Build Wallet Panel
-    /// │       ├── Build Deposit Option Prefab
-    /// │       └── Build Transaction Item Prefab
+    /// │   └── Social/                            [220-229]
+    /// │       └── Scores
     /// │
     /// ├── ✨ Effects/                            [300-399]
     /// │   ├── Setup FeedbackManager
@@ -122,9 +104,8 @@ namespace DigitPark.Editor
                 "🎨 UI BUILDERS\n" +
                 "   • Games (DigitRush, FlashTap, etc.)\n" +
                 "   • Core (MainMenu, Matchmaking)\n" +
-                "   • Monetization (Shop, DailyRewards)\n" +
-                "   • Social (Scores, SearchPlayers)\n" +
-                "   • Tournaments\n" +
+                "   • Monetization (Shop)\n" +
+                "   • Social (Scores, MatchHistory)\n" +
                 "   • CashBattle\n\n" +
                 "✨ EFFECTS - Efectos visuales y feedback\n" +
                 "🎬 ANIMATION - Sistema de animaciones\n" +

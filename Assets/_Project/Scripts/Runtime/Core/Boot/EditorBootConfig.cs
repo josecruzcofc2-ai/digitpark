@@ -31,14 +31,8 @@ namespace DigitPark.Tools
             MainMenu,
             GameSelector,
             Settings,
-            Profile,
             Shop,
-            Achievements,
-            DailyMissions,
-            DailyRewards,
-            Friends,
-            Scores,
-            TournamentsBrowser
+            Scores
         }
 
         private void Awake()

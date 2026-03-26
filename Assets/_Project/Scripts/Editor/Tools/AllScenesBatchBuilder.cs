@@ -6,7 +6,7 @@
 // Groups mirror the Scenes/ folder structure:
 //   Core > Auth > Onboarding > Games/Navigation > Games/Minigames >
 //   Social/Profile > Social/Friends > Social/Notifications >
-//   Monetization > Tournaments > Prefab Builders
+//   Monetization > Prefab Builders
 //
 // Menu: DigitPark/Tools/Batch Build All Scenes
 // ============================================================
@@ -87,29 +87,12 @@ namespace DigitPark.Editor
             E("Games / Minigames", S + "Games/Minigames/OddOneOut.unity",    "OddOneOut",    "OddOneOutUIBuilder",    "RebuildOddOneOutUI"),
             E("Games / Minigames", S + "Games/Minigames/QuickMath.unity",    "QuickMath",    "QuickMathUIBuilder",    "RebuildQuickMathUI"),
 
-            // ── SOCIAL - PROFILE ──
-            E("Social / Profile", S + "Social/Profile/Profile.unity",      "Profile",      "ProfileUIBuilder",       "RebuildProfile"),
+            // ── SOCIAL ──
             E("Social / Profile", S + "Social/Profile/Scores.unity",       "Scores",       "ScoresUIBuilder",        "RebuildScoresUI"),
             E("Social / Profile", S + "Social/Profile/MatchHistory.unity", "MatchHistory", "MatchHistoryUIBuilder",  "RebuildMatchHistory"),
 
-            // ── SOCIAL - FRIENDS ──
-            E("Social / Friends", S + "Social/Friends/Friends.unity",        "Friends",        "FriendsUIBuilder",          "RebuildFriends"),
-            E("Social / Friends", S + "Social/Friends/FriendRequests.unity", "FriendRequests", "FriendRequestsUIBuilder",   "RebuildFriendRequests"),
-            E("Social / Friends", S + "Social/Friends/SearchPlayers.unity",  "SearchPlayers",  "SearchPlayersUIBuilder",    "RebuildSearchPlayersUI"),
-
-            // ── SOCIAL - NOTIFICATIONS ──
-            E("Social / Notifications", S + "Social/Notifications/Notifications.unity", "Notifications", "NotificationsUIBuilder", "RebuildNotifications"),
-
             // ── MONETIZATION ──
             E("Monetization", S + "Monetization/Shop.unity",          "Shop",          "ShopPremiumUIBuilder",          "BuildCompleteUI"),
-            E("Monetization", S + "Monetization/DailyMissions.unity", "DailyMissions", "DailyMissionsUIBuilder",        "RebuildMissions"),
-            E("Monetization", S + "Monetization/DailyRewards.unity",  "DailyRewards",  "DailyRewardsPremiumUIBuilder",  "RebuildDailyRewards"),
-            E("Monetization", S + "Monetization/Achievements.unity",  "Achievements",  "AchievementsUIBuilder",         "BuildTrophyShowcase"),
-
-            // ── TOURNAMENTS ──
-            E("Tournaments", S + "Tournaments/TournamentsBrowser.unity", "TournamentsBrowser", "TournamentsBrowserUIBuilder", "BuildCompleteUI"),
-            E("Tournaments", S + "Tournaments/TournamentCreate.unity",   "TournamentCreate",   "TournamentCreateUIBuilder",   "BuildCompleteUI"),
-            E("Tournaments", S + "Tournaments/TournamentLobby.unity",    "TournamentLobby",    "TournamentLobbyUIBuilder",    "BuildCompleteUI"),
 
             // ── PREFAB BUILDERS (no scene required) ──
             // Win Panels
@@ -121,39 +104,20 @@ namespace DigitPark.Editor
             // Online Result Panels
             E("Prefabs / Result Panels", null, "Online Result (Win)",       "OnlineResultPanelUIBuilder",     "BuildWinPanel"),
             E("Prefabs / Result Panels", null, "Online Result (Lose)",      "OnlineResultPanelUIBuilder",     "BuildLosePanel"),
-            E("Prefabs / Result Panels", null, "Tournament Result (Win)",   "TournamentResultPanelUIBuilder", "BuildWinPanel"),
-            E("Prefabs / Result Panels", null, "Tournament Result (Lose)",  "TournamentResultPanelUIBuilder", "BuildLosePanel"),
-            E("Prefabs / Result Panels", null, "Sprint Summary Panel",      "SprintSummaryPanelUIBuilder",    "BuildSprintSummaryPanel"),
-
-            // Toast / Notification Prefabs
-            E("Prefabs / Toasts", null, "Achievement Toast",          "AchievementToastUIBuilder",      "CreateAchievementToastPrefab"),
-            E("Prefabs / Toasts", null, "In-App Toast",               "InAppToastUIBuilder",            "CreateInAppToastPrefab"),
 
             // Monetization & Item Prefabs
             E("Prefabs / Items", null, "Monetization Prefabs (All)",  "MonetizationPrefabBuilder", "CreateAllPrefabs"),
-            E("Prefabs / Items", null, "Mission Card",                "MonetizationPrefabBuilder", "CreateMissionCardPrefab"),
-            E("Prefabs / Items", null, "Tournament Item",             "MonetizationPrefabBuilder", "CreateTournamentItemPrefab"),
-            E("Prefabs / Items", null, "Tournament Search Item",      "MonetizationPrefabBuilder", "CreateTournamentSearchItemPrefab"),
-            E("Prefabs / Items", null, "Tournament My Item",          "MonetizationPrefabBuilder", "CreateTournamentMyItemPrefab"),
             E("Prefabs / Items", null, "Leaderboard Entry",           "MonetizationPrefabBuilder", "CreateLeaderboardEntryPrefab"),
 
             // Social Item Prefabs (builders live inside scene UIBuilders)
-            E("Prefabs / Social", null, "Friend Card",         "FriendsUIBuilder",        "CreateFriendCardPrefab"),
-            E("Prefabs / Social", null, "Request Item",        "FriendRequestsUIBuilder", "CreateRequestItemPrefab"),
-            E("Prefabs / Social", null, "Notification Card",   "NotificationsUIBuilder",  "CreateNotificationCardPrefab"),
             E("Prefabs / Social", null, "Match History Entry", "MatchHistoryUIBuilder",   "CreateMatchEntryPrefab"),
-            E("Prefabs / Social", null, "Player Card",         "SearchPlayersUIBuilder",  "CreatePlayerCardPrefab"),
 
             // Monetization extras (builders live inside scene UIBuilders)
-
-            // Progression Prefabs
-            E("Prefabs / Progression", null, "LevelUp Panel",          "LevelUpPanelBuilder",  "BuildPrefab"),
 
             // Animation Prefabs (Button3D, TransitionCanvas, UIAnimationManager)
             E("Prefabs / Animations",  null, "Animation System Prefabs", "AnimationSystemBuilder", "CreateAllPrefabs"),
 
             // Shop ScriptableObject Assets
-            E("Assets / Shop", null, "Background Shop Items (13)",  "BackgroundShopItemBuilder",   "BuildAll"),
             E("Assets / Shop", null, "Shop Catalog — All Items (~89)", "CreateAllShopItemsCatalog", "CreateAll"),
 
             // Cosmetics ScriptableObject Assets

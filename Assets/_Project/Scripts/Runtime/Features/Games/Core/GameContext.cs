@@ -5,7 +5,7 @@ namespace DigitPark.Games
 {
     /// <summary>
     /// Contexto de una sesion de juego
-    /// Contiene toda la informacion necesaria para una partida/torneo/sprint
+    /// Contiene toda la informacion necesaria para una partida (Practice o Ranked 1v1)
     /// </summary>
     [Serializable]
     public class GameContext
@@ -16,7 +16,7 @@ namespace DigitPark.Games
         public GameMode Mode { get; set; }
 
         /// <summary>
-        /// Lista de juegos a jugar (para Cognitive Sprint o torneo multi-juego)
+        /// Lista de juegos a jugar en la sesion
         /// </summary>
         public List<GameType> Games { get; set; }
 
@@ -41,11 +41,6 @@ namespace DigitPark.Games
         public decimal EntryFee { get; set; }
 
         /// <summary>
-        /// ID del torneo (si aplica)
-        /// </summary>
-        public string TournamentId { get; set; }
-
-        /// <summary>
         /// ID de la partida/match
         /// </summary>
         public string MatchId { get; set; }
@@ -62,8 +57,7 @@ namespace DigitPark.Games
 
         /// <summary>
         /// Cantidad de rondas a jugar (1, 3, o 5). Default 1.
-        /// En Practice: usuario elige. En 1v1/CashBattle: matchmaking empareja por rondas iguales.
-        /// En Torneos: definido por el creador. En CognitiveSprint: siempre 1.
+        /// En Practice: usuario elige. En 1v1: matchmaking empareja por rondas iguales.
         /// </summary>
         public int Rounds { get; set; } = 1;
 

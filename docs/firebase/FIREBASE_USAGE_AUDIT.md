@@ -1,6 +1,6 @@
 # FIREBASE USAGE AUDIT — DigitPark
-> Generado: 2026-03-19 | **Actualizado post-simplificación: 2026-03-24**
-> CashBattle, Stripe, Triumph, Themes, RemoteConfig eliminados.
+> Generado: 2026-03-19 | **Actualizado post-simplificación V58: 2026-03-25**
+> CashBattle, Stripe, Triumph, Themes, RemoteConfig, DailyRewards, BattleCards eliminados.
 > Sistemas activos: Auth, Realtime Database, Storage, FCM, Analytics, Firestore (backend), Cloud Functions.
 
 ---
@@ -34,6 +34,10 @@ Los siguientes sistemas y sus archivos Firebase fueron eliminados:
 - **Remote Config**: RemoteConfigService (Firebase Remote Config SDK)
 - **Feature Flags**: LocalFlagCache, PaymentFeatureFlag
 - **ServiceLocator**: Eliminado (ya no hay interfaces CashBattle)
+
+### V58 — 2026-03-25
+- **DailyRewards**: DailyRewardsManager, DailyRewardService (DB: dailyRewards, premium rewards)
+- **BattleCards**: BattleCardService (DB: equippedBattleCard, ownedBattleCards)
 
 ---
 

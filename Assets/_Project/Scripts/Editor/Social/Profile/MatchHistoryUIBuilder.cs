@@ -286,8 +286,6 @@ namespace DigitPark.Editor
             CreateIconFilterChip(filters.transform, "FilterQuickMath", "QuickMathIcon", COLOR_QUICK_MATH);
             CreateIconFilterChip(filters.transform, "FilterFlashTap", "FlashTapIcon", COLOR_FLASH_TAP);
             CreateIconFilterChip(filters.transform, "FilterOddOneOut", "OddOneOutIcon", COLOR_ODD_ONE_OUT);
-            CreateIconFilterChip(filters.transform, "FilterCognitiveSprint", "CognitiveSprintIcon", COLOR_COGNITIVE_SPRINT);
-
             Debug.Log("[MatchHistoryUI] Game Filters creados con iconos oficiales");
         }
 
@@ -684,8 +682,6 @@ namespace DigitPark.Editor
             SetRef(so, "filterQuickMathButton", FindInPath<Button>(r, "GameFilters/FilterQuickMath"));
             SetRef(so, "filterFlashTapButton", FindInPath<Button>(r, "GameFilters/FilterFlashTap"));
             SetRef(so, "filterOddOneOutButton", FindInPath<Button>(r, "GameFilters/FilterOddOneOut"));
-            SetRef(so, "filterCognitiveSprintButton", FindInPath<Button>(r, "GameFilters/FilterCognitiveSprint"));
-
             // Content
             Transform scrollContent = r.Find("ScrollView/Viewport/Content");
             if (scrollContent != null) SetRef(so, "scrollContent", scrollContent);

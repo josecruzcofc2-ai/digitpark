@@ -17,7 +17,7 @@ namespace DigitPark.Editor
         // Ancestros prohibidos - Canvas dentro de estos contenedores se ignoran
         private static readonly string[] BLOCKED_ANCESTORS = {
             "---ANIMATION_MANAGERS---", "ANIMATION_MANAGERS",
-            "UIAnimationManager", "SceneTransitionManager", "ParticleEffectSpawner"
+            "UIAnimationManager", "SceneTransitionManager"
         };
 
         /// <summary>

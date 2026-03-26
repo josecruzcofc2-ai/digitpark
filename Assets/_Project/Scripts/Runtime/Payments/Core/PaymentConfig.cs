@@ -20,7 +20,7 @@ namespace DigitPark.Payments
         public string paymentsHealthUrl;            // .../paymentsHealth
 
         /// <summary>
-        /// URL base derivada de stripeCreateCheckoutUrl (para health checks).
+        /// URL base derivada de paymentsHealthUrl (para health checks).
         /// Ej: https://us-central1-PROYECTO.cloudfunctions.net
         /// </summary>
         public string BackendBaseUrl

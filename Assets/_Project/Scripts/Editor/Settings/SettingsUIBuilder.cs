@@ -419,7 +419,7 @@ namespace DigitPark.Editor
             Transform card = CreateCard(parent, "AppearanceCard", "APPEARANCE", CYAN_BORDER);
 
             CreateDropdownRow(card, "LanguageDropdown", "ChangeLanguageLabel", "Language",
-                new[] { "English", "Español", "Français", "Português", "Deutsch" }, 1);
+                new[] { "English", "Español" }, 1);
         }
 
         private static void BuildPremiumCard(Transform parent)

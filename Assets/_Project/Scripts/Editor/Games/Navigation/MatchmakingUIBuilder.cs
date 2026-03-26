@@ -46,7 +46,6 @@ namespace DigitPark.Editor
         private const string ICON_QUICK_MATH = "Assets/_Project/Art/Icons/Games/QuickMathIcon.png";
         private const string ICON_FLASH_TAP = "Assets/_Project/Art/Icons/Games/FlashTapIcon.png";
         private const string ICON_ODD_ONE_OUT = "Assets/_Project/Art/Icons/Games/OddOneOutIcon.png";
-        private const string ICON_COGNITIVE_SPRINT = "Assets/_Project/Art/Icons/Games/CognitiveSprintIcon.png";
         // Avatar icon removed — players identified by color bar + name
 
         // ═══════════════════════════════════════════════════════════════
@@ -121,7 +120,7 @@ namespace DigitPark.Editor
             Image bgImg = bg.AddComponent<Image>();
             bgImg.color = Color.white; // ThemeApplier tints at runtime
             bgImg.raycastTarget = false;
-            // Matchmaking: only Background gets ThemeApplier — BattleCardApplier controls the rest
+            // Matchmaking: only Background gets ThemeApplier
 
             // Ambient spotlight (subtle glow behind battle area)
             GameObject spotlight = CreateElement(bg.transform, "Spotlight");
@@ -323,8 +322,7 @@ namespace DigitPark.Editor
             Image colorBarImg = colorBar.AddComponent<Image>();
             colorBarImg.color = accentColor;
 
-            // Variables for BattleCardApplier (no longer avatar-based)
-            Image glowImg = colorBarImg;  // reuse for theming
+            Image glowImg = colorBarImg;
             Image frameImg = colorBarImg;
 
             // --- Info Section (expanded — avatar removed) ---
@@ -417,16 +415,6 @@ namespace DigitPark.Editor
 
             }
 
-            // --- BattleCardApplier --- wire visual refs for runtime card theming
-            var bcApplier = card.AddComponent<DigitPark.Cosmetics.BattleCardApplier>();
-            SerializedObject bcSO = new SerializedObject(bcApplier);
-            bcSO.FindProperty("cardBackground").objectReferenceValue = cardBgImg;
-            bcSO.FindProperty("outlineBorder").objectReferenceValue = cardBorder;
-            bcSO.FindProperty("avatarGlow").objectReferenceValue = glowImg;
-            bcSO.FindProperty("avatarFrame").objectReferenceValue = frameImg;
-            bcSO.FindProperty("levelPillBg").objectReferenceValue = levelBg;
-            bcSO.FindProperty("playerNameText").objectReferenceValue = nameTmp;
-            bcSO.ApplyModifiedPropertiesWithoutUndo();
         }
 
         /// <summary>
@@ -649,12 +637,10 @@ namespace DigitPark.Editor
             // --- Player Card ---
             SetProperty(so, "playerCard", sa, "BattleArea/PlayerCard");
             SetProperty(so, "playerNameText", sa, "BattleArea/PlayerCard/PlayerInfo/PlayerName");
-            SetProperty(so, "playerLevelText", sa, "BattleArea/PlayerCard/PlayerInfo/PlayerLevel/LevelText");
 
             // --- Opponent Card ---
             SetProperty(so, "opponentCard", sa, "BattleArea/OpponentCard");
             SetProperty(so, "opponentNameText", sa, "BattleArea/OpponentCard/OpponentInfo/OpponentName");
-            SetProperty(so, "opponentLevelText", sa, "BattleArea/OpponentCard/OpponentInfo/OpponentLevel/LevelText");
             // SearchingIndicator removed — SearchSection handles search feedback
 
             // --- VS Section ---
@@ -690,7 +676,6 @@ namespace DigitPark.Editor
             SetIconProperty(so, "quickMathIcon", ICON_QUICK_MATH);
             SetIconProperty(so, "flashTapIcon", ICON_FLASH_TAP);
             SetIconProperty(so, "oddOneOutIcon", ICON_ODD_ONE_OUT);
-            SetIconProperty(so, "cognitiveSprintIcon", ICON_COGNITIVE_SPRINT);
         }
 
         private static void SetIconProperty(SerializedObject so, string propName, string assetPath)

@@ -69,7 +69,7 @@ namespace DigitPark.Managers
         [SerializeField] private Button resultPlayAgainButton;
         [SerializeField] private Button resultExitButton;
 
-        [Header("Win/Lose Panels (Cash Battle)")]
+        [Header("Win/Lose Panels (Real Money)")]
         [SerializeField] private WinPanelController winPanelRealMoney;
         [SerializeField] private WinPanelController losePanelRealMoney;
 
@@ -322,7 +322,7 @@ namespace DigitPark.Managers
 
             if (premiumBannerText != null && !isPremium)
             {
-                premiumBannerText.text = $"{AutoLocalizer.Get("premium_feature_no_ads")} + {AutoLocalizer.Get("premium_feature_tournaments")}";
+                premiumBannerText.text = AutoLocalizer.Get("premium_feature_no_ads");
             }
         }
 
@@ -1014,35 +1014,12 @@ namespace DigitPark.Managers
             // Show panel based on game mode
             var ctx = GameSessionManager.Instance?.CurrentContext;
 
-            // 1. Online free 1v1 (no sprint)
-            if (IsOnlineMode() && ctx?.Mode != GameMode.CognitiveSprint)
+            // 1. Online free 1v1
+            if (IsOnlineMode())
             {
                 HandleOnlineResult(result);
             }
-            // 2. Online sprint final -> wait for opponent, then SprintSummary
-            else if (IsOnlineMode() && ctx?.Mode == GameMode.CognitiveSprint)
-            {
-                if (!ctx.HasMoreGames)
-                    OnlineResultManager.Instance.SubmitSprintAndWaitForResult(ctx);
-                else
-                    HandleOnlineResult(result);
-            }
-            // 3. Tournament
-            else if (ctx?.Mode == GameMode.Tournament)
-            {
-                HandleTournamentResult(result, ctx);
-            }
-            // 4. CognitiveSprint final
-            else if (ctx?.Mode == GameMode.CognitiveSprint && !ctx.HasMoreGames)
-            {
-                ResultPanelManager.Instance.ShowSprintSummary(ctx);
-            }
-            // 6. CognitiveSprint mid-game -> normal transition panel
-            else if (ctx?.Mode == GameMode.CognitiveSprint && ctx.HasMoreGames)
-            {
-                ShowPracticeResult(isNewRecord);
-            }
-            // 7. Practice single
+            // Practice single
             else
             {
                 ShowPracticeResult(isNewRecord);
@@ -1192,23 +1169,6 @@ namespace DigitPark.Managers
                     Debug.Log($"[DigitRush] Online result: {(playerWon ? "VICTORY" : "DEFEAT")}");
                 }
             );
-        }
-
-        private void HandleTournamentResult(MinigameResult result, GameContext ctx)
-        {
-            int attemptsUsed = PlayerPrefs.GetInt($"tournament_{ctx.TournamentId}_attempts", 1);
-            int maxAttempts = 3;
-            float bestTime = PlayerPrefs.GetFloat($"tournament_{ctx.TournamentId}_best", result.FinalScore);
-
-            if (result.FinalScore < bestTime)
-            {
-                bestTime = result.FinalScore;
-                PlayerPrefs.SetFloat($"tournament_{ctx.TournamentId}_best", bestTime);
-            }
-            PlayerPrefs.SetInt($"tournament_{ctx.TournamentId}_attempts", attemptsUsed + 1);
-            PlayerPrefs.Save();
-
-            ResultPanelManager.Instance.ShowTournamentResult(result, 1, attemptsUsed, maxAttempts, bestTime, 0m);
         }
 
         #endregion

@@ -197,37 +197,6 @@ namespace DigitPark.Services.Firebase
 
         #endregion
 
-        #region Tournament Events
-
-        public void LogTournamentJoined(string tournamentId, string gameType, decimal entryFee)
-        {
-            if (!_isInitialized) return;
-
-            FirebaseAnalytics.LogEvent("tournament_joined",
-                new Parameter("tournament_id", tournamentId),
-                new Parameter("game_type", gameType),
-                new Parameter("entry_fee", (double)entryFee)
-            );
-
-            LogDebug($"tournament_joined: {tournamentId}");
-        }
-
-        public void LogTournamentCompleted(string tournamentId, int finalPosition, int totalParticipants, decimal prizeWon)
-        {
-            if (!_isInitialized) return;
-
-            FirebaseAnalytics.LogEvent("tournament_completed",
-                new Parameter("tournament_id", tournamentId),
-                new Parameter("final_position", finalPosition),
-                new Parameter("total_participants", totalParticipants),
-                new Parameter("prize_won", (double)prizeWon)
-            );
-
-            LogDebug($"tournament_completed: pos={finalPosition}/{totalParticipants}, prize={prizeWon}");
-        }
-
-        #endregion
-
         #region Economy Events
 
         public void LogVirtualCurrencyEarned(string currencyType, int amount, string source)
@@ -303,22 +272,6 @@ namespace DigitPark.Services.Firebase
 
         #region Social Events
 
-        public void LogFriendRequestSent()
-        {
-            if (!_isInitialized) return;
-
-            FirebaseAnalytics.LogEvent("friend_request_sent");
-            LogDebug("friend_request_sent");
-        }
-
-        public void LogFriendAdded()
-        {
-            if (!_isInitialized) return;
-
-            FirebaseAnalytics.LogEvent("friend_added");
-            LogDebug("friend_added");
-        }
-
         public void LogChallengeCreated(string gameType)
         {
             if (!_isInitialized) return;
@@ -364,37 +317,6 @@ namespace DigitPark.Services.Firebase
         public void SetUserLevel(int level)
         {
             SetUserProperty("player_level", level.ToString());
-        }
-
-        #endregion
-
-        #region KYC Events
-
-        public void LogKYCAgeVerified()
-        {
-            if (!_isInitialized) return;
-
-            FirebaseAnalytics.LogEvent("kyc_age_verified");
-            LogDebug("kyc_age_verified");
-        }
-
-        public void LogKYCFullyVerified()
-        {
-            if (!_isInitialized) return;
-
-            FirebaseAnalytics.LogEvent("kyc_fully_verified");
-            LogDebug("kyc_fully_verified");
-        }
-
-        public void LogKYCRejected(string reason)
-        {
-            if (!_isInitialized) return;
-
-            FirebaseAnalytics.LogEvent("kyc_rejected",
-                new Parameter("reason", reason)
-            );
-
-            LogDebug($"kyc_rejected: {reason}");
         }
 
         #endregion
@@ -501,7 +423,7 @@ namespace DigitPark.Services.Firebase
 
         /// <summary>
         /// Loga un evento personalizado con parametros arbitrarios.
-        /// Usado por sistemas externos (ej: StripeAbortProtocol) que no tienen metodo especifico.
+        /// Usado por sistemas externos (ej: payment failure handlers) que no tienen metodo especifico.
         /// </summary>
         public void LogCustomEvent(string eventName, Dictionary<string, object> parameters = null)
         {

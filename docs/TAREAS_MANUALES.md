@@ -16,11 +16,6 @@ Estas tareas NO se pueden automatizar con codigo. Requieren accion tuya en conso
 - Reemplazar los archivos en `Assets/` (ya estan en .gitignore)
 - **Riesgo**: Si las API keys antiguas siguen activas, alguien puede abusar de ellas
 
-### 2. App Store ID en ReviewService
-- Abrir App Store Connect > Mis Apps > DigitPark > campo "Apple ID" (numero de 10 digitos)
-- Decirle a Claude el numero → edita `Scripts/Runtime/Services/ReviewService.cs:226`
-- **Riesgo**: Sin esto, la solicitud de review nunca abre la App Store
-
 ### 3. Terminal — Firebase Secrets (ANTES del deploy de Functions)
 Ejecutar en `C:\Users\josec\digitPark`:
 ```bash
@@ -102,11 +97,7 @@ firebase deploy --only database,storage,firestore
 
 ## P2 - MEJORAS (post-lanzamiento)
 
-### 14. Unity Inspector — Achievements.unity: asignar TrophyCard.prefab
-- Abrir `Achievements.unity` > seleccionar GO con `AchievementsManager`
-- Arrastrar `Assets/_Project/Prefabs/Monetization/TrophyCard.prefab` al campo `Trophy Card Prefab`
-
-### 15. Unity Inspector — Canvas Scaler: verificar escenas restantes
+### 14. Unity Inspector — Canvas Scaler: verificar escenas restantes
 Para cada escena, seleccionar Canvas > Canvas Scaler y verificar:
 - UI Scale Mode = Scale With Screen Size
 - Reference Resolution = 1080 × 1920

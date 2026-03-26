@@ -1,9 +1,8 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using DG.Tweening;
 using System;
-using DigitPark.UI;
 
 namespace DigitPark.Animations
 {
@@ -27,10 +26,10 @@ namespace DigitPark.Animations
         /// </summary>
         public static Tween ButtonPress(Transform target, float scale = 0.9f, float duration = DURATION_FAST)
         {
-            float d = AccessibilityHelper.AnimDuration(duration);
+            float d = duration;
             return target.DOScale(scale, d / 2)
-                .SetEase(AccessibilityHelper.AnimEase(Ease.OutQuad))
-                .OnComplete(() => target.DOScale(1f, d / 2).SetEase(AccessibilityHelper.AnimEase(Ease.OutBack)));
+                .SetEase(Ease.OutQuad)
+                .OnComplete(() => target.DOScale(1f, d / 2).SetEase(Ease.OutBack));
         }
 
         /// <summary>
@@ -38,10 +37,10 @@ namespace DigitPark.Animations
         /// </summary>
         public static Tween ButtonBounce(Transform target, float scale = 1.1f, float duration = DURATION_NORMAL, GameObject owner = null)
         {
-            float d = AccessibilityHelper.AnimDuration(duration);
+            float d = duration;
             var seq = DOTween.Sequence()
-                .Append(target.DOScale(scale, d * 0.4f).SetEase(AccessibilityHelper.AnimEase(Ease.OutQuad)))
-                .Append(target.DOScale(1f, d * 0.6f).SetEase(AccessibilityHelper.AnimEase(Ease.OutBounce)));
+                .Append(target.DOScale(scale, d * 0.4f).SetEase(Ease.OutQuad))
+                .Append(target.DOScale(1f, d * 0.6f).SetEase(Ease.OutBounce));
             if (owner != null) seq.SetLink(owner);
             return seq;
         }
@@ -52,7 +51,7 @@ namespace DigitPark.Animations
         public static Tween ButtonPulse(Transform target, float minScale = 0.95f, float maxScale = 1.05f, float duration = 0.8f)
         {
             return target.DOScale(maxScale, duration / 2)
-                .SetEase(AccessibilityHelper.AnimEase(Ease.InOutSine))
+                .SetEase(Ease.InOutSine)
                 .SetLoops(-1, LoopType.Yoyo);
         }
 
@@ -61,11 +60,11 @@ namespace DigitPark.Animations
         /// </summary>
         public static Tween Button3DPress(RectTransform target, float pressDepth = 5f, float duration = DURATION_INSTANT, GameObject owner = null)
         {
-            float d = AccessibilityHelper.AnimDuration(duration);
+            float d = duration;
             Vector2 originalPos = target.anchoredPosition;
             var seq = DOTween.Sequence()
-                .Append(target.DOAnchorPosY(originalPos.y - pressDepth, d).SetEase(AccessibilityHelper.AnimEase(Ease.OutQuad)))
-                .Append(target.DOAnchorPosY(originalPos.y, d).SetEase(AccessibilityHelper.AnimEase(Ease.OutBack)));
+                .Append(target.DOAnchorPosY(originalPos.y - pressDepth, d).SetEase(Ease.OutQuad))
+                .Append(target.DOAnchorPosY(originalPos.y, d).SetEase(Ease.OutBack));
             if (owner != null) seq.SetLink(owner);
             return seq;
         }
@@ -83,7 +82,7 @@ namespace DigitPark.Animations
             target.anchoredPosition = startPos;
             target.gameObject.SetActive(true);
 
-            return target.DOAnchorPos(endPos, AccessibilityHelper.AnimDuration(duration)).SetEase(AccessibilityHelper.AnimEase(Ease.OutBack));
+            return target.DOAnchorPos(endPos, duration).SetEase(Ease.OutBack);
         }
 
         /// <summary>
@@ -93,8 +92,8 @@ namespace DigitPark.Animations
         {
             Vector2 endPos = GetOffscreenPosition(target, direction);
 
-            return target.DOAnchorPos(endPos, AccessibilityHelper.AnimDuration(duration))
-                .SetEase(AccessibilityHelper.AnimEase(Ease.InBack))
+            return target.DOAnchorPos(endPos, duration)
+                .SetEase(Ease.InBack)
                 .OnComplete(() => { if (deactivate) target.gameObject.SetActive(false); });
         }
 
@@ -105,7 +104,7 @@ namespace DigitPark.Animations
         {
             target.localScale = Vector3.zero;
             target.gameObject.SetActive(true);
-            return target.DOScale(1f, AccessibilityHelper.AnimDuration(duration)).SetEase(AccessibilityHelper.AnimEase(Ease.OutBack));
+            return target.DOScale(1f, duration).SetEase(Ease.OutBack);
         }
 
         /// <summary>
@@ -113,8 +112,8 @@ namespace DigitPark.Animations
         /// </summary>
         public static Tween PopupHide(Transform target, float duration = DURATION_FAST, bool deactivate = true)
         {
-            return target.DOScale(0f, AccessibilityHelper.AnimDuration(duration))
-                .SetEase(AccessibilityHelper.AnimEase(Ease.InBack))
+            return target.DOScale(0f, duration)
+                .SetEase(Ease.InBack)
                 .OnComplete(() => { if (deactivate) target.gameObject.SetActive(false); });
         }
 
@@ -125,7 +124,7 @@ namespace DigitPark.Animations
         {
             target.alpha = 0f;
             target.gameObject.SetActive(true);
-            return target.DOFade(1f, AccessibilityHelper.AnimDuration(duration)).SetEase(AccessibilityHelper.AnimEase(Ease.OutQuad));
+            return target.DOFade(1f, duration).SetEase(Ease.OutQuad);
         }
 
         /// <summary>
@@ -133,8 +132,8 @@ namespace DigitPark.Animations
         /// </summary>
         public static Tween FadeOut(CanvasGroup target, float duration = DURATION_NORMAL, bool deactivate = true)
         {
-            return target.DOFade(0f, AccessibilityHelper.AnimDuration(duration))
-                .SetEase(AccessibilityHelper.AnimEase(Ease.InQuad))
+            return target.DOFade(0f, duration)
+                .SetEase(Ease.InQuad)
                 .OnComplete(() => { if (deactivate) target.gameObject.SetActive(false); });
         }
 
@@ -148,7 +147,7 @@ namespace DigitPark.Animations
             return DOTween.To(() => startValue, x => {
                 startValue = x;
                 text.text = string.Format(format, x);
-            }, endValue, AccessibilityHelper.AnimDuration(duration)).SetEase(AccessibilityHelper.AnimEase(Ease.OutQuad));
+            }, endValue, duration).SetEase(Ease.OutQuad);
         }
 
         /// <summary>
@@ -157,8 +156,8 @@ namespace DigitPark.Animations
         public static Tween TypewriterEffect(TextMeshProUGUI text, string fullText, float duration = 1f)
         {
             text.text = "";
-            return DOTween.To(() => 0, x => text.text = fullText.Substring(0, x), fullText.Length, AccessibilityHelper.AnimDuration(duration))
-                .SetEase(AccessibilityHelper.AnimEase(Ease.Linear));
+            return DOTween.To(() => 0, x => text.text = fullText.Substring(0, x), fullText.Length, duration)
+                .SetEase(Ease.Linear);
         }
 
         /// <summary>
@@ -166,7 +165,7 @@ namespace DigitPark.Animations
         /// </summary>
         public static Tween TextPunch(Transform target, float punch = 0.2f, float duration = DURATION_NORMAL)
         {
-            return target.DOPunchScale(Vector3.one * punch, AccessibilityHelper.AnimDuration(duration), 5, 0.5f);
+            return target.DOPunchScale(Vector3.one * punch, duration, 5, 0.5f);
         }
 
         // ==================== REWARD ANIMATIONS ====================
@@ -176,11 +175,11 @@ namespace DigitPark.Animations
         /// </summary>
         public static Tween FlyToTarget(RectTransform item, Vector3 targetPosition, float duration = DURATION_SLOW, Action onComplete = null, GameObject owner = null)
         {
-            float d = AccessibilityHelper.AnimDuration(duration);
+            float d = duration;
             var seq = DOTween.Sequence()
-                .Append(item.DOScale(1.2f, d * 0.2f).SetEase(AccessibilityHelper.AnimEase(Ease.OutQuad)))
-                .Join(item.DOMove(targetPosition, d * 0.8f).SetEase(AccessibilityHelper.AnimEase(Ease.InBack)))
-                .Join(item.DOScale(0.5f, d * 0.8f).SetEase(AccessibilityHelper.AnimEase(Ease.InQuad)))
+                .Append(item.DOScale(1.2f, d * 0.2f).SetEase(Ease.OutQuad))
+                .Join(item.DOMove(targetPosition, d * 0.8f).SetEase(Ease.InBack))
+                .Join(item.DOScale(0.5f, d * 0.8f).SetEase(Ease.InQuad))
                 .OnComplete(() => onComplete?.Invoke());
             if (owner != null) seq.SetLink(owner);
             return seq;
@@ -191,10 +190,10 @@ namespace DigitPark.Animations
         /// </summary>
         public static Tween RewardCelebration(Transform target, float duration = DURATION_NORMAL, GameObject owner = null)
         {
-            float d = AccessibilityHelper.AnimDuration(duration);
+            float d = duration;
             var seq = DOTween.Sequence()
-                .Append(target.DOScale(1.3f, d * 0.3f).SetEase(AccessibilityHelper.AnimEase(Ease.OutQuad)))
-                .Append(target.DOScale(1f, d * 0.7f).SetEase(AccessibilityHelper.AnimEase(Ease.OutBounce)))
+                .Append(target.DOScale(1.3f, d * 0.3f).SetEase(Ease.OutQuad))
+                .Append(target.DOScale(1f, d * 0.7f).SetEase(Ease.OutBounce))
                 .Join(target.DOPunchRotation(new Vector3(0, 0, 15f), d * 0.5f, 10, 0.5f));
             if (owner != null) seq.SetLink(owner);
             return seq;
@@ -207,7 +206,7 @@ namespace DigitPark.Animations
         /// </summary>
         public static Tween Shake(Transform target, float strength = 10f, float duration = DURATION_NORMAL)
         {
-            return target.DOShakePosition(AccessibilityHelper.AnimDuration(duration), strength, 20, 90, false, true);
+            return target.DOShakePosition(duration, strength, 20, 90, false, true);
         }
 
         /// <summary>
@@ -215,7 +214,7 @@ namespace DigitPark.Animations
         /// </summary>
         public static Tween ShakeRotation(Transform target, float strength = 15f, float duration = DURATION_NORMAL)
         {
-            return target.DOShakeRotation(AccessibilityHelper.AnimDuration(duration), new Vector3(0, 0, strength), 20, 90);
+            return target.DOShakeRotation(duration, new Vector3(0, 0, strength), 20, 90);
         }
 
         /// <summary>
@@ -225,7 +224,7 @@ namespace DigitPark.Animations
         {
             Color originalColor = target.color;
             return target.DOColor(glowColor, duration / 2)
-                .SetEase(AccessibilityHelper.AnimEase(Ease.InOutSine))
+                .SetEase(Ease.InOutSine)
                 .SetLoops(-1, LoopType.Yoyo);
         }
 
@@ -234,11 +233,11 @@ namespace DigitPark.Animations
         /// </summary>
         public static Tween Flash(Image target, Color flashColor, float duration = DURATION_FAST, GameObject owner = null)
         {
-            float d = AccessibilityHelper.AnimDuration(duration);
+            float d = duration;
             Color originalColor = target.color;
             var seq = DOTween.Sequence()
-                .Append(target.DOColor(flashColor, d / 2).SetEase(AccessibilityHelper.AnimEase(Ease.OutQuad)))
-                .Append(target.DOColor(originalColor, d / 2).SetEase(AccessibilityHelper.AnimEase(Ease.InQuad)));
+                .Append(target.DOColor(flashColor, d / 2).SetEase(Ease.OutQuad))
+                .Append(target.DOColor(originalColor, d / 2).SetEase(Ease.InQuad));
             if (owner != null) seq.SetLink(owner);
             return seq;
         }
@@ -250,14 +249,14 @@ namespace DigitPark.Animations
         /// </summary>
         public static Sequence StaggeredEntrance(Transform[] items, float staggerDelay = 0.1f, float duration = DURATION_NORMAL)
         {
-            float d = AccessibilityHelper.AnimDuration(duration);
-            float delay = AccessibilityHelper.AnimDuration(staggerDelay);
+            float d = duration;
+            float delay = staggerDelay;
             Sequence seq = DOTween.Sequence();
 
             for (int i = 0; i < items.Length; i++)
             {
                 items[i].localScale = Vector3.zero;
-                seq.Insert(i * delay, items[i].DOScale(1f, d).SetEase(AccessibilityHelper.AnimEase(Ease.OutBack)));
+                seq.Insert(i * delay, items[i].DOScale(1f, d).SetEase(Ease.OutBack));
             }
 
             return seq;
@@ -268,8 +267,8 @@ namespace DigitPark.Animations
         /// </summary>
         public static Sequence CascadeEntrance(RectTransform[] items, Direction direction, float staggerDelay = 0.08f, float duration = DURATION_NORMAL)
         {
-            float d = AccessibilityHelper.AnimDuration(duration);
-            float delay = AccessibilityHelper.AnimDuration(staggerDelay);
+            float d = duration;
+            float delay = staggerDelay;
             Sequence seq = DOTween.Sequence();
 
             for (int i = 0; i < items.Length; i++)
@@ -278,7 +277,7 @@ namespace DigitPark.Animations
                 Vector2 startPos = GetOffscreenPosition(items[i], direction);
                 items[i].anchoredPosition = startPos;
 
-                seq.Insert(i * delay, items[i].DOAnchorPos(originalPos, d).SetEase(AccessibilityHelper.AnimEase(Ease.OutBack)));
+                seq.Insert(i * delay, items[i].DOAnchorPos(originalPos, d).SetEase(Ease.OutBack));
             }
 
             return seq;
@@ -291,8 +290,8 @@ namespace DigitPark.Animations
         /// </summary>
         public static Tween Spin(Transform target, float rotations = 1f, float duration = DURATION_SLOW)
         {
-            return target.DORotate(new Vector3(0, 0, 360f * rotations), AccessibilityHelper.AnimDuration(duration), RotateMode.FastBeyond360)
-                .SetEase(AccessibilityHelper.AnimEase(Ease.InOutQuad));
+            return target.DORotate(new Vector3(0, 0, 360f * rotations), duration, RotateMode.FastBeyond360)
+                .SetEase(Ease.InOutQuad);
         }
 
         /// <summary>
@@ -301,7 +300,7 @@ namespace DigitPark.Animations
         public static Tween Float(Transform target, float distance = 10f, float duration = 1.5f)
         {
             return target.DOMoveY(target.position.y + distance, duration)
-                .SetEase(AccessibilityHelper.AnimEase(Ease.InOutSine))
+                .SetEase(Ease.InOutSine)
                 .SetLoops(-1, LoopType.Yoyo);
         }
 
@@ -311,7 +310,7 @@ namespace DigitPark.Animations
         public static Tween Breathe(Transform target, float minScale = 0.98f, float maxScale = 1.02f, float duration = 2f)
         {
             return target.DOScale(maxScale, duration / 2)
-                .SetEase(AccessibilityHelper.AnimEase(Ease.InOutSine))
+                .SetEase(Ease.InOutSine)
                 .SetLoops(-1, LoopType.Yoyo);
         }
 
@@ -324,13 +323,13 @@ namespace DigitPark.Animations
         {
             float scale = 1f + (comboLevel * 0.1f);
             float shake = comboLevel * 2f;
-            float dFast = AccessibilityHelper.AnimDuration(DURATION_FAST);
-            float dNormal = AccessibilityHelper.AnimDuration(DURATION_NORMAL);
+            float dFast = DURATION_FAST;
+            float dNormal = DURATION_NORMAL;
 
             var seq = DOTween.Sequence()
-                .Append(target.DOScale(scale, dFast).SetEase(AccessibilityHelper.AnimEase(Ease.OutQuad)))
+                .Append(target.DOScale(scale, dFast).SetEase(Ease.OutQuad))
                 .Join(target.DOShakeRotation(dFast, new Vector3(0, 0, shake)))
-                .Append(target.DOScale(1f, dNormal).SetEase(AccessibilityHelper.AnimEase(Ease.OutBounce)));
+                .Append(target.DOScale(1f, dNormal).SetEase(Ease.OutBounce));
             if (owner != null) seq.SetLink(owner);
             return seq;
         }
@@ -341,9 +340,9 @@ namespace DigitPark.Animations
         public static Sequence UltraCombo(Transform screenTransform, Transform comboText, GameObject owner = null)
         {
             var seq = DOTween.Sequence()
-                .Append(screenTransform.DOShakePosition(AccessibilityHelper.AnimDuration(0.5f), 20f, 30))
-                .Join(comboText.DOScale(2f, AccessibilityHelper.AnimDuration(0.2f)).SetEase(AccessibilityHelper.AnimEase(Ease.OutQuad)))
-                .Append(comboText.DOScale(1.5f, AccessibilityHelper.AnimDuration(0.3f)).SetEase(AccessibilityHelper.AnimEase(Ease.OutBounce)));
+                .Append(screenTransform.DOShakePosition(0.5f, 20f, 30))
+                .Join(comboText.DOScale(2f, 0.2f).SetEase(Ease.OutQuad))
+                .Append(comboText.DOScale(1.5f, 0.3f).SetEase(Ease.OutBounce));
             if (owner != null) seq.SetLink(owner);
             return seq;
         }

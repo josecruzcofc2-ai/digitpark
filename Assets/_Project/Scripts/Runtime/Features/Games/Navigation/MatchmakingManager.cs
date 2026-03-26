@@ -30,12 +30,10 @@ namespace DigitPark.Managers
 
         [Header("=== PLAYER CARD ===")]
         [SerializeField] private TextMeshProUGUI playerNameText;
-        [SerializeField] private TextMeshProUGUI playerLevelText;
         [SerializeField] private GameObject playerCard;
 
         [Header("=== OPPONENT CARD ===")]
         [SerializeField] private TextMeshProUGUI opponentNameText;
-        [SerializeField] private TextMeshProUGUI opponentLevelText;
         [SerializeField] private GameObject opponentCard;
         [Header("=== VS SECTION ===")]
         [SerializeField] private GameObject vsContainer;
@@ -71,20 +69,16 @@ namespace DigitPark.Managers
         [SerializeField] private Sprite quickMathIcon;
         [SerializeField] private Sprite flashTapIcon;
         [SerializeField] private Sprite oddOneOutIcon;
-        [SerializeField] private Sprite cognitiveSprintIcon;
-
         // State
         private bool isSearching = false;
         private bool matchFound = false;
         private float searchTime = 0f;
         private GameType currentGameType;
-        private bool isCognitiveSprint = false;
         private string matchId;
         private string opponentId;
 
         // Keys
         private const string MATCH_GAME_TYPE_KEY = "DigitPark_MatchGameType";
-        private const string MATCH_IS_SPRINT_KEY = "DigitPark_MatchIsSprint";
         private const string MATCH_ROUNDS_KEY = "DigitPark_MatchRounds";
 
         #region Unity Lifecycle
@@ -97,7 +91,6 @@ namespace DigitPark.Managers
             LoadMatchParameters();
             SetupPlayerInfo();
             SetupGameIcon();
-            ApplyPlayerBattleCard();
             StartSearching();
         }
 
@@ -138,10 +131,9 @@ namespace DigitPark.Managers
         {
             int gameTypeInt = PlayerPrefs.GetInt(MATCH_GAME_TYPE_KEY, 0);
             currentGameType = (GameType)gameTypeInt;
-            isCognitiveSprint = PlayerPrefs.GetInt(MATCH_IS_SPRINT_KEY, 0) == 1;
             matchRounds = PlayerPrefs.GetInt(MATCH_ROUNDS_KEY, 1);
 
-            Debug.Log($"[Matchmaking] Game: {currentGameType}, IsSprint: {isCognitiveSprint}, Rounds: {matchRounds}");
+            Debug.Log($"[Matchmaking] Game: {currentGameType}, Rounds: {matchRounds}");
         }
 
         private async void SetupPlayerInfo()
@@ -154,11 +146,6 @@ namespace DigitPark.Managers
                 if (playerNameText != null)
                     playerNameText.text = playerName;
 
-                // Get player level
-                int level = PlayerPrefs.GetInt("DP_PlayerLevel", 1);
-                if (playerLevelText != null)
-                    playerLevelText.text = AutoLocalizer.Get("level_prefix", level);
-
                 // Setup opponent as searching
                 ShowOpponentSearching(true);
             }
@@ -170,7 +157,7 @@ namespace DigitPark.Managers
 
         private void SetupGameIcon()
         {
-            string gameName = isCognitiveSprint ? AutoLocalizer.Get("matchmaking_cognitive_sprint") : FormatGameName(currentGameType);
+            string gameName = FormatGameName(currentGameType);
 
             // 1. Try to get assigned icon first
             Sprite icon = GetGameIcon(currentGameType);
@@ -292,9 +279,6 @@ namespace DigitPark.Managers
                 _ => null
             };
 
-            if (isCognitiveSprint)
-                iconName = "CognitiveSprintIcon";
-
             if (string.IsNullOrEmpty(iconName))
                 return null;
 
@@ -311,9 +295,6 @@ namespace DigitPark.Managers
 
         private Sprite GetGameIcon(GameType gameType)
         {
-            if (isCognitiveSprint && cognitiveSprintIcon != null)
-                return cognitiveSprintIcon;
-
             return gameType switch
             {
                 GameType.DigitRush => digitRushIcon,
@@ -323,36 +304,6 @@ namespace DigitPark.Managers
                 GameType.OddOneOut => oddOneOutIcon,
                 _ => null
             };
-        }
-
-        private void ApplyPlayerBattleCard()
-        {
-            var bcService = DigitPark.Cosmetics.BattleCardService.Instance;
-            if (bcService == null) return;
-
-            var card = bcService.GetEquippedCard();
-            if (card == null) return;
-
-            // Find BattleCardApplier on player card
-            if (playerCard != null)
-            {
-                var applier = playerCard.GetComponentInChildren<DigitPark.Cosmetics.BattleCardApplier>();
-                if (applier != null)
-                    applier.ApplyCard(card);
-            }
-        }
-
-        private void ApplyOpponentBattleCard(string battleCardId)
-        {
-            var bcService = DigitPark.Cosmetics.BattleCardService.Instance;
-            if (bcService == null || opponentCard == null) return;
-
-            var card = bcService.GetCardById(battleCardId) ?? bcService.GetDefault();
-            if (card == null) return;
-
-            var applier = opponentCard.GetComponentInChildren<DigitPark.Cosmetics.BattleCardApplier>();
-            if (applier != null)
-                applier.ApplyCard(card);
         }
 
         #endregion
@@ -389,18 +340,6 @@ namespace DigitPark.Managers
         {
             if (MatchmakingService.Instance != null)
             {
-                if (isCognitiveSprint)
-                {
-                    if (CognitiveSprintManager.Instance?.SelectedGames?.Count > 0)
-                        MatchmakingService.Instance.FindCognitiveSprintMatch(
-                            CognitiveSprintManager.Instance.SelectedGames,
-                            OnMatchFound,
-                            OnMatchFailed
-                        );
-                    else
-                        OnMatchFailed("No games selected for Cognitive Sprint");
-                }
-                else
                 {
                     MatchmakingService.Instance.FindMatch(
                         currentGameType,
@@ -490,9 +429,6 @@ namespace DigitPark.Managers
         {
             if (opponentNameText != null)
                 opponentNameText.text = searching ? "???" : "";
-
-            if (opponentLevelText != null)
-                opponentLevelText.text = searching ? "---" : "";
         }
 
         private async void ShowOpponentInfo(string opponentInfo)
@@ -501,18 +437,9 @@ namespace DigitPark.Managers
             {
                 ShowOpponentSearching(false);
 
-                // Apply opponent BattleCard cosmetic
-                string opponentBcId = MatchmakingService.Instance?.OpponentBattleCardId;
-                if (!string.IsNullOrEmpty(opponentBcId))
-                    ApplyOpponentBattleCard(opponentBcId);
-
                 // Parse opponent name
                 if (opponentNameText != null)
                     opponentNameText.text = opponentInfo;
-
-                // Real opponent level shown when available from matchmaking service
-                if (opponentLevelText != null)
-                    opponentLevelText.text = "---";
 
                 // Load opponent avatar
                 // Animate opponent card
@@ -643,9 +570,6 @@ namespace DigitPark.Managers
             if (getReadyText != null)
                 getReadyText.text = AutoLocalizer.Get("matchmaking_get_ready");
 
-            // Pause BattleCard animations during countdown
-            PauseBattleCardAnimations();
-
             for (int i = 3; i > 0; i--)
             {
                 if (countdownText != null)
@@ -674,7 +598,6 @@ namespace DigitPark.Managers
             yield return new WaitForSeconds(0.5f);
             if (this == null) yield break;
 
-            ResumeBattleCardAnimations();
             StartOnlineGame();
         }
 
@@ -692,15 +615,8 @@ namespace DigitPark.Managers
                 GameSessionManager.Instance.StartOnlineMatch(matchId, opponentId);
             }
 
-            if (isCognitiveSprint)
-            {
-                CognitiveSprintManager.Instance?.StartOnlineSprint();
-            }
-            else
-            {
-                string sceneName = GetSceneNameForGameType(currentGameType);
-                SceneManager.LoadScene(sceneName);
-            }
+            string sceneName = GetSceneNameForGameType(currentGameType);
+            SceneManager.LoadScene(sceneName);
         }
 
         private string GetSceneNameForGameType(GameType gameType)
@@ -780,30 +696,6 @@ namespace DigitPark.Managers
             target.localScale = targetScale;
         }
 
-        private void PauseBattleCardAnimations()
-        {
-            ForEachBattleCardApplier(a => a.PauseAnimation());
-        }
-
-        private void ResumeBattleCardAnimations()
-        {
-            ForEachBattleCardApplier(a => a.ResumeAnimation());
-        }
-
-        private void ForEachBattleCardApplier(System.Action<DigitPark.Cosmetics.BattleCardApplier> action)
-        {
-            if (playerCard != null)
-            {
-                var applier = playerCard.GetComponentInChildren<DigitPark.Cosmetics.BattleCardApplier>();
-                if (applier != null) action(applier);
-            }
-            if (opponentCard != null)
-            {
-                var applier = opponentCard.GetComponentInChildren<DigitPark.Cosmetics.BattleCardApplier>();
-                if (applier != null) action(applier);
-            }
-        }
-
         private float EaseOutBack(float t)
         {
             const float c1 = 1.70158f;
@@ -818,13 +710,12 @@ namespace DigitPark.Managers
         /// <summary>
         /// Sets the game type before loading matchmaking scene
         /// </summary>
-        public static void SetMatchGameType(GameType gameType, bool isCognitiveSprint = false, int rounds = 1)
+        public static void SetMatchGameType(GameType gameType, int rounds = 1)
         {
             PlayerPrefs.SetInt(MATCH_GAME_TYPE_KEY, (int)gameType);
-            PlayerPrefs.SetInt(MATCH_IS_SPRINT_KEY, isCognitiveSprint ? 1 : 0);
             PlayerPrefs.SetInt(MATCH_ROUNDS_KEY, rounds);
             PlayerPrefs.Save();
-            Debug.Log($"[Matchmaking] Set game type: {gameType}, IsSprint: {isCognitiveSprint}, Rounds: {rounds}");
+            Debug.Log($"[Matchmaking] Set game type: {gameType}, Rounds: {rounds}");
         }
 
         public static int GetMatchRounds()

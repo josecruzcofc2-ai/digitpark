@@ -48,10 +48,6 @@ namespace DigitPark.Managers
 
         [Header("UI - Premium Section")]
         [SerializeField] private GameObject premiumSection;
-        [SerializeField] private Button createTournamentsButton;
-        [SerializeField] private TextMeshProUGUI createTournamentsButtonText;
-        [SerializeField] private Button tournamentBundleButton;
-        [SerializeField] private TextMeshProUGUI tournamentBundleButtonText;
         [SerializeField] private Button restorePurchasesButton;
 
         [Header("UI - Premium Button (Pro)")]
@@ -88,7 +84,6 @@ namespace DigitPark.Managers
         private const string SOUND_VOLUME_KEY = "SoundVolume";
         private const string EFFECTS_VOLUME_KEY = "EffectsVolume";
         private const string VIBRATION_KEY = "VibrationEnabled";
-        private const string NOTIFICATIONS_KEY = "NotificationsEnabled";
         private const string NAME_CHANGE_COUNT_KEY = "NameChangeCount";
         private const int NAME_CHANGE_GEM_COST = 100;
 
@@ -195,7 +190,7 @@ namespace DigitPark.Managers
             if (languageDropdown == null) return;
 
             // Las opciones ya están configuradas en el Inspector:
-            // 0: English, 1: Español, 2: Français, 3: Português, 4: Deutsch
+            // 0: English, 1: Español
 
             // Establecer el valor actual
             int currentIndex = PlayerPrefs.GetInt("DP_Language", 0);
@@ -214,7 +209,7 @@ namespace DigitPark.Managers
             languageDropdown.RefreshShownValue();
             languageDropdown.onValueChanged.AddListener(OnLanguageDropdownChanged);
 
-            string[] languageNames = { "English", "Español", "Français", "Português", "Deutsch" };
+            string[] languageNames = { "English", "Español" };
             string currentLanguage = currentIndex < languageNames.Length ? languageNames[currentIndex] : "Unknown";
             Debug.Log($"[Settings] Idioma actual: {currentLanguage}");
         }
@@ -259,8 +254,6 @@ namespace DigitPark.Managers
             backButton?.onClick.AddListener(OnBackButtonClicked);
 
             // Premium buttons
-            createTournamentsButton?.onClick.AddListener(OnCreateTournamentsClicked);
-            tournamentBundleButton?.onClick.AddListener(OnTournamentBundleClicked);
             restorePurchasesButton?.onClick.AddListener(OnRestorePurchasesClicked);
             premiumButton?.onClick.AddListener(OnPremiumButtonClicked);
 
@@ -319,7 +312,7 @@ namespace DigitPark.Managers
 
         private void OnLanguageDropdownChanged(int index)
         {
-            string[] languageNames = { "English", "Español", "Français", "Português", "Deutsch" };
+            string[] languageNames = { "English", "Español" };
             string language = index < languageNames.Length ? languageNames[index] : "Unknown";
             Debug.Log($"[Settings] Cambiando idioma a: {language}");
 
@@ -514,29 +507,6 @@ namespace DigitPark.Managers
 #endif
         }
 
-        /// <summary>
-        /// Verifica si las notificaciones están habilitadas
-        /// </summary>
-        public static bool AreNotificationsEnabled()
-        {
-            return PlayerPrefs.GetInt(NOTIFICATIONS_KEY, 1) == 1;
-        }
-
-        /// <summary>
-        /// Establece el estado de notificaciones
-        /// </summary>
-        public static void SetNotificationsEnabled(bool enabled)
-        {
-            PlayerPrefs.SetInt(NOTIFICATIONS_KEY, enabled ? 1 : 0);
-            PlayerPrefs.Save();
-
-            // Sincronizar con NotificationService si existe
-            if (Services.Firebase.NotificationService.Instance != null)
-            {
-                Services.Firebase.NotificationService.Instance.SetNotificationsEnabled(enabled);
-            }
-        }
-
         #endregion
 
         #region Copy ID
@@ -549,13 +519,6 @@ namespace DigitPark.Managers
 
             // Clear clipboard after 10 seconds for security
             StartCoroutine(ClearClipboardAfterDelay(10f));
-
-            // Show toast notification
-            if (InAppNotificationManager.Instance != null)
-            {
-                InAppNotificationManager.Instance.Show(
-                    AutoLocalizer.Get("id_copied"), "", "info");
-            }
         }
 
         private IEnumerator ClearClipboardAfterDelay(float delay)
@@ -822,121 +785,8 @@ namespace DigitPark.Managers
         {
             if (PremiumManager.Instance == null) return;
 
-            bool canCreateTournaments = PremiumManager.Instance.CanCreateTournaments;
-            bool hasBundle = canCreateTournaments;
-
-            // Actualizar boton de crear torneos
-            if (createTournamentsButton != null)
-            {
-                createTournamentsButton.interactable = !canCreateTournaments;
-                if (createTournamentsButtonText != null)
-                {
-                    if (canCreateTournaments)
-                    {
-                        createTournamentsButtonText.text = AutoLocalizer.Get("already_purchased");
-                    }
-                    else
-                    {
-                        string ctPrice = PremiumManager.Instance?.GetProductPrice(PremiumProduct.CreateTournaments) ?? PremiumManager.PRICE_CREATE_TOURNAMENTS;
-                        createTournamentsButtonText.text = $"{AutoLocalizer.Get("create_tournaments_title")} - {ctPrice}";
-                    }
-                }
-            }
-
-            // Actualizar boton de tournament bundle
-            if (tournamentBundleButton != null)
-            {
-                tournamentBundleButton.interactable = !hasBundle;
-                if (tournamentBundleButtonText != null)
-                {
-                    if (hasBundle)
-                    {
-                        tournamentBundleButtonText.text = AutoLocalizer.Get("already_purchased");
-                    }
-                    else
-                    {
-                        string tbPrice = PremiumManager.Instance?.GetProductPrice(PremiumProduct.TournamentBundle) ?? PremiumManager.PRICE_TOURNAMENT_BUNDLE;
-                        tournamentBundleButtonText.text = $"{AutoLocalizer.Get("tournament_bundle_title")} - {tbPrice}";
-                    }
-                }
-            }
-
-            // Ocultar seccion de premium si ya tiene todo
-            if (premiumSection != null && hasBundle)
-            {
-                // Opcionalmente ocultar la seccion si tiene todo
-                // premiumSection.SetActive(false);
-            }
-
-            Debug.Log($"[Settings] Premium UI actualizada - CreateTournaments: {canCreateTournaments}");
-
             // Actualizar el badge del boton Pro
             UpdatePremiumBadge();
-        }
-
-        /// <summary>
-        /// Compra: Crear Torneos ($3.99 USD)
-        /// </summary>
-        private void OnCreateTournamentsClicked()
-        {
-            Debug.Log("[Settings] Iniciando compra: Crear Torneos");
-
-            if (PremiumManager.Instance == null) return;
-
-            if (PremiumManager.Instance.CanCreateTournaments)
-            {
-                errorPanel?.Show(AutoLocalizer.Get("already_purchased"));
-                return;
-            }
-
-            // Deshabilitar boton mientras se procesa
-            if (createTournamentsButton != null) createTournamentsButton.interactable = false;
-
-            PremiumManager.Instance.PurchaseCreateTournaments(success =>
-            {
-                if (success)
-                {
-                    errorPanel?.Show(AutoLocalizer.Get("purchase_success"));
-                }
-                else
-                {
-                    errorPanel?.Show(AutoLocalizer.Get("purchase_failed"));
-                    if (createTournamentsButton != null) createTournamentsButton.interactable = true;
-                }
-            });
-        }
-
-        /// <summary>
-        /// Compra: Tournament Bundle ($8.99 USD)
-        /// </summary>
-        private void OnTournamentBundleClicked()
-        {
-            Debug.Log("[Settings] Iniciando compra: Tournament Bundle");
-
-            if (PremiumManager.Instance == null) return;
-
-            bool hasBundle = PremiumManager.Instance.CanCreateTournaments;
-            if (hasBundle)
-            {
-                errorPanel?.Show(AutoLocalizer.Get("already_purchased"));
-                return;
-            }
-
-            // Deshabilitar boton mientras se procesa
-            if (tournamentBundleButton != null) tournamentBundleButton.interactable = false;
-
-            PremiumManager.Instance.PurchaseTournamentBundle(success =>
-            {
-                if (success)
-                {
-                    errorPanel?.Show(AutoLocalizer.Get("purchase_success"));
-                }
-                else
-                {
-                    errorPanel?.Show(AutoLocalizer.Get("purchase_failed"));
-                    if (tournamentBundleButton != null) tournamentBundleButton.interactable = true;
-                }
-            });
         }
 
         /// <summary>
@@ -981,7 +831,7 @@ namespace DigitPark.Managers
             if (premiumBadge == null) return;
 
             bool isPremium = PremiumManager.Instance != null &&
-                            PremiumManager.Instance.CanCreateTournaments;
+                            PremiumManager.Instance.IsPremium;
 
             if (isPremium && !premiumBadge.activeSelf)
             {

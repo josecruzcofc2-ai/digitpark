@@ -316,7 +316,7 @@ namespace DigitPark.Services.Firebase
 
         public async Task<bool> RegisterWithEmail(string email, string password, string username)
         {
-            // C-P1-35: Minimum 8 chars — accounts may hold real money (CashBattle)
+            // C-P1-35: Minimum 8 chars
             if (password.Length < 8)
             {
                 OnLoginFailed?.Invoke(AutoLocalizer.Get("error_password_too_short"));
@@ -656,10 +656,8 @@ namespace DigitPark.Services.Firebase
                     {
                         await dbService.RemoveUserFromLeaderboards(userId);
                         await dbService.DeleteMatchHistory(userId);
-                        await dbService.DeleteAchievements(userId);
-                        await dbService.DeleteFriendsList(userId);
+
                         await dbService.DeleteNotifications(userId);
-                        await dbService.DeleteTournamentHistory(userId);
                     }
                     catch (Exception dbEx)
                     {

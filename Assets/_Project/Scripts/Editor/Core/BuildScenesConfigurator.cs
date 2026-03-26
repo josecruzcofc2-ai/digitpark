@@ -34,10 +34,9 @@ namespace DigitPark.Editor
             // === 4: ONBOARDING ===
             new[] { "Onboarding/Onboarding" },
 
-            // === 5-7: CORE (hub + settings) ===
+            // === 5-6: CORE (hub + settings) ===
             new[] { "_Core/MainMenu" },
             new[] { "_Core/Settings" },
-            new[] { "Social/Profile/Profile" },
 
             // === 8-11: GAME NAVIGATION ===
             new[] { "Games/Navigation/PlayModeSelection" },
@@ -52,24 +51,11 @@ namespace DigitPark.Editor
             new[] { "Games/Minigames/OddOneOut" },
             new[] { "Games/Minigames/QuickMath" },
 
-            // === 17-22: SOCIAL ===
+            // === 16-18: SOCIAL ===
             new[] { "Social/Profile/Scores" },
-            new[] { "Social/Friends/SearchPlayers" },
-            new[] { "Social/Friends/Friends" },
-            new[] { "Social/Friends/FriendRequests" },
             new[] { "Social/Profile/MatchHistory" },
-            new[] { "Social/Notifications/Notifications" },
-
             // === 23-26: MONETIZATION ===
             new[] { "Monetization/Shop" },
-            new[] { "Monetization/DailyMissions" },
-            new[] { "Monetization/DailyRewards" },
-            new[] { "Monetization/Achievements" },
-
-            // === 27-29: TOURNAMENTS ===
-            new[] { "Tournaments/TournamentsBrowser" },
-            new[] { "Tournaments/TournamentCreate" },
-            new[] { "Tournaments/TournamentLobby" },
 
         };
 
@@ -112,7 +98,7 @@ namespace DigitPark.Editor
             EditorGUILayout.HelpBox(
                 "Configura el orden de escenas en Build Settings.\n" +
                 "Indice 0 = Boot (entry point). Orden por flujo de navegacion.\n" +
-                "30 escenas totales: Auth > Core > Games > Social > Monetization > Tournaments",
+                "Escenas: Auth > Core > Games > Social > Monetization",
                 MessageType.Info);
 
             GUILayout.Space(10);
@@ -241,12 +227,10 @@ namespace DigitPark.Editor
                     if (path.Contains("Minigames/")) return "MINIGAMES";
                     return "GAMES";
                 case "Social":
-                    if (path.Contains("Friends/")) return "SOCIAL - FRIENDS";
                     if (path.Contains("Profile/")) return "SOCIAL - PROFILE";
                     if (path.Contains("Notifications/")) return "SOCIAL - NOTIFICATIONS";
                     return "SOCIAL";
                 case "Monetization": return "MONETIZATION";
-                case "Tournaments": return "TOURNAMENTS";
                 default: return "OTHER";
             }
         }
@@ -276,11 +260,10 @@ namespace DigitPark.Editor
                 "[0] Boot (entry point)\n" +
                 "[1-2] Auth (Login, Register)\n" +
                 "[4] Onboarding\n" +
-                "[5-7] Core (MainMenu, Settings, Profile)\n" +
-                "[8-16] Games\n" +
-                "[17-22] Social\n" +
-                "[23-26] Monetization\n" +
-                "[27-29] Tournaments",
+                "[5-6] Core (MainMenu, Settings)\n" +
+                "[7-15] Games\n" +
+                "[16-18] Social\n" +
+                "[19-20] Monetization",
                 "OK");
         }
     }

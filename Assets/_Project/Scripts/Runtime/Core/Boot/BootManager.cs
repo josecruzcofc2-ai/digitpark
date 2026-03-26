@@ -14,8 +14,6 @@ using DigitPark.Payments;
 using DigitPark.Payments.Entitlements;
 using Firebase.Database;
 using DigitPark.Navigation;
-using DigitPark.Progression;
-using DigitPark.Cosmetics;
 
 namespace DigitPark.Managers
 {
@@ -103,9 +101,6 @@ namespace DigitPark.Managers
 
             UpdateLoadingProgress(1f, "boot_completed");
 
-            // Auto-etiquetar accesibilidad de la escena actual
-            AccessibilityHelper.AutoLabelScene();
-
             yield return new WaitForSeconds(0.5f);
 
             // Redirigir a la escena apropiada
@@ -143,23 +138,6 @@ namespace DigitPark.Managers
                 GameObject bannerObj = new GameObject("NetworkStatusBanner");
                 bannerObj.AddComponent<NetworkStatusBanner>();
                 Debug.Log("[Boot] NetworkStatusBanner creado");
-            }
-
-            // Crear ReviewService
-            if (ReviewService.Instance == null)
-            {
-                GameObject reviewObj = new GameObject("ReviewService");
-                reviewObj.AddComponent<ReviewService>();
-                Debug.Log("[Boot] ReviewService creado");
-            }
-            ReviewService.Instance?.IncrementSessionCount();
-
-            // Crear DeepLinkService
-            if (DeepLinkService.Instance == null)
-            {
-                GameObject deepLinkObj = new GameObject("DeepLinkService");
-                deepLinkObj.AddComponent<DeepLinkService>();
-                Debug.Log("[Boot] DeepLinkService creado");
             }
 
             // Crear BackButtonManager (Android back button global handler)
@@ -238,14 +216,6 @@ namespace DigitPark.Managers
             {
                 GameObject analyticsService = new GameObject("AnalyticsService");
                 analyticsService.AddComponent<AnalyticsService>();
-            }
-
-            // Crear AchievementService
-            if (AchievementService.Instance == null)
-            {
-                GameObject achievementService = new GameObject("AchievementService");
-                achievementService.AddComponent<AchievementService>();
-                Debug.Log("[Boot] AchievementService creado");
             }
 
             // Wait for AuthenticationService to finish Firebase init (max 10s timeout)
@@ -389,9 +359,6 @@ namespace DigitPark.Managers
                 var restoreTasks = new List<Task>
                 {
                     PlayerFrameService.Instance?.RestoreFromFirebaseAsync(uid) ?? Task.CompletedTask,
-                    PlayerTitleService.Instance?.RestoreFromFirebaseAsync(uid) ?? Task.CompletedTask,
-                    PlayerProgressionSystem.Instance?.RestoreFromFirebaseAsync(uid) ?? Task.CompletedTask,
-                    BackgroundPatternManager.Instance?.RestoreFromFirebaseAsync(uid) ?? Task.CompletedTask,
                 };
                 var restoreTask = Task.WhenAll(restoreTasks);
                 while (!restoreTask.IsCompleted) yield return null;
@@ -417,23 +384,6 @@ namespace DigitPark.Managers
                     updates["coins"] = currencyMgr.Coins;
                 }
 
-                // Daily Rewards
-                string dailyData = PlayerPrefs.GetString("DailyReward_Data", "");
-                if (!string.IsNullOrEmpty(dailyData))
-                {
-                    updates["dailyReward/localData"] = dailyData;
-                }
-
-                // Daily Rewards Manager streak
-                int streak = PlayerPrefs.GetInt("DailyRewards_Streak", 0);
-                int currentDay = PlayerPrefs.GetInt("DailyRewards_CurrentDay", 0);
-                if (streak > 0 || currentDay > 0)
-                {
-                    updates["dailyRewardsManager/streak"] = streak;
-                    updates["dailyRewardsManager/currentDay"] = currentDay;
-                    updates["dailyRewardsManager/lastClaim"] = PlayerPrefs.GetString("DailyRewards_LastClaim", "");
-                }
-
                 // XP / Level
                 int xp = PlayerPrefs.GetInt("DP_PlayerXP", 0);
                 int level = PlayerPrefs.GetInt("DP_PlayerLevel", 1);
@@ -444,7 +394,6 @@ namespace DigitPark.Managers
                 }
 
                 PlayerFrameService.Instance?.TriggerFirebaseSync();
-                PlayerTitleService.Instance?.TriggerFirebaseSync();
             }
             catch (System.Exception e)
             {
@@ -471,7 +420,7 @@ namespace DigitPark.Managers
         }
 
         /// <summary>
-        /// Inicializa el sistema de pagos (Stripe + AppleIAP + FeatureFlags + Entitlements)
+        /// Inicializa el sistema de pagos (Apple IAP + Firebase Entitlements + FeatureFlags)
         /// </summary>
         private IEnumerator InitializePaymentSystem()
         {
@@ -532,14 +481,6 @@ namespace DigitPark.Managers
         {
             Debug.Log("[Boot] Inicializando managers del juego...");
 
-            // BattleCardService — cosmético de matchmaking (independiente de ThemeManager)
-            if (DigitPark.Cosmetics.BattleCardService.Instance == null)
-            {
-                GameObject bcObj = new GameObject("BattleCardService");
-                bcObj.AddComponent<DigitPark.Cosmetics.BattleCardService>();
-                Debug.Log("[Boot] BattleCardService creado");
-            }
-
             // DailyOfferService — daily rotating offers (Economy Rebalance V55)
             if (DailyOfferService.Instance == null)
             {
@@ -557,7 +498,6 @@ namespace DigitPark.Managers
             }
 
             // RotatingContentService — whale ceiling expansion (Economy Rebalance V55 / 13F)
-            // Seasonal BattleCards + Monthly Frames + Limited Theme Variants
             if (RotatingContentService.Instance == null)
             {
                 GameObject rcObj = new GameObject("RotatingContentService");

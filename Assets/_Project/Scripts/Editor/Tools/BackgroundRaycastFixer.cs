@@ -136,21 +136,11 @@ namespace DigitPark.Editor
                 "Assets/_Project/Scenes/Games/Minigames/MemoryPairs.unity",
                 "Assets/_Project/Scenes/Games/Minigames/OddOneOut.unity",
                 "Assets/_Project/Scenes/Games/Minigames/QuickMath.unity",
-                // Social - Profile
-                "Assets/_Project/Scenes/Social/Profile/Profile.unity",
+                // Social
                 "Assets/_Project/Scenes/Social/Profile/Scores.unity",
                 "Assets/_Project/Scenes/Social/Profile/MatchHistory.unity",
-                // Social - Friends
-                "Assets/_Project/Scenes/Social/Friends/Friends.unity",
                 // Monetization
-                "Assets/_Project/Scenes/Monetization/Achievements.unity",
                 "Assets/_Project/Scenes/Monetization/Shop.unity",
-                "Assets/_Project/Scenes/Monetization/DailyMissions.unity",
-                "Assets/_Project/Scenes/Monetization/DailyRewards.unity",
-                // Tournaments
-                "Assets/_Project/Scenes/Tournaments/TournamentsBrowser.unity",
-                "Assets/_Project/Scenes/Tournaments/TournamentCreate.unity",
-                "Assets/_Project/Scenes/Tournaments/TournamentLobby.unity",
             };
         }
     }

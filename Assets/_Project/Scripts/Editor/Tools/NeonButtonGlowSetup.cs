@@ -42,10 +42,6 @@ namespace DigitPark.Editor
             "Assets/_Project/Scenes/_Core/MainMenu.unity",
             "Assets/_Project/Scenes/Social/Profile/Scores.unity",
             "Assets/_Project/Scenes/_Core/Settings.unity",
-            "Assets/_Project/Scenes/Tournaments/TournamentsBrowser.unity",
-            "Assets/_Project/Scenes/Social/Profile/Profile.unity",
-            "Assets/_Project/Scenes/Social/Friends/SearchPlayers.unity",
-            // CashBattleHub EXCLUIDA — estilo gold fijo, ThemeApplierProtector la protege
             "Assets/_Project/Scenes/Games/Navigation/GameSelector.unity"
         };
 
@@ -416,13 +412,6 @@ namespace DigitPark.Editor
                 lower.Contains("aceptar") || lower.Contains("guardar") || lower.Contains("listo"))
             {
                 return NeonButtonGlow.GlowStyle.Success;
-            }
-
-            // Tournament/special buttons
-            if (lower.Contains("tournament") || lower.Contains("challenge") || lower.Contains("battle") ||
-                lower.Contains("torneo") || lower.Contains("desafio") || lower.Contains("batalla"))
-            {
-                return NeonButtonGlow.GlowStyle.Purple;
             }
 
             // Default to primary cyan

@@ -32,14 +32,8 @@ namespace DigitPark.Data
         // Historial de tiempos (ultimos 30)
         public List<ScoreEntry> scoreHistory;
 
-        // Torneos participados (List for JsonUtility compatibility — Dictionary not serializable)
-        public List<TournamentResultEntry> tournamentResults;
-
         // Configuraciones del jugador
         public PlayerSettings settings;
-
-        // Lista de amigos
-        public List<string> friends;
 
         // Estado premium
         public bool isPremium;
@@ -88,10 +82,7 @@ namespace DigitPark.Data
             oddOneOutStats = new GameStats();
 
             scoreHistory = new List<ScoreEntry>();
-            tournamentResults = new List<TournamentResultEntry>();
             settings = new PlayerSettings();
-            friends = new List<string>();
-
             isPremium = false;
             premiumExpiryDate = DateTime.MinValue;
 
@@ -113,14 +104,6 @@ namespace DigitPark.Data
                 "OddOneOut" => oddOneOutStats,
                 _ => null
             };
-        }
-
-        /// <summary>
-        /// Verifica si un jugador es amigo
-        /// </summary>
-        public bool IsFriend(string playerId)
-        {
-            return friends != null && friends.Contains(playerId);
         }
 
         /// <summary>
@@ -261,7 +244,6 @@ namespace DigitPark.Data
     {
         public float time;
         public string timestamp; // Almacenado como string para serialización JSON
-        public string tournamentId; // null si es partida casual
 
         // Propiedad helper para obtener DateTime
         public DateTime GetTimestamp()
@@ -277,28 +259,4 @@ namespace DigitPark.Data
         }
     }
 
-    /// <summary>
-    /// Resultado de un torneo específico
-    /// </summary>
-    [System.Serializable]
-    public class TournamentResult
-    {
-        public string tournamentId;
-        public string tournamentName;
-        public float bestTime;
-        public int finalPosition;
-        public int totalParticipants;
-        public int prizeWon;
-        public string completionDate;
-    }
-
-    /// <summary>
-    /// JsonUtility-compatible wrapper for tournament results (replaces Dictionary&lt;string, TournamentResult&gt;)
-    /// </summary>
-    [System.Serializable]
-    public class TournamentResultEntry
-    {
-        public string key;
-        public TournamentResult value;
-    }
 }

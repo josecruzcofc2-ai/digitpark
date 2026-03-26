@@ -51,11 +51,6 @@ namespace DigitPark.Localization
             { "ScoresButton", "scores_button" },
             { "ScoresButtonText", "scores_button" },
             { "ScoresText", "scores_button" },
-            { "TournamentButton", "tournament_button" },
-            { "TournamentButtonText", "tournament_button" },
-            { "TournamentsButton", "tournament_button" },
-            { "TournamentsButtonText", "tournament_button" },
-            { "TournamentsText", "tournament_button" },
             { "SettingsButton", "settings_button" },
             { "SettingsButtonText", "settings_button" },
             { "SettingsText", "settings_button" },
@@ -63,34 +58,14 @@ namespace DigitPark.Localization
             // Main Menu Cards
             { "PlayCardTitle", "play_title" },
             { "PlayCardSubtitle", "play_subtitle" },
-            { "DailyRewardCardTitle", "daily_reward_title" },
             { "ClaimButtonText", "claim" },
             { "RankingsLabel", "rankings" },
             { "SearchLabel", "search" },
-            { "MissionsLabel", "missions" },
-            { "AchievementsLabel", "achievements_title" },
             { "ShopLabel", "shop_title" },
             { "PremiumLabel", "premium_section_title" },
 
             // Player Card
-            { "ViewProfileButtonText", "view_profile" },
             { "OnlineLabel", "online" },
-
-            // Achievement Toast
-            { "HeaderText", "achievement_unlocked" },
-            { "CompletionText", "completed" },
-
-            // ==================== ACHIEVEMENTS SCENE ====================
-            // Progress
-            { "AchProgressLeft", "total_progress" },
-            // Empty state
-            { "AchEmptySubtitle", "ach_keep_playing" },
-            // Detail panel
-            { "DetailProgressText", "completed" },
-            { "AchRewardLabel", "reward_label" },
-            // Celebration
-            { "CelebrationTitle", "achievement_unlocked" },
-            // C-P1-23: CelebrationAchievementName removed — AchievementsManager sets it dynamically via achievement.nameKey
 
             // ==================== SETTINGS ====================
             { "SettingsTitleText", "settings_title" },
@@ -205,31 +180,14 @@ namespace DigitPark.Localization
             { "TimeText", "time" },
 
             // ==================== TOURNAMENTS ====================
-            { "TournamentsTitle", "tournaments_title" },
-            { "TournamentsTitleText", "tournaments_title" },
             { "SearchTab", "search_tab" },
             { "SearchTabText", "search_tab" },
             { "SearchButton", "search" },
             { "SearchButtonText", "search" },
-            { "SearchOptionsButtonText", "search_tournament" },
-            { "SearchTournamentButton", "search_tournament" },
-            { "SearchTournamentButtonText", "search_tournament" },
             { "SearchOptionsTitle", "search_options" },
             { "SearchOptionsTitleText", "search_options" },
-            { "MyTournamentsTab", "my_tournaments_tab" },
-            { "MyTournamentsTabText", "my_tournaments_tab" },
-            { "MyTournamentsButton", "my_tournaments_tab" },
-            { "MyTournamentsButtonText", "my_tournaments_tab" },
             { "CreateTab", "create_tab" },
             { "CreateTabText", "create_tab" },
-            { "CreateButton", "create_tournament" },
-            { "CreateTournamentButton", "create_tournament" },
-            { "CreateTournamentButtonText", "create_tournament" },
-            { "JoinButton", "join_tournament" },
-            { "JoinButtonText", "join_tournament" },
-            { "JoinTournamentButton", "join_tournament" },
-            { "ExitTournamentButton", "exit_tournament" },
-            { "ExitTournamentButtonText", "exit_tournament" },
             { "EntryFeeLabel", "entry_fee" },
             { "PrizePoolLabel", "prize_pool" },
             { "ParticipantsLabel", "participants" },
@@ -293,8 +251,6 @@ namespace DigitPark.Localization
             { "PersonalTabText", "personal_tab" },
 
             // ==================== CREATE TOURNAMENT ====================
-            { "CreateTournamentTitle", "create_tournament_title" },
-            { "CreateTournamentTitleText", "create_tournament_title" },
 
             // ==================== TOURNAMENTS - Additional Labels ====================
             { "UsernameSearchPlaceholder", "username_search_placeholder" },
@@ -359,7 +315,6 @@ namespace DigitPark.Localization
             { "NoThanksText", "no_thanks" },
             { "NoThanksButton", "no_thanks" },
             { "Feature1Text", "premium_feature_no_ads" },
-            { "Feature2Text", "premium_feature_tournaments" },
             { "Feature3Text", "premium_feature_badge" },
 
             // ==================== PLAY MODE SELECTION ====================
@@ -373,9 +328,6 @@ namespace DigitPark.Localization
             { "OneVsOneTitle", "1v1_title" },
             { "OneVsOneDescText", "1v1_description" },
             { "OneVsOneDescription", "1v1_description" },
-            // TournamentsTitleText ya está definido en la sección TOURNAMENTS
-            { "TournamentsDescText", "tournaments_description" },
-            { "TournamentsDescription", "tournaments_description" },
 
             // ==================== WIN/LOSE PANELS ====================
             { "CompletedText", "completed" },
@@ -394,66 +346,6 @@ namespace DigitPark.Localization
             { "ErrorsLabelText", "errors_label" },
             { "YourTimeLabel", "your_time" },
 
-            // ==================== FRIENDS ====================
-            { "FriendsTitle", "friends_title" },
-            { "FriendsTitleText", "friends_title" },
-            { "FriendsCount", "friend_count" },
-            { "FriendsCountText", "friend_count" },
-            { "SearchFriendsPlaceholder", "search_friends_placeholder" },
-            { "FriendRequestsLink", "friend_requests_link" },
-            { "FriendRequestsLinkText", "friend_requests_link" },
-            { "NoFriendsEmpty", "no_friends_empty" },
-            { "PendingCount", "pending_count" },
-            { "PendingCountText", "pending_count" },
-            { "ReceivedTab", "received_tab" },
-            { "ReceivedTabText", "received_tab" },
-            { "SentTab", "sent_tab" },
-            { "SentTabText", "sent_tab" },
-            { "NoPendingRequests", "no_pending_requests" },
-            { "SearchByUsername", "search_by_username" },
-            // FriendRequests scene - Header title uses "TitleText" (mapped generically)
-            { "RequestsTitle", "requests_title" },
-            { "RequestsTitleText", "requests_title" },
-            // SearchPlayers scene
-            { "SearchPlayersTitle", "search_players_title" },
-            { "SearchPlayersTitleText", "search_players_title" },
-            { "NoResultsText", "no_results" },
-            { "AddFriendButton", "search_add_friend" },
-            { "AddFriendButtonText", "search_add_friend" },
-
-            // ==================== PROFILE ====================
-            { "ProfileTitle", "profile_title" },
-            { "ProfileTitleText", "profile_title" },
-            { "YourProfile", "your_profile" },
-            { "YourProfileText", "your_profile" },
-            { "GeneralStatistics", "general_statistics" },
-            { "GeneralStatisticsText", "general_statistics" },
-            { "GamesStat", "games_stat" },
-            { "GamesStatText", "games_stat" },
-            { "WinsStat", "wins_stat" },
-            { "WinsStatText", "wins_stat" },
-            { "BestTimeStat", "best_time_stat" },
-            { "BestTimeStatText", "best_time_stat" },
-            { "AvgTimeStat", "avg_time_stat" },
-            { "AvgTimeStatText", "avg_time_stat" },
-            { "StatsByGame", "stats_by_game" },
-            { "StatsByGameText", "stats_by_game" },
-            { "ChallengeButton", "challenge_button" },
-            { "ChallengeButtonText", "challenge_button" },
-
-            // ==================== NOTIFICATIONS ====================
-            { "NotificationsTitle", "notifications_title" },
-            { "NotificationsTitleText", "notifications_title" },
-            { "UnreadCount", "unread_count" },
-            { "UnreadCountText", "unread_count" },
-            { "AllTab", "all_tab" },
-            { "AllTabText", "all_tab" },
-            { "GamesTab", "games_tab" },
-            { "GamesTabText", "games_tab" },
-            { "NoNotificationsEmpty", "no_notifications_empty" },
-            { "MarkAllRead", "mark_all_read" },
-            { "MarkAllReadText", "mark_all_read" },
-
             // ==================== MATCH HISTORY ====================
             { "MatchHistoryTitle", "match_history_title" },
             { "MatchHistoryTitleText", "match_history_title" },
@@ -462,8 +354,6 @@ namespace DigitPark.Localization
             { "LoadMoreButtonText", "load_more" },
 
             // ==================== DAILY MISSIONS ====================
-            { "MissionsDailyHeader", "missions_daily_header" },
-            { "MissionsWeeklyHeader", "missions_weekly_header" },
             { "DailyProgressTitle", "daily_progress" },
             { "DailyProgressText", "daily_progress" },
             { "ResetsIn", "resets_in" },
@@ -519,9 +409,6 @@ namespace DigitPark.Localization
             { "PrizesLabelText", "prizes_label" },
             { "ShareButton", "share_button" },
             { "ShareButtonText", "share_button" },
-            { "TournamentStartsIn", "tournament_starts_in" },
-            // TournamentLobby chat tab (direct TMP on ChatTabText child)
-            { "ChatTabText", "tournament_tab_chat" },
 
             // ==================== ONBOARDING ====================
             { "WelcomeTitle", "welcome_title" },
@@ -537,13 +424,7 @@ namespace DigitPark.Localization
             { "StartButtonText", "start_button" },
 
             // ==================== GAME SELECTOR ====================
-            { "CognitiveSprintDescText", "cognitive_sprint_desc" },
             { "RulesDescText", "game_rules_label" },
-            { "ViewProfileButton", "view_profile" },
-            { "PanelTitle", "cognitive_sprint_title" },
-            { "SelectedCountText", "sprint_selected_count" },
-            { "CancelSprintButton", "cancel_button" },
-            { "StartSprintButton", "start_sprint" },
 
             // ==================== PLAY MODE SELECTION (extra) ====================
             { "SubtitleText", "play_mode_subtitle" },
@@ -616,58 +497,6 @@ namespace DigitPark.Localization
             { "PremiumPanelTitle", "premium_panel_title" },
             { "ChangeNamePlaceholder", "change_name_placeholder" },
 
-            // ==================== SOCIAL - FRIENDS (V41) ====================
-            { "FriendsSearchPlaceholder", "search_friends_placeholder" },
-            { "RequestsNavLabel", "friend_requests_link" },
-            { "FriendsEmptyText", "no_friends_empty" },
-            { "FriendsLoadingText", "loading" },
-            { "RemoveFriendButtonText", "remove_action" },
-            { "OnlineStatusText", "online_status" },
-            { "OfflineStatusText", "offline_status" },
-
-            // ==================== SOCIAL - FRIEND REQUESTS (V41) ====================
-            { "FriendRequestsTitleText", "friend_requests_title" },
-            { "NoPendingRequestsText", "no_pending_requests" },
-            { "RequestsEmptyText", "no_pending_requests" },
-            { "RejectButtonText", "reject_action" },
-            { "CancelRequestButtonText", "cancel_action" },
-            { "CancelRequestText", "cancel_action" },
-
-            // ==================== SOCIAL - SEARCH PLAYERS (V41) ====================
-            { "SearchPlaceholder", "search_placeholder" },
-            { "NoSearchResultsText", "search_no_results" },
-            { "SearchingText", "searching" },
-            { "ClearSearchText", "clear_action" },
-            { "ViewProfileBtnText", "view_profile" },
-            { "SearchEmptyTitle", "search_players_title" },
-            { "SearchEmptyDesc", "search_players_desc" },
-
-            // ==================== SOCIAL - PROFILE (V41) ====================
-            { "MatchesStatLabel", "matches_stat" },
-            { "WinsStatLabel", "wins_stat" },
-            { "WinRateStatLabel", "win_rate" },
-            { "LossesStatLabel", "losses_stat" },
-            { "GamesPlayedStatLabel", "games_played" },
-            { "AddFriendProfileButton", "add_friend_action" },
-            { "MatchHistoryButton", "match_history" },
-            { "ChallengeProfileButton", "challenge_action" },
-            { "FavoriteGameLabel", "favorite_game" },
-            { "MemberSinceLabel", "member_since" },
-            { "TotalScoreLabel", "total_score" },
-            { "AverageTimeLabel", "average_time" },
-            { "CurrentStreakLabel", "current_streak" },
-            { "BestStreakLabel", "best_streak" },
-            { "LevelLabel", "level_label" },
-            { "ExperienceLabel", "experience_label" },
-
-            // ==================== SOCIAL - NOTIFICATIONS (V41) ====================
-            { "SocialTabText", "social_tab" },
-            { "NoNotificationsText", "no_notifications" },
-            { "NotificationAcceptText", "accept_action" },
-            { "NotificationRejectText", "reject_action" },
-            { "NotificationViewText", "view_details" },
-            { "NotificationDismissText", "dismiss" },
-
             // ==================== SOCIAL - SCORES (V41) ====================
             { "RankingsTitleText", "rankings_title" },
             { "NoScoresText", "no_scores_yet" },
@@ -698,8 +527,6 @@ namespace DigitPark.Localization
             { "OnlineWinTitle", "you_won" },
             { "OnlineLoseTitle", "defeat_title" },
 
-            // ==================== SPRINT SUMMARY (V42) ====================
-            { "SprintSummarySubtitle", "sprint_summary" },
             { "GameHeader", "header_game" },
             { "ErrorsHeader", "header_errors" },
             { "TotalTimeLabel", "total_time" },
@@ -716,15 +543,11 @@ namespace DigitPark.Localization
             { "LabelCreator", "label_creator" },
             { "LabelCreatorTime", "label_time" },
             { "LabelMyTime", "label_my_best" },
-            { "FullIndicatorText", "tournament_full" },
-            { "PrivateIndicatorText", "tournament_private" },
-            { "ExpandButtonText", "view_tournament_details" },
 
             // ==================== TOURNAMENT CREATE SECTIONS (V42) ====================
             { "GameTypeLabel", "game_type" },
             { "PlayersAndPrizeLabel", "players_and_prize" },
             { "StartScheduleLabel", "start_schedule" },
-            { "TournamentRulesLabel", "tournament_rules" },
             { "PrivacyLabel", "privacy_label" },
             { "PreviewLabel", "preview_label" },
 
@@ -734,10 +557,7 @@ namespace DigitPark.Localization
             { "FirstPlaceLabel", "first_place" },
             { "SecondPlaceLabel", "second_place" },
             { "ThirdPlaceLabel", "third_place" },
-            { "LeavePopupTitle", "leave_tournament_title" },
-            { "LeavePopupMessage", "leave_tournament_message" },
             { "StayButtonText", "stay_button" },
-            { "SearchTournamentsTab", "search_tournaments_tab" },
             { "ClearFiltersText", "clear_filters" },
 
             // ==================== SHOP POPUPS (V43 AUDIT) ====================
@@ -759,7 +579,6 @@ namespace DigitPark.Localization
             { "ResetsInLabel", "resets_in" },
             { "TitleLeft", "daily_progress" },
             { "ActionButtonText", "claim" },
-            { "MissionCompletedTitle", "mission_completed" },
 
             // ==================== DAILY REWARDS (V43 AUDIT) ====================
             { "GrandPrizeLabel", "day7_grand_prize" },
@@ -773,30 +592,14 @@ namespace DigitPark.Localization
 
             // ==================== NOTIFICATIONS (V43 AUDIT) ====================
 
-            // ==================== FRIENDS (V43 AUDIT) ====================
-            { "FriendRequestsLabel", "friend_requests_nav" },
-
             // ==================== TOURNAMENT LOBBY (V43 AUDIT) ====================
 
             // ==================== TOURNAMENTS BROWSER (V43 AUDIT) ====================
-            { "CreateTournamentText", "create_tournament" },
             { "LoadMoreText", "load_more" },
 
-            // ==================== WIN EFFECTS (V50) ====================
-            { "WinEffectsTabTitle", "win_effects_tab_title" },
-            { "WinEffectEquippedLabel", "win_effect_equipped_label" },
-            { "WinEffectPreviewButton", "win_effect_preview_button" },
-            { "WinEffectEquipButton", "win_effect_equip_button" },
-            { "WinEffectFreeLabel", "win_effect_free_label" },
-            { "WinEffectAlreadyOwned", "win_effect_already_owned" },
             { "ReducedMotionLabel", "setting_reduced_motion" },
 
             // ==================== LEVEL UP PANEL ====================
-            { "LevelUpLabel", "levelup_title" },
-            { "MilestoneLabel", "levelup_milestone" },
-            { "ExperienceTitle", "experience_label" },
-            { "NextRewardHint", "levelup_next_reward" },
-            { "RewardHintText", "levelup_equip_hint" },
             // "ContinueButtonText" already mapped at line 516 → "continue_button"
             { "RewardUnlockedLabel", "reward_unlocked_title" },
         };

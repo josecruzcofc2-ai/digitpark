@@ -8,10 +8,10 @@ namespace DigitPark.Editor
 {
     /// <summary>
     /// Creates all ShopItemData ScriptableObjects for the shop catalog.
-    /// Economy V56 prices — synced with PlayerFrameService, PlayerTitleService,
-    /// VictoryEffectService, ThemeManager, and ProductCatalog.
+    /// Economy V57 prices — synced with PlayerFrameService,
+    /// ThemeManager, and ProductCatalog.
     ///
-    /// Total: ~89 items
+    /// Total: 63 items
     ///   Gem Packs       (6)  — $0.99–$99.99
     ///   Bundles          (2)  — $26.25–$30.45
     ///   Frames DC       (8)  — 2K–100K DC
@@ -35,7 +35,7 @@ namespace DigitPark.Editor
     {
         private const string SHOP_DIR   = "Assets/_Project/Resources/Shop";
         private const string IAP_PREFIX = "com.matrixsoftware.digitpark.";
-        private const int EXPECTED_TOTAL = 88;
+        private const int EXPECTED_TOTAL = 63;
 
         // ──────────────────────────────────────────────────────────
         //  ENTRY POINT
@@ -53,12 +53,6 @@ namespace DigitPark.Editor
             CreateFramesDC(ref created, ref skipped);
             CreateFramesDG(ref created, ref skipped);
             CreateFramesUSD(ref created, ref skipped);
-            CreateTitlesDC(ref created, ref skipped);
-            CreateTitlesDG(ref created, ref skipped);
-            CreateTitlesUSD(ref created, ref skipped);
-            CreateEffectsDC(ref created, ref skipped);
-            CreateEffectsDG(ref created, ref skipped);
-            CreateEffectsUSD(ref created, ref skipped);
             CreateThemes(ref created, ref skipped);
 
             AssetDatabase.SaveAssets();
@@ -221,133 +215,6 @@ namespace DigitPark.Editor
         }
 
         // ──────────────────────────────────────────────────────────
-        //  TITLES DC (4) — sortOrder 400–403
-        // ──────────────────────────────────────────────────────────
-
-        private static void CreateTitlesDC(ref int created, ref int skipped)
-        {
-            var items = new (string id, string name, int dc, int order)[]
-            {
-                ("strategist", "Strategist", 8_000,  400),
-                ("analyst",    "Analyst",    8_000,  401),
-                ("champion",   "Champion",   20_000, 402),
-                ("gladiator",  "Gladiator",  20_000, 403),
-            };
-
-            foreach (var (id, name, dc, order) in items)
-            {
-                var so = MakeTitle(id, name, PriceType.DigitCoins, 0, dc, 0f, "", order);
-                Save(so, $"Title_DC_{Capitalize(id)}", ref created, ref skipped);
-            }
-        }
-
-        // ──────────────────────────────────────────────────────────
-        //  TITLES DG (5) — sortOrder 500–504
-        // ──────────────────────────────────────────────────────────
-
-        private static void CreateTitlesDG(ref int created, ref int skipped)
-        {
-            var items = new (string id, string name, int dg, int order)[]
-            {
-                ("mastermind", "Mastermind", 150, 500),
-                ("prodigy",    "Prodigy",    150, 501),
-                ("titan",      "Titan",      300, 502),
-                ("oracle",     "Oracle",     300, 503),
-                ("phoenix",    "Phoenix",    500, 504),
-            };
-
-            foreach (var (id, name, dg, order) in items)
-            {
-                var so = MakeTitle(id, name, PriceType.DigitGems, dg, 0, 0f, "", order);
-                Save(so, $"Title_DG_{Capitalize(id)}", ref created, ref skipped);
-            }
-        }
-
-        // ──────────────────────────────────────────────────────────
-        //  TITLES USD (4) — sortOrder 505–508
-        // ──────────────────────────────────────────────────────────
-
-        private static void CreateTitlesUSD(ref int created, ref int skipped)
-        {
-            var items = new (string id, string name, float usd, int order)[]
-            {
-                ("quantum",        "Quantum",       1.99f, 505),
-                ("immortal_title", "Immortal",      2.99f, 506),
-                ("transcendent",   "Transcendent",  4.99f, 507),
-                ("apex_predator",  "Apex Predator", 9.99f, 508),
-            };
-
-            foreach (var (id, name, usd, order) in items)
-            {
-                var so = MakeTitle(id, name, PriceType.RealMoney, 0, 0, usd, IAP_PREFIX + "title_" + id, order);
-                Save(so, $"Title_USD_{SnakeToPascal(id)}", ref created, ref skipped);
-            }
-        }
-
-        // ──────────────────────────────────────────────────────────
-        //  EFFECTS DC (2) — sortOrder 700–701
-        // ──────────────────────────────────────────────────────────
-
-        private static void CreateEffectsDC(ref int created, ref int skipped)
-        {
-            var items = new (string id, string name, int dc, int order)[]
-            {
-                ("confetti",  "Confetti Burst", 12_000, 700),
-                ("fireworks", "Fireworks",      20_000, 701),
-            };
-
-            foreach (var (id, name, dc, order) in items)
-            {
-                var so = MakeEffect(id, name, PriceType.DigitCoins, 0, dc, 0f, "", order);
-                Save(so, $"Effect_DC_{Capitalize(id)}", ref created, ref skipped);
-            }
-        }
-
-        // ──────────────────────────────────────────────────────────
-        //  EFFECTS DG (5) — sortOrder 710–714
-        // ──────────────────────────────────────────────────────────
-
-        private static void CreateEffectsDG(ref int created, ref int skipped)
-        {
-            var items = new (string id, string name, int dg, int order)[]
-            {
-                ("lightning",      "Lightning Strike", 200, 710),
-                ("gold_rain",      "Gold Rain",        250, 711),
-                ("neon_explosion", "Neon Explosion",    350, 712),
-                ("pixel_rain",     "Pixel Rain",        500, 713),
-                ("rainbow",        "Rainbow",           750, 714),
-            };
-
-            foreach (var (id, name, dg, order) in items)
-            {
-                var so = MakeEffect(id, name, PriceType.DigitGems, dg, 0, 0f, "", order);
-                Save(so, $"Effect_DG_{SnakeToPascal(id)}", ref created, ref skipped);
-            }
-        }
-
-        // ──────────────────────────────────────────────────────────
-        //  EFFECTS USD (5) — sortOrder 720–724
-        // ──────────────────────────────────────────────────────────
-
-        private static void CreateEffectsUSD(ref int created, ref int skipped)
-        {
-            var items = new (string id, string name, float usd, int order)[]
-            {
-                ("crown_drop",      "Crown Drop",       1.99f, 720),
-                ("cosmic_shatter",  "Cosmic Shatter",   1.99f, 721),
-                ("fire_ring",       "Fire Ring",         2.99f, 722),
-                ("quantum_rift",    "Quantum Rift",      3.99f, 723),
-                ("divine_ascension","Divine Ascension",  6.99f, 724),
-            };
-
-            foreach (var (id, name, usd, order) in items)
-            {
-                var so = MakeEffect(id, name, PriceType.RealMoney, 0, 0, usd, IAP_PREFIX + "effect_" + id, order);
-                Save(so, $"Effect_USD_{SnakeToPascal(id)}", ref created, ref skipped);
-            }
-        }
-
-        // ──────────────────────────────────────────────────────────
         //  THEMES (30) — sortOrder 800–829 — Tab: Styles
         //  themeId must match ThemeData asset in Resources/Themes/
         // ──────────────────────────────────────────────────────────
@@ -439,42 +306,6 @@ namespace DigitPark.Editor
             so.description    = $"Profile frame — {displayName}.";
             so.itemType       = ShopItemType.Frame;
             so.shopTab        = ShopTab.Styles;
-            so.priceType      = priceType;
-            so.gemsPrice      = gems;
-            so.coinsPrice     = coins;
-            so.realMoneyPrice = usd;
-            so.iapProductId   = iapId;
-            so.sortOrder      = sortOrder;
-            return so;
-        }
-
-        private static ShopItemData MakeTitle(string itemId, string displayName,
-            PriceType priceType, int gems, int coins, float usd, string iapId, int sortOrder)
-        {
-            var so = ScriptableObject.CreateInstance<ShopItemData>();
-            so.itemId         = itemId;
-            so.displayName    = displayName;
-            so.description    = $"Player title: \"{displayName}\".";
-            so.itemType       = ShopItemType.Title;
-            so.shopTab        = ShopTab.Styles;
-            so.priceType      = priceType;
-            so.gemsPrice      = gems;
-            so.coinsPrice     = coins;
-            so.realMoneyPrice = usd;
-            so.iapProductId   = iapId;
-            so.sortOrder      = sortOrder;
-            return so;
-        }
-
-        private static ShopItemData MakeEffect(string itemId, string displayName,
-            PriceType priceType, int gems, int coins, float usd, string iapId, int sortOrder)
-        {
-            var so = ScriptableObject.CreateInstance<ShopItemData>();
-            so.itemId         = itemId;
-            so.displayName    = displayName;
-            so.description    = $"Victory effect: {displayName}.";
-            so.itemType       = ShopItemType.WinEffect;
-            so.shopTab        = ShopTab.Effects;
             so.priceType      = priceType;
             so.gemsPrice      = gems;
             so.coinsPrice     = coins;

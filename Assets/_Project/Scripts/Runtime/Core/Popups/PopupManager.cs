@@ -192,14 +192,6 @@ namespace DigitPark.UI
             ShowConfirm("confirm_delete_message", onConfirm);
         }
 
-        /// <summary>
-        /// Muestra confirmación de salir del torneo
-        /// </summary>
-        public void ShowExitTournamentConfirm(Action onConfirm)
-        {
-            ShowConfirm("confirm_exit_tournament_message", onConfirm);
-        }
-
         private void OnConfirmClicked()
         {
             Debug.Log("[PopupManager] Confirm clicked");
